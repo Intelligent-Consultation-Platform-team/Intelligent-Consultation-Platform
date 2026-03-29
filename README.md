@@ -1,5 +1,41 @@
 智能问诊平台
 
+## 前端运行与依赖说明（给协作者）
+
+本项目为 `Vue 3 + Vite + Element Plus` 前端工程。
+
+### 环境要求
+
+- Node.js：`>= 18`（推荐 `20.x`）
+- npm：随 Node 安装
+
+### 安装依赖
+
+```bash
+npm install
+```
+
+### 启动开发环境
+
+```bash
+npm run dev
+```
+
+### 构建生产包
+
+```bash
+npm run build
+```
+
+### 主要依赖（见 `package.json`）
+
+- `vue`
+- `element-plus`
+- `@element-plus/icons-vue`
+- `vite`
+- `@vitejs/plugin-vue`
+
+
 # 1.1.项目概况
 项目名称：智能问诊平台
 开发模式：前后端分离
