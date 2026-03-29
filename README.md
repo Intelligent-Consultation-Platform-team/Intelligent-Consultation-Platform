@@ -1,84 +1,102 @@
-智能问诊平台
+from __future__ import annotations
 
-## 前端运行与依赖说明（给协作者）
+from typing import List
 
-本项目为 `Vue 3 + Vite + Element Plus` 前端工程。
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
-### 环境要求
+from algorithms import Slot, SymptomInput, choose_best_slots, recommend_department, risk_level, similar_cases
 
-- Node.js：`>= 18`（推荐 `20.x`）
-- npm：随 Node 安装
-
-### 安装依赖
-
-```bash
-npm install
-```
-
-### 启动开发环境
-
-```bash
-npm run dev
-```
-
-### 构建生产包
-
-```bash
-npm run build
-```
-
-### 主要依赖（见 `package.json`）
-
-- `vue`
-- `element-plus`
-- `@element-plus/icons-vue`
-- `vite`
-- `@vitejs/plugin-vue`
+app = FastAPI(title="Smart Consultation Algorithms API", version="1.0.0")
 
 
-# 1.1.项目概况
-项目名称：智能问诊平台
-开发模式：前后端分离
-技术栈：后端 JAVA，前端 Vue.js
-主要受众：患者（用户）及医院管理员
+class RiskRequest(BaseModel):
+    fever: bool = False
+    chest_pain: bool = False
+    breath_shortness: bool = False
+    bleeding: bool = False
+    consciousness_issue: bool = False
+    days: int = Field(0, ge=0)
+    age: int = Field(18, ge=0)
 
-## 1.2.背景与意义
 
-## 1.2.1. 现状与问题
-就医压力：线下门诊挂号窗口压力大，患者看病时间成本高 。
-信息焦虑：用户对突发小病症缺乏专业科普，盲目搜索（如百度）易受广告干扰或产生过度焦虑 。
-资源分布：权威医院门户网站往往侧重政务宣传，缺乏深入的卫生知识和医疗常识科普 。
+class DepartmentRequest(BaseModel):
+    symptoms: List[str]
+    top_k: int = Field(3, ge=1, le=10)
 
-## 1.2.2.项目意义
-便民科普：提供专业病症查询与家用治疗方案，引导用户科学处理小病，实现自行调节 。
-分流减压：通过线上问诊与科普，减少非必要到院人数，缓解医院人流压力 。
-医患透明：通过专业的信息管理维护，减少医患间信息不对称，提升社会稳定性 。
 
-# 1.3.项目目标
-实现智能问诊：与AI医生助手进行对话交流。
-优化预约流程：用户可在线查看科室位置剩余情况，并根据需要自主预约 。
-提升管理效率：为医院提供后端管理系统，实时维护科室状态及症状信息 。
+class SlotItem(BaseModel):
+    doctor_id: int
+    date: str
+    time_range: str
+    remaining: int = Field(0, ge=0)
 
-# 1.4.系统功能范围
 
-## 1.4.1. 用户端（前台）
-功能模块	功能描述
-登录注册	支持用户注册登录，是预约和收藏功能的前提 。
-信息管理	提供科室，公告，医生排版等信息。
-症状查看	AI问诊: 智能分析症状并提供医疗建议
-预约就诊	用户可以进行预约挂号，查看就诊记录，医嘱病历，住院登记，清单缴纳
-个人中心	统一管理个人账号信息。
+class SlotsRequest(BaseModel):
+    slots: List[SlotItem]
+    top_k: int = Field(5, ge=1, le=20)
 
-## 1.4.2.管理端（后台）
-功能模块	功能描述
-科室信息管理	对科室内容进行增、删、改、查 。
-患者挂号管理	管理患者挂号信息
-预约挂号管理	可以查看当天可预约挂号的医生信息。
-患者就诊管理	管理患者就诊信息。
-医生排班管理	给平台所有医生进行排班。
-上传功能模块	管理能够上传公告
 
-## 1.5.业务约束与非功能需求
-业务规则：同一科室同一时间段内不可重复预约 。
-数据维护：系统需具备专业的管理后台，确信息的专业性与权威性，以获取用户信任 。
-核心指标：优化患者住院/就诊时间，缓解医院拥挤程度 。
+class SimilarCaseRequest(BaseModel):
+    query: str
+    cases: List[str]
+    top_k: int = Field(3, ge=1, le=20)
+
+
+@app.get("/health")
+def health_check():
+    return {"ok": True}
+
+
+@app.post("/algo/risk")
+def api_risk(req: RiskRequest):
+    level, reasons = risk_level(
+        SymptomInput(
+            fever=req.fever,
+            chest_pain=req.chest_pain,
+            breath_shortness=req.breath_shortness,
+            bleeding=req.bleeding,
+            consciousness_issue=req.consciousness_issue,
+            days=req.days,
+            age=req.age,
+        )
+    )
+    return {"level": level, "reasons": reasons}
+
+
+@app.post("/algo/department")
+def api_department(req: DepartmentRequest):
+    result = recommend_department(req.symptoms, req.top_k)
+    return {"recommendations": [{"department": d, "score": s} for d, s in result]}
+
+
+@app.post("/algo/slots")
+def api_slots(req: SlotsRequest):
+    slots = [
+        Slot(
+            doctor_id=s.doctor_id,
+            date=s.date,
+            time_range=s.time_range,
+            remaining=s.remaining,
+        )
+        for s in req.slots
+    ]
+    result = choose_best_slots(slots, req.top_k)
+    return {
+        "best_slots": [
+            {
+                "doctor_id": s.doctor_id,
+                "date": s.date,
+                "time_range": s.time_range,
+                "remaining": s.remaining,
+            }
+            for s in result
+        ]
+    }
+
+
+@app.post("/algo/similar-cases")
+def api_similar_cases(req: SimilarCaseRequest):
+    result = similar_cases(req.query, req.cases, req.top_k)
+    return {"results": [{"case": c, "score": score} for c, score in result]}
+
