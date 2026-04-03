@@ -33,6 +33,23 @@
 
           <el-form-item
             v-if="isRegister"
+            label="角色"
+            prop="role"
+          >
+            <el-select
+              v-model="formModel.role"
+              placeholder="请选择角色"
+              clearable
+              style="width: 100%"
+            >
+              <el-option label="管理员" value="admin" />
+              <el-option label="医生" value="doctor" />
+              <el-option label="患者" value="patient" />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item
+            v-if="isRegister"
             label="昵称"
             prop="nickname"
           >
@@ -108,25 +125,26 @@
         <el-aside width="220px" class="aside">
           <div class="brand">牛牛平台</div>
           <el-menu default-active="home" class="menu" unique-opened>
-            <el-menu-item index="home">系统首页</el-menu-item>
-            <el-sub-menu index="manage">
-              <template #title>信息管理</template>
-              <el-menu-item index="notice">公告信息</el-menu-item>
-              <el-menu-item index="office">科室信息</el-menu-item>
-              <el-menu-item index="schedule">医生排班</el-menu-item>
-            </el-sub-menu>
-            <el-sub-menu index="appoint">
-              <template #title>预约就诊</template>
-              <el-menu-item index="book">预约挂号</el-menu-item>
-              <el-menu-item index="patient-book">患者挂号</el-menu-item>
-              <el-menu-item index="visit">患者就诊</el-menu-item>
-              <el-menu-item index="hospital">住院登记</el-menu-item>
-            </el-sub-menu>
-            <el-sub-menu index="user">
-              <template #title>用户管理</template>
-              <el-menu-item index="admin">管理员信息</el-menu-item>
-              <el-menu-item index="doctor">医生信息</el-menu-item>
-              <el-menu-item index="user">用户信息</el-menu-item>
+            <el-menu-item
+              v-for="item in menuItems.filter(i => !i.children)"
+              :key="item.index"
+              :index="item.index"
+            >
+              {{ item.label }}
+            </el-menu-item>
+            <el-sub-menu
+              v-for="item in menuItems.filter(i => i.children)"
+              :key="item.index"
+              :index="item.index"
+            >
+              <template #title>{{ item.label }}</template>
+              <el-menu-item
+                v-for="child in item.children"
+                :key="child.index"
+                :index="child.index"
+              >
+                {{ child.label }}
+              </el-menu-item>
             </el-sub-menu>
           </el-menu>
         </el-aside>
@@ -136,6 +154,7 @@
             <div class="title">欢迎，{{ currentUser.nickname || currentUser.username }}</div>
             <div class="header-actions">
               <el-tag type="success">已登录</el-tag>
+              <el-tag type="primary">{{ getRoleLabel(currentUser.role) }}</el-tag>
               <el-button type="danger" plain size="small" @click="logout">
                 退出登录
               </el-button>
@@ -193,6 +212,7 @@ const currentUser = reactive({
   username: '',
   nickname: '',
   email: '',
+  role: '',
 })
 
 const formModel = reactive({
@@ -201,6 +221,7 @@ const formModel = reactive({
   email: '',
   password: '',
   confirmPassword: '',
+  role: '',
 })
 
 const tabOptions = [
@@ -209,6 +230,67 @@ const tabOptions = [
 ]
 
 const isRegister = computed(() => activeTab.value === 'register')
+
+const roleLabels = {
+  admin: '管理员',
+  doctor: '医生',
+  patient: '患者',
+}
+
+const getRoleLabel = (role) => roleLabels[role] || '未知'
+
+const menuItems = computed(() => {
+  const role = currentUser.role
+  const items = [
+    { index: 'home', label: '系统首页', roles: ['admin', 'doctor', 'patient'] },
+    {
+      index: 'manage',
+      label: '信息管理',
+      roles: ['admin'],
+      children: [
+        { index: 'notice', label: '公告信息', roles: ['admin'] },
+        { index: 'office', label: '科室信息', roles: ['admin'] },
+        { index: 'schedule', label: '医生排班', roles: ['admin'] },
+      ],
+    },
+    {
+      index: 'appoint',
+      label: '预约就诊',
+      roles: ['admin', 'doctor', 'patient'],
+      children: [
+        { index: 'book', label: '预约挂号', roles: ['patient'] },
+        { index: 'patient-book', label: '患者挂号', roles: ['admin', 'doctor'] },
+        { index: 'visit', label: '患者就诊', roles: ['doctor'] },
+        { index: 'hospital', label: '住院登记', roles: ['admin', 'doctor'] },
+      ],
+    },
+    {
+      index: 'user',
+      label: '用户管理',
+      roles: ['admin'],
+      children: [
+        { index: 'admin', label: '管理员信息', roles: ['admin'] },
+        { index: 'doctor', label: '医生信息', roles: ['admin'] },
+        { index: 'user', label: '用户信息', roles: ['admin'] },
+      ],
+    },
+  ]
+
+  const filterByRole = (items) => {
+    return items.filter((item) => item.roles.includes(role)).map((item) => {
+      if (item.children) {
+        const filteredChildren = filterByRole(item.children)
+        if (filteredChildren.length > 0) {
+          return { ...item, children: filteredChildren }
+        }
+        return null
+      }
+      return item
+    }).filter(Boolean)
+  }
+
+  return filterByRole(items)
+})
 
 const validateConfirmPassword = (_, value, callback) => {
   if (!isRegister.value) {
@@ -231,6 +313,9 @@ const rules = computed(() => ({
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度为 3-20 位', trigger: 'blur' },
   ],
+  role: isRegister.value
+    ? [{ required: true, message: '请选择角色', trigger: 'change' }]
+    : [],
   nickname: isRegister.value
     ? [
         { required: true, message: '请输入昵称', trigger: 'blur' },
@@ -289,6 +374,7 @@ const restoreSession = () => {
   currentUser.username = user.username
   currentUser.nickname = user.nickname
   currentUser.email = user.email
+  currentUser.role = user.role
   isLoggedIn.value = true
 }
 
@@ -302,6 +388,7 @@ const resetForm = () => {
   formModel.email = ''
   formModel.password = ''
   formModel.confirmPassword = ''
+  formModel.role = ''
   formRef.value?.clearValidate()
 }
 
@@ -344,6 +431,7 @@ const handleSubmit = async () => {
         nickname: formModel.nickname,
         email: formModel.email,
         password: formModel.password,
+        role: formModel.role,
       }
       users.push(newUser)
       saveUsers(users)
@@ -368,11 +456,13 @@ const handleSubmit = async () => {
     currentUser.username = matched.username
     currentUser.nickname = matched.nickname
     currentUser.email = matched.email
+    currentUser.role = matched.role
     isLoggedIn.value = true
     saveSession({
       username: matched.username,
       nickname: matched.nickname,
       email: matched.email,
+      role: matched.role,
     })
 
     ElMessage.success(`登录成功，欢迎回来：${matched.nickname || matched.username}`)
@@ -389,6 +479,7 @@ const logout = () => {
   currentUser.username = ''
   currentUser.nickname = ''
   currentUser.email = ''
+  currentUser.role = ''
   activeTab.value = 'login'
   resetForm()
 }

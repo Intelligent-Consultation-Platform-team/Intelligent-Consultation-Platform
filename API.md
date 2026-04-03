@@ -57,7 +57,8 @@
   "nickname": "张三",
   "email": "zhangsan@example.com",
   "password": "123456",
-  "confirmPassword": "123456"
+  "confirmPassword": "123456",
+  "role": "patient"
 }
 ```
 
@@ -70,6 +71,7 @@
 | email | string | 是 | 邮箱格式 |
 | password | string | 是 | 6-32 位 |
 | confirmPassword | string | 是 | 必须与 `password` 一致 |
+| role | string | 是 | 枚举值：`admin`（管理员）、`doctor`（医生）、`patient`（患者） |
 
 ### 2.3 成功响应
 
@@ -80,6 +82,7 @@
   "data": {
     "userId": 10001,
     "username": "zhangsan",
+    "role": "patient",
     "createdAt": "2026-03-29T10:00:00Z"
   }
 }
@@ -136,7 +139,8 @@
       "userId": 10001,
       "username": "zhangsan",
       "nickname": "张三",
-      "email": "zhangsan@example.com"
+      "email": "zhangsan@example.com",
+      "role": "patient"
     }
   }
 }
@@ -177,7 +181,8 @@ curl -X POST 'http://localhost:3000/api/auth/register' \
     "nickname":"张三",
     "email":"zhangsan@example.com",
     "password":"123456",
-    "confirmPassword":"123456"
+    "confirmPassword":"123456",
+    "role":"patient"
   }'
 ```
 
