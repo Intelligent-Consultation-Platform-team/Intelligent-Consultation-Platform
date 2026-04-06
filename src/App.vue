@@ -33,6 +33,30 @@
 
           <el-form-item
             v-if="isRegister"
+            label="真实姓名"
+            prop="realName"
+          >
+            <el-input
+              v-model.trim="formModel.realName"
+              placeholder="请输入真实姓名"
+              clearable
+            />
+          </el-form-item>
+
+          <el-form-item
+            v-if="isRegister"
+            label="手机号"
+            prop="phone"
+          >
+            <el-input
+              v-model.trim="formModel.phone"
+              placeholder="请输入手机号"
+              clearable
+            />
+          </el-form-item>
+
+          <el-form-item
+            v-if="isRegister"
             label="角色"
             prop="role"
           >
@@ -42,22 +66,9 @@
               clearable
               style="width: 100%"
             >
-              <el-option label="管理员" value="admin" />
-              <el-option label="医生" value="doctor" />
               <el-option label="患者" value="patient" />
+              <el-option label="医生" value="doctor" />
             </el-select>
-          </el-form-item>
-
-          <el-form-item
-            v-if="isRegister"
-            label="昵称"
-            prop="nickname"
-          >
-            <el-input
-              v-model.trim="formModel.nickname"
-              placeholder="请输入昵称"
-              clearable
-            />
           </el-form-item>
 
           <el-form-item label="邮箱" prop="email">
@@ -151,7 +162,7 @@
 
         <el-container>
           <el-header class="header">
-            <div class="title">欢迎，{{ currentUser.nickname || currentUser.username }}</div>
+            <div class="title">欢迎，{{ currentUser.realName || currentUser.username }}</div>
             <div class="header-actions">
               <el-tag type="success">已登录</el-tag>
               <el-tag type="primary">{{ getRoleLabel(currentUser.role) }}</el-tag>
@@ -210,14 +221,15 @@ const submitting = ref(false)
 const isLoggedIn = ref(false)
 const currentUser = reactive({
   username: '',
-  nickname: '',
+  realName: '',
   email: '',
   role: '',
 })
 
 const formModel = reactive({
   username: '',
-  nickname: '',
+  realName: '',
+  phone: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -313,14 +325,20 @@ const rules = computed(() => ({
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度为 3-20 位', trigger: 'blur' },
   ],
+  realName: isRegister.value
+    ? [
+        { required: true, message: '请输入真实姓名', trigger: 'blur' },
+        { min: 2, max: 20, message: '真实姓名长度为 2-20 位', trigger: 'blur' },
+      ]
+    : [],
+  phone: isRegister.value
+    ? [
+        { required: true, message: '请输入手机号', trigger: 'blur' },
+        { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: ['blur', 'change'] },
+      ]
+    : [],
   role: isRegister.value
     ? [{ required: true, message: '请选择角色', trigger: 'change' }]
-    : [],
-  nickname: isRegister.value
-    ? [
-        { required: true, message: '请输入昵称', trigger: 'blur' },
-        { min: 2, max: 20, message: '昵称长度为 2-20 位', trigger: 'blur' },
-      ]
     : [],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -346,9 +364,11 @@ const seedDemoAccount = () => {
     users.push({
       id: 1,
       username: 'test',
-      nickname: '测试用户',
+      realName: '测试用户',
+      phone: '13800138000',
       email: 'test@demo.com',
       password: '123456',
+      role: 'patient',
     })
     saveUsers(users)
   }
@@ -372,7 +392,7 @@ const restoreSession = () => {
   if (!raw) return
   const user = JSON.parse(raw)
   currentUser.username = user.username
-  currentUser.nickname = user.nickname
+  currentUser.realName = user.realName
   currentUser.email = user.email
   currentUser.role = user.role
   isLoggedIn.value = true
@@ -384,7 +404,8 @@ watch(activeTab, () => {
 
 const resetForm = () => {
   formModel.username = ''
-  formModel.nickname = ''
+  formModel.realName = ''
+  formModel.phone = ''
   formModel.email = ''
   formModel.password = ''
   formModel.confirmPassword = ''
@@ -414,10 +435,15 @@ const handleSubmit = async () => {
     if (isRegister.value) {
       const users = loadUsers()
       const usernameExists = users.some((u) => u.username === formModel.username)
+      const phoneExists = users.some((u) => u.phone === formModel.phone)
       const emailExists = users.some((u) => u.email === formModel.email)
 
       if (usernameExists) {
         ElMessage.error('用户名已存在')
+        return
+      }
+      if (phoneExists) {
+        ElMessage.error('手机号已注册')
         return
       }
       if (emailExists) {
@@ -428,7 +454,8 @@ const handleSubmit = async () => {
       const newUser = {
         id: Date.now(),
         username: formModel.username,
-        nickname: formModel.nickname,
+        realName: formModel.realName,
+        phone: formModel.phone,
         email: formModel.email,
         password: formModel.password,
         role: formModel.role,
@@ -436,7 +463,7 @@ const handleSubmit = async () => {
       users.push(newUser)
       saveUsers(users)
 
-      ElMessage.success(`注册成功，欢迎你：${formModel.nickname}`)
+      ElMessage.success(`注册成功，欢迎你：${formModel.realName}`)
       activeTab.value = 'login'
       return
     }
@@ -444,7 +471,7 @@ const handleSubmit = async () => {
     const users = loadUsers()
     const matched = users.find(
       (u) =>
-        (u.username === formModel.username || u.email === formModel.email) &&
+        (u.username === formModel.username || u.phone === formModel.username) &&
         u.password === formModel.password
     )
 
@@ -454,18 +481,18 @@ const handleSubmit = async () => {
     }
 
     currentUser.username = matched.username
-    currentUser.nickname = matched.nickname
+    currentUser.realName = matched.realName
     currentUser.email = matched.email
     currentUser.role = matched.role
     isLoggedIn.value = true
     saveSession({
       username: matched.username,
-      nickname: matched.nickname,
+      realName: matched.realName,
       email: matched.email,
       role: matched.role,
     })
 
-    ElMessage.success(`登录成功，欢迎回来：${matched.nickname || matched.username}`)
+    ElMessage.success(`登录成功，欢迎回来：${matched.realName || matched.username}`)
   } catch {
     ElMessage.warning('请先完成表单信息')
   } finally {
@@ -477,7 +504,7 @@ const logout = () => {
   localStorage.removeItem(storageKeys.session)
   isLoggedIn.value = false
   currentUser.username = ''
-  currentUser.nickname = ''
+  currentUser.realName = ''
   currentUser.email = ''
   currentUser.role = ''
   activeTab.value = 'login'
