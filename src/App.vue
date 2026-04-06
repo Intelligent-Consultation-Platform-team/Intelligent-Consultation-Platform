@@ -135,24 +135,29 @@
       <el-container class="layout">
         <el-aside width="220px" class="aside">
           <div class="brand">牛牛平台</div>
-          <el-menu default-active="home" class="menu" unique-opened>
+          <el-menu
+            :default-active="activeMenu"
+            class="menu"
+            unique-opened
+            router
+          >
             <el-menu-item
               v-for="item in menuItems.filter(i => !i.children)"
               :key="item.index"
-              :index="item.index"
+              :index="item.path"
             >
               {{ item.label }}
             </el-menu-item>
             <el-sub-menu
               v-for="item in menuItems.filter(i => i.children)"
               :key="item.index"
-              :index="item.index"
+              :index="item.path"
             >
               <template #title>{{ item.label }}</template>
               <el-menu-item
                 v-for="child in item.children"
                 :key="child.index"
-                :index="child.index"
+                :index="child.path"
               >
                 {{ child.label }}
               </el-menu-item>
@@ -173,37 +178,11 @@
           </el-header>
 
           <el-main class="main">
-            <el-card shadow="never">
-              <h3>页面完成情况预览</h3>
-              <p>你已成功进入系统内部页面，这里可以展示各模块完成情况。</p>
-              <el-divider />
-              <el-row :gutter="16">
-                <el-col :span="12">
-                  <el-card shadow="never" class="status-card">
-                    <div class="status-title">用户管理</div>
-                    <div class="status-desc">已完成基础布局与列表展示</div>
-                  </el-card>
-                </el-col>
-                <el-col :span="12">
-                  <el-card shadow="never" class="status-card">
-                    <div class="status-title">预约就诊</div>
-                    <div class="status-desc">待对接后端接口</div>
-                  </el-card>
-                </el-col>
-                <el-col :span="12">
-                  <el-card shadow="never" class="status-card">
-                    <div class="status-title">信息管理</div>
-                    <div class="status-desc">页面结构已完成，数据待补充</div>
-                  </el-card>
-                </el-col>
-                <el-col :span="12">
-                  <el-card shadow="never" class="status-card">
-                    <div class="status-title">系统首页</div>
-                    <div class="status-desc">可添加统计卡片与图表</div>
-                  </el-card>
-                </el-col>
-              </el-row>
-            </el-card>
+            <router-view v-slot="{ Component }">
+              <transition name="fade" mode="out-in">
+                <component :is="Component" />
+              </transition>
+            </router-view>
           </el-main>
         </el-container>
       </el-container>
@@ -214,6 +193,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRoute } from 'vue-router'
 
 const activeTab = ref('login')
 const formRef = ref()
@@ -225,6 +205,8 @@ const currentUser = reactive({
   email: '',
   role: '',
 })
+
+const route = useRoute()
 
 const formModel = reactive({
   username: '',
@@ -251,39 +233,47 @@ const roleLabels = {
 
 const getRoleLabel = (role) => roleLabels[role] || '未知'
 
+const activeMenu = computed(() => {
+  return route.path
+})
+
 const menuItems = computed(() => {
   const role = currentUser.role
+  console.log('当前用户角色:', role)
   const items = [
-    { index: 'home', label: '系统首页', roles: ['admin', 'doctor', 'patient'] },
+    { index: 'home', label: '系统首页', path: '/home', roles: ['admin', 'doctor', 'patient'] },
     {
       index: 'manage',
       label: '信息管理',
+      path: '/manage/notice',
       roles: ['admin'],
       children: [
-        { index: 'notice', label: '公告信息', roles: ['admin'] },
-        { index: 'office', label: '科室信息', roles: ['admin'] },
-        { index: 'schedule', label: '医生排班', roles: ['admin'] },
+        { index: 'notice', label: '公告信息', path: '/manage/notice', roles: ['admin'] },
+        { index: 'office', label: '科室信息', path: '/manage/office', roles: ['admin'] },
+        { index: 'schedule', label: '医生排班', path: '/manage/schedule', roles: ['admin'] },
       ],
     },
     {
       index: 'appoint',
       label: '预约就诊',
+      path: '/appoint/book',
       roles: ['admin', 'doctor', 'patient'],
       children: [
-        { index: 'book', label: '预约挂号', roles: ['patient'] },
-        { index: 'patient-book', label: '患者挂号', roles: ['admin', 'doctor'] },
-        { index: 'visit', label: '患者就诊', roles: ['doctor'] },
-        { index: 'hospital', label: '住院登记', roles: ['admin', 'doctor'] },
+        { index: 'book', label: '预约挂号', path: '/appoint/book', roles: ['patient'] },
+        { index: 'patient-book', label: '患者挂号', path: '/appoint/patient-book', roles: ['admin', 'doctor'] },
+        { index: 'visit', label: '患者就诊', path: '/appoint/visit', roles: ['doctor'] },
+        { index: 'hospital', label: '住院登记', path: '/appoint/hospital', roles: ['admin', 'doctor'] },
       ],
     },
     {
       index: 'user',
       label: '用户管理',
+      path: '/user/admin',
       roles: ['admin'],
       children: [
-        { index: 'admin', label: '管理员信息', roles: ['admin'] },
-        { index: 'doctor', label: '医生信息', roles: ['admin'] },
-        { index: 'user', label: '用户信息', roles: ['admin'] },
+        { index: 'admin', label: '管理员信息', path: '/user/admin', roles: ['admin'] },
+        { index: 'doctor', label: '医生信息', path: '/user/doctor', roles: ['admin'] },
+        { index: 'user', label: '用户信息', path: '/user/user', roles: ['admin'] },
       ],
     },
   ]
@@ -301,7 +291,9 @@ const menuItems = computed(() => {
     }).filter(Boolean)
   }
 
-  return filterByRole(items)
+  const result = filterByRole(items)
+  console.log('生成的菜单:', result)
+  return result
 })
 
 const validateConfirmPassword = (_, value, callback) => {
@@ -368,7 +360,7 @@ const seedDemoAccount = () => {
       phone: '13800138000',
       email: 'test@demo.com',
       password: '123456',
-      role: 'patient',
+      role: 'admin',
     })
     saveUsers(users)
   }
