@@ -1,102 +1,90 @@
-from __future__ import annotations
+# 智能问诊平台前端
 
-from typing import List
+## 项目简介
 
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
+智能问诊平台前端项目，基于 Vue 3 + Element Plus 开发，提供用户注册、登录、角色管理等功能。
 
-from algorithms import Slot, SymptomInput, choose_best_slots, recommend_department, risk_level, similar_cases
+## 技术栈
 
-app = FastAPI(title="Smart Consultation Algorithms API", version="1.0.0")
+- Vue 3
+- Element Plus
+- Vite
 
+## 项目结构
 
-class RiskRequest(BaseModel):
-    fever: bool = False
-    chest_pain: bool = False
-    breath_shortness: bool = False
-    bleeding: bool = False
-    consciousness_issue: bool = False
-    days: int = Field(0, ge=0)
-    age: int = Field(18, ge=0)
+```
+src/
+├── App.vue          # 主应用组件
+├── main.js          # 入口文件
+└── style.css        # 样式文件
+```
 
+## 功能特性
 
-class DepartmentRequest(BaseModel):
-    symptoms: List[str]
-    top_k: int = Field(3, ge=1, le=10)
+- ✅ 用户注册（支持患者、医生角色）
+- ✅ 用户登录（支持用户名或手机号登录）
+- ✅ 基于角色的权限控制
+- ✅ 响应式界面设计
+- ✅ 表单验证
+- ✅ 本地存储模拟
 
+## 快速开始
 
-class SlotItem(BaseModel):
-    doctor_id: int
-    date: str
-    time_range: str
-    remaining: int = Field(0, ge=0)
+### 安装依赖
 
+```bash
+npm install
+```
 
-class SlotsRequest(BaseModel):
-    slots: List[SlotItem]
-    top_k: int = Field(5, ge=1, le=20)
+### 启动开发服务器
 
+```bash
+npm run dev
+```
 
-class SimilarCaseRequest(BaseModel):
-    query: str
-    cases: List[str]
-    top_k: int = Field(3, ge=1, le=20)
+### 构建生产版本
 
+```bash
+npm run build
+```
 
-@app.get("/health")
-def health_check():
-    return {"ok": True}
+### 预览生产构建
 
+```bash
+npm run preview
+```
 
-@app.post("/algo/risk")
-def api_risk(req: RiskRequest):
-    level, reasons = risk_level(
-        SymptomInput(
-            fever=req.fever,
-            chest_pain=req.chest_pain,
-            breath_shortness=req.breath_shortness,
-            bleeding=req.bleeding,
-            consciousness_issue=req.consciousness_issue,
-            days=req.days,
-            age=req.age,
-        )
-    )
-    return {"level": level, "reasons": reasons}
+## 登录信息
 
+### 默认测试账号
 
-@app.post("/algo/department")
-def api_department(req: DepartmentRequest):
-    result = recommend_department(req.symptoms, req.top_k)
-    return {"recommendations": [{"department": d, "score": s} for d, s in result]}
+- 邮箱：test@demo.com
+- 密码：123456
 
+## 角色权限
 
-@app.post("/algo/slots")
-def api_slots(req: SlotsRequest):
-    slots = [
-        Slot(
-            doctor_id=s.doctor_id,
-            date=s.date,
-            time_range=s.time_range,
-            remaining=s.remaining,
-        )
-        for s in req.slots
-    ]
-    result = choose_best_slots(slots, req.top_k)
-    return {
-        "best_slots": [
-            {
-                "doctor_id": s.doctor_id,
-                "date": s.date,
-                "time_range": s.time_range,
-                "remaining": s.remaining,
-            }
-            for s in result
-        ]
-    }
+### 患者角色
+- 系统首页
+- 预约挂号
 
+### 医生角色
+- 系统首页
+- 患者挂号
+- 患者就诊
+- 住院登记
 
-@app.post("/algo/similar-cases")
-def api_similar_cases(req: SimilarCaseRequest):
-    result = similar_cases(req.query, req.cases, req.top_k)
-    return {"results": [{"case": c, "score": score} for c, score in result]}
+### 管理员角色
+- 系统首页
+- 信息管理（公告、科室、排班）
+- 预约就诊（患者挂号、住院登记）
+- 用户管理（管理员、医生、用户）
 
+## API 文档
+
+详细的 API 接口说明请查看 [API.md](API.md) 文件。
+
+## 注意事项
+
+- 本项目使用本地存储（localStorage）模拟数据存储
+- 注册时只能选择患者或医生角色
+- 管理员账号需要通过其他方式创建
