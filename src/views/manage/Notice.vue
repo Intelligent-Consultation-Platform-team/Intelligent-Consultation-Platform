@@ -15,36 +15,24 @@
             v-model="filter.title"
             placeholder="公告标题"
             clearable
-            prefix-icon="el-icon-search"
           />
         </el-col>
         <el-col :span="8">
-          <el-select
-            v-model="filter.status"
-            placeholder="状态"
-            clearable
-            style="width: 100%"
-          >
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
-          </el-select>
-        </el-col>
-        <el-col :span="8">
-          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
           <el-button @click="resetFilter">重置</el-button>
         </el-col>
       </el-row>
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="notices" style="width: 100%">
+      <el-table v-loading="loading" :data="pagedNotices" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="content" label="内容" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="statusText" label="状态" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
-              {{ scope.row.status === 1 ? '启用' : '禁用' }}
+            <el-tag :type="scope.row.status === 'active' ? 'success' : 'danger'">
+              {{ scope.row.statusText }}
             </el-tag>
           </template>
         </el-table-column>
@@ -95,9 +83,6 @@
             placeholder="请输入公告内容"
           />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="form.status" active-value="1" inactive-value="0" />
-        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -110,22 +95,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { request } from '../../utils/request'
 
 const filter = reactive({
   title: '',
-  status: ''
 })
 
 const pagination = reactive({
   current: 1,
   size: 10,
-  total: 0
+  total: 0,
 })
 
 const notices = ref([])
+const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增公告')
 const formRef = ref()
@@ -133,55 +119,66 @@ const form = reactive({
   id: '',
   title: '',
   content: '',
-  status: 1
 })
 
 const rules = {
-  title: [
-    { required: true, message: '请输入公告标题', trigger: 'blur' }
-  ],
-  content: [
-    { required: true, message: '请输入公告内容', trigger: 'blur' }
-  ]
+  title: [{ required: true, message: '请输入公告标题', trigger: 'blur' }],
+  content: [{ required: true, message: '请输入公告内容', trigger: 'blur' }],
 }
 
-const loadData = () => {
-  // 模拟数据
-  notices.value = [
-    {
-      id: 1,
-      title: '系统升级通知',
-      content: '系统将于2026年4月10日进行升级维护，届时系统将暂停服务。',
-      status: 1,
-      createdAt: '2026-04-01 10:00:00'
-    },
-    {
-      id: 2,
-      title: '节假日安排',
-      content: '五一劳动节放假安排：5月1日至5月5日放假调休。',
-      status: 1,
-      createdAt: '2026-04-15 14:30:00'
-    }
-  ]
-  pagination.total = notices.value.length
+const filteredNotices = computed(() => {
+  return notices.value.filter((item) => {
+    if (!filter.title) return true
+    return item.title?.includes(filter.title)
+  })
+})
+
+const pagedNotices = computed(() => {
+  const start = (pagination.current - 1) * pagination.size
+  const end = start + pagination.size
+  return filteredNotices.value.slice(start, end)
+})
+
+const formatDate = (value) => {
+  if (!value) return '-'
+  return String(value).replace('T', ' ').slice(0, 19)
+}
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const data = await request('/notices')
+    notices.value = (data || []).map((item) => ({
+      id: item.noticeId,
+      title: item.title,
+      content: item.content,
+      status: item.status,
+      statusText: item.status === 'active' ? '启用' : '禁用',
+      createdAt: formatDate(item.createdAt),
+    }))
+    pagination.total = filteredNotices.value.length
+  } catch (error) {
+    ElMessage.error(error.message || '加载公告失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
-  loadData()
+  pagination.current = 1
+  pagination.total = filteredNotices.value.length
 }
 
 const resetFilter = () => {
   filter.title = ''
-  filter.status = ''
-  loadData()
+  pagination.current = 1
+  pagination.total = filteredNotices.value.length
 }
 
 const handleAdd = () => {
   form.id = ''
   form.title = ''
   form.content = ''
-  form.status = 1
   dialogTitle.value = '新增公告'
   dialogVisible.value = true
 }
@@ -190,23 +187,20 @@ const handleEdit = (row) => {
   form.id = row.id
   form.title = row.title
   form.content = row.content
-  form.status = row.status
   dialogTitle.value = '编辑公告'
   dialogVisible.value = true
 }
 
-const handleDelete = (id) => {
-  ElMessage.success('删除成功')
-  loadData()
+const handleDelete = () => {
+  ElMessage.warning('当前后端暂未提供删除接口')
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.success('保存成功')
+    ElMessage.warning('当前后端暂未提供新增/编辑接口')
     dialogVisible.value = false
-    loadData()
   } catch {
     ElMessage.warning('请完善表单信息')
   }
@@ -214,16 +208,14 @@ const handleSubmit = async () => {
 
 const handleSizeChange = (size) => {
   pagination.size = size
-  loadData()
 }
 
 const handleCurrentChange = (current) => {
   pagination.current = current
-  loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadData()
 })
 </script>
 

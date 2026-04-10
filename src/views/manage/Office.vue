@@ -15,40 +15,21 @@
             v-model="filter.name"
             placeholder="科室名称"
             clearable
-            prefix-icon="el-icon-search"
           />
         </el-col>
         <el-col :span="8">
-          <el-select
-            v-model="filter.status"
-            placeholder="状态"
-            clearable
-            style="width: 100%"
-          >
-            <el-option label="启用" value="1" />
-            <el-option label="禁用" value="0" />
-          </el-select>
-        </el-col>
-        <el-col :span="8">
-          <el-button type="primary" @click="handleSearch">查询</el-button>
+          <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
           <el-button @click="resetFilter">重置</el-button>
         </el-col>
       </el-row>
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="offices" style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80" />
+      <el-table v-loading="loading" :data="pagedOffices" style="width: 100%">
+        <el-table-column prop="id" label="ID" width="90" />
         <el-table-column prop="name" label="科室名称" />
         <el-table-column prop="description" label="科室描述" show-overflow-tooltip />
-        <el-table-column prop="doctorCount" label="医生数量" width="120" />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
-              {{ scope.row.status === 1 ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
+        <el-table-column prop="location" label="位置" width="180" />
         <el-table-column prop="createdAt" label="创建时间" width="180" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
@@ -96,9 +77,6 @@
             placeholder="请输入科室描述"
           />
         </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="form.status" active-value="1" inactive-value="0" />
-        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -111,22 +89,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { request } from '../../utils/request'
 
 const filter = reactive({
   name: '',
-  status: ''
 })
 
 const pagination = reactive({
   current: 1,
   size: 10,
-  total: 0
+  total: 0,
 })
 
 const offices = ref([])
+const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增科室')
 const formRef = ref()
@@ -134,81 +113,65 @@ const form = reactive({
   id: '',
   name: '',
   description: '',
-  status: 1
 })
 
 const rules = {
-  name: [
-    { required: true, message: '请输入科室名称', trigger: 'blur' }
-  ],
-  description: [
-    { required: true, message: '请输入科室描述', trigger: 'blur' }
-  ]
+  name: [{ required: true, message: '请输入科室名称', trigger: 'blur' }],
+  description: [{ required: true, message: '请输入科室描述', trigger: 'blur' }],
 }
 
-const loadData = () => {
-  // 模拟数据
-  offices.value = [
-    {
-      id: 1,
-      name: '内科',
-      description: '内科是医学的一个重要分支，主要负责诊断和治疗内脏系统疾病。',
-      doctorCount: 12,
-      status: 1,
-      createdAt: '2026-01-01 00:00:00'
-    },
-    {
-      id: 2,
-      name: '外科',
-      description: '外科主要负责需要手术治疗的疾病，包括各种外科手术。',
-      doctorCount: 8,
-      status: 1,
-      createdAt: '2026-01-01 00:00:00'
-    },
-    {
-      id: 3,
-      name: '儿科',
-      description: '儿科专门负责儿童的医疗保健和疾病治疗。',
-      doctorCount: 6,
-      status: 1,
-      createdAt: '2026-01-01 00:00:00'
-    },
-    {
-      id: 4,
-      name: '妇产科',
-      description: '妇产科负责女性生殖系统的健康和疾病治疗。',
-      doctorCount: 5,
-      status: 1,
-      createdAt: '2026-01-01 00:00:00'
-    },
-    {
-      id: 5,
-      name: '骨科',
-      description: '骨科负责骨骼、关节、肌肉等运动系统疾病的诊断和治疗。',
-      doctorCount: 7,
-      status: 1,
-      createdAt: '2026-01-01 00:00:00'
-    }
-  ]
-  pagination.total = offices.value.length
+const filteredOffices = computed(() => {
+  return offices.value.filter((item) => {
+    if (!filter.name) return true
+    return item.name?.includes(filter.name)
+  })
+})
+
+const pagedOffices = computed(() => {
+  const start = (pagination.current - 1) * pagination.size
+  const end = start + pagination.size
+  return filteredOffices.value.slice(start, end)
+})
+
+const formatDate = (value) => {
+  if (!value) return '-'
+  return String(value).replace('T', ' ').slice(0, 19)
+}
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const data = await request('/departments')
+    offices.value = (data || []).map((item) => ({
+      id: item.deptId,
+      name: item.deptName,
+      description: item.description || '-',
+      location: item.location || '-',
+      createdAt: formatDate(item.createdAt),
+    }))
+    pagination.total = filteredOffices.value.length
+  } catch (error) {
+    ElMessage.error(error.message || '加载科室失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
-  loadData()
+  pagination.current = 1
+  pagination.total = filteredOffices.value.length
 }
 
 const resetFilter = () => {
   filter.name = ''
-  filter.status = ''
-  loadData()
+  pagination.current = 1
+  pagination.total = filteredOffices.value.length
 }
 
 const handleAdd = () => {
   form.id = ''
   form.name = ''
   form.description = ''
-  form.status = 1
   dialogTitle.value = '新增科室'
   dialogVisible.value = true
 }
@@ -216,24 +179,21 @@ const handleAdd = () => {
 const handleEdit = (row) => {
   form.id = row.id
   form.name = row.name
-  form.description = row.description
-  form.status = row.status
+  form.description = row.description === '-' ? '' : row.description
   dialogTitle.value = '编辑科室'
   dialogVisible.value = true
 }
 
-const handleDelete = (id) => {
-  ElMessage.success('删除成功')
-  loadData()
+const handleDelete = () => {
+  ElMessage.warning('当前后端暂未提供删除接口')
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.success('保存成功')
+    ElMessage.warning('当前后端暂未提供新增/编辑接口')
     dialogVisible.value = false
-    loadData()
   } catch {
     ElMessage.warning('请完善表单信息')
   }
@@ -241,16 +201,14 @@ const handleSubmit = async () => {
 
 const handleSizeChange = (size) => {
   pagination.size = size
-  loadData()
 }
 
 const handleCurrentChange = (current) => {
   pagination.current = current
-  loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadData()
 })
 </script>
 

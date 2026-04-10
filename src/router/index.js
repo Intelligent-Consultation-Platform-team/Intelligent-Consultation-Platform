@@ -1,11 +1,31 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+const AuthPlaceholder = { template: '<div></div>' }
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
       redirect: '/home'
+    },
+    {
+      path: '/auth/login',
+      name: 'AuthLogin',
+      component: AuthPlaceholder,
+      meta: {
+        title: '登录',
+        public: true
+      }
+    },
+    {
+      path: '/auth/register',
+      name: 'AuthRegister',
+      component: AuthPlaceholder,
+      meta: {
+        title: '注册',
+        public: true
+      }
     },
     {
       path: '/home',
@@ -139,6 +159,57 @@ const router = createRouter({
       ]
     }
   ]
+})
+
+router.beforeEach((to) => {
+  const rawSession = localStorage.getItem('demo_session')
+  const isPublicRoute = to.matched.some((record) => record.meta?.public)
+
+  let session = null
+  if (rawSession) {
+    try {
+      session = JSON.parse(rawSession)
+    } catch {
+      localStorage.removeItem('demo_session')
+      session = null
+    }
+  }
+
+  // token 过期处理
+  if (session?.expiresIn && session?.loginAt) {
+    const isExpired = Date.now() > session.loginAt + Number(session.expiresIn) * 1000
+    if (isExpired) {
+      localStorage.removeItem('demo_session')
+      session = null
+    }
+  }
+
+  const isLoggedIn = !!session
+  const hasRole = !!session?.role
+
+  if (!session && !isPublicRoute) {
+    return '/auth/login'
+  }
+
+  if (session && to.path.startsWith('/auth')) {
+    return '/home'
+  }
+
+  // 角色守卫：路由配置了 roles 时必须匹配
+  const requiredRoles = to.matched
+    .flatMap((record) => (Array.isArray(record.meta?.roles) ? record.meta.roles : []))
+
+  if (requiredRoles.length > 0) {
+    if (!isLoggedIn || !hasRole) {
+      return '/auth/login'
+    }
+
+    if (!requiredRoles.includes(session.role)) {
+      return '/home'
+    }
+  }
+
+  return true
 })
 
 export default router

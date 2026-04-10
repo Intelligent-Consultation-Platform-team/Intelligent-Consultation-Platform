@@ -197,7 +197,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const activeTab = ref('login')
 const formRef = ref()
@@ -211,6 +211,7 @@ const currentUser = reactive({
 })
 
 const route = useRoute()
+const router = useRouter()
 
 const formModel = reactive({
   username: '',
@@ -336,10 +337,12 @@ const rules = computed(() => ({
   role: isRegister.value
     ? [{ required: true, message: '请选择角色', trigger: 'change' }]
     : [],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] },
-  ],
+  email: isRegister.value
+    ? [
+        { required: true, message: '请输入邮箱', trigger: 'blur' },
+        { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] },
+      ]
+    : [],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 6, max: 32, message: '密码长度为 6-32 位', trigger: 'blur' },
@@ -350,43 +353,46 @@ const rules = computed(() => ({
 }))
 
 const storageKeys = {
-  users: 'demo_users',
   session: 'demo_session',
 }
 
-const seedDemoAccount = () => {
-  const users = loadUsers()
-  if (users.length === 0) {
-    users.push({
-      id: 1,
-      username: 'test',
-      realName: '测试用户',
-      phone: '13800138000',
-      email: 'test@demo.com',
-      password: '123456',
-      role: 'admin',
+
+const saveSession = (user) => {
+  localStorage.setItem(
+    storageKeys.session,
+    JSON.stringify({
+      ...user,
+      loginAt: Date.now(),
     })
-    saveUsers(users)
+  )
+}
+
+const getSession = () => {
+  const raw = localStorage.getItem(storageKeys.session)
+  if (!raw) return null
+
+  try {
+    return JSON.parse(raw)
+  } catch {
+    localStorage.removeItem(storageKeys.session)
+    return null
   }
 }
 
-const loadUsers = () => {
-  const raw = localStorage.getItem(storageKeys.users)
-  return raw ? JSON.parse(raw) : []
-}
-
-const saveUsers = (users) => {
-  localStorage.setItem(storageKeys.users, JSON.stringify(users))
-}
-
-const saveSession = (user) => {
-  localStorage.setItem(storageKeys.session, JSON.stringify(user))
+const isSessionExpired = (session) => {
+  if (!session?.expiresIn || !session?.loginAt) return false
+  return Date.now() > session.loginAt + Number(session.expiresIn) * 1000
 }
 
 const restoreSession = () => {
-  const raw = localStorage.getItem(storageKeys.session)
-  if (!raw) return
-  const user = JSON.parse(raw)
+  const user = getSession()
+  if (!user) return
+
+  if (isSessionExpired(user)) {
+    localStorage.removeItem(storageKeys.session)
+    return
+  }
+
   currentUser.username = user.username
   currentUser.realName = user.realName
   currentUser.email = user.email
@@ -394,9 +400,50 @@ const restoreSession = () => {
   isLoggedIn.value = true
 }
 
-watch(activeTab, () => {
+const authFetch = async (url, options = {}) => {
+  const session = getSession()
+  const token = session?.token
+  const tokenType = session?.tokenType || 'Bearer'
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `${tokenType} ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+  })
+
+  if (response.status === 401) {
+    localStorage.removeItem(storageKeys.session)
+    isLoggedIn.value = false
+    router.push('/auth/login')
+    throw new Error('登录已过期，请重新登录')
+  }
+
+  return response
+}
+
+watch(activeTab, (tab) => {
   resetForm()
+
+  const targetPath = tab === 'register' ? '/auth/register' : '/auth/login'
+  if (route.path !== targetPath) {
+    router.push(targetPath)
+  }
 })
+
+watch(
+  () => route.path,
+  (path) => {
+    if (path === '/auth/register') {
+      activeTab.value = 'register'
+    } else if (path === '/auth/login') {
+      activeTab.value = 'login'
+    }
+  },
+  { immediate: true }
+)
 
 const resetForm = () => {
   formModel.username = ''
@@ -410,7 +457,7 @@ const resetForm = () => {
 }
 
 const toggleTab = () => {
-  activeTab.value = isRegister.value ? 'login' : 'register'
+  router.push(isRegister.value ? '/auth/login' : '/auth/register')
 }
 
 const fillDemoAccount = () => {
@@ -425,71 +472,73 @@ const handleSubmit = async () => {
     await formRef.value.validate()
     submitting.value = true
 
-    await new Promise((resolve) => setTimeout(resolve, 700))
-
     if (isRegister.value) {
-      const users = loadUsers()
-      const usernameExists = users.some((u) => u.username === formModel.username)
-      const phoneExists = users.some((u) => u.phone === formModel.phone)
-      const emailExists = users.some((u) => u.email === formModel.email)
+      const response = await authFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: formModel.username,
+          nickname: formModel.realName,
+          phone: formModel.phone,
+          email: formModel.email,
+          password: formModel.password,
+          confirmPassword: formModel.confirmPassword,
+          role: formModel.role,
+        }),
+      })
 
-      if (usernameExists) {
-        ElMessage.error('用户名已存在')
-        return
-      }
-      if (phoneExists) {
-        ElMessage.error('手机号已注册')
-        return
-      }
-      if (emailExists) {
-        ElMessage.error('邮箱已注册')
+      const result = await response.json()
+
+      if (!response.ok || result.code !== 0) {
+        ElMessage.error(result.message || '注册失败')
         return
       }
 
-      const newUser = {
-        id: Date.now(),
+      ElMessage.success('注册成功，请登录')
+      router.push('/auth/login')
+      return
+    }
+
+    const response = await authFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
         username: formModel.username,
-        realName: formModel.realName,
-        phone: formModel.phone,
-        email: formModel.email,
         password: formModel.password,
-        role: formModel.role,
-      }
-      users.push(newUser)
-      saveUsers(users)
-
-      ElMessage.success(`注册成功，欢迎你：${formModel.realName}`)
-      activeTab.value = 'login'
-      return
-    }
-
-    const users = loadUsers()
-    const matched = users.find(
-      (u) =>
-        (u.username === formModel.username || u.phone === formModel.username) &&
-        u.password === formModel.password
-    )
-
-    if (!matched) {
-      ElMessage.error('账号或密码错误')
-      return
-    }
-
-    currentUser.username = matched.username
-    currentUser.realName = matched.realName
-    currentUser.email = matched.email
-    currentUser.role = matched.role
-    isLoggedIn.value = true
-    saveSession({
-      username: matched.username,
-      realName: matched.realName,
-      email: matched.email,
-      role: matched.role,
+      }),
     })
 
-    ElMessage.success(`登录成功，欢迎回来：${matched.realName || matched.username}`)
-  } catch {
-    ElMessage.warning('请先完成表单信息')
+    const result = await response.json()
+
+    if (!response.ok || result.code !== 0) {
+      ElMessage.error(result.message || '账号或密码错误')
+      return
+    }
+
+    const user = result?.data?.user || {}
+
+    currentUser.username = user.username || formModel.username
+    currentUser.realName = user.nickname || user.realName || formModel.username
+    currentUser.email = user.email || formModel.email
+    if (!user.role) {
+      ElMessage.error('登录返回缺少角色信息，请联系后端检查 /auth/login 返回数据')
+      return
+    }
+    currentUser.role = user.role
+    isLoggedIn.value = true
+
+    saveSession({
+      username: currentUser.username,
+      realName: currentUser.realName,
+      email: currentUser.email,
+      role: currentUser.role,
+      token: result?.data?.token || '',
+      tokenType: result?.data?.tokenType || 'Bearer',
+      expiresIn: result?.data?.expiresIn,
+    })
+
+    ElMessage.success(`登录成功，欢迎回来：${currentUser.realName || currentUser.username}`)
+    router.push('/home')
+  } catch (error) {
+    ElMessage.error('网络异常或后端服务未启动')
   } finally {
     submitting.value = false
   }
@@ -502,12 +551,11 @@ const logout = () => {
   currentUser.realName = ''
   currentUser.email = ''
   currentUser.role = ''
-  activeTab.value = 'login'
+  router.push('/auth/login')
   resetForm()
 }
 
 onMounted(() => {
-  seedDemoAccount()
   restoreSession()
 })
 </script>
