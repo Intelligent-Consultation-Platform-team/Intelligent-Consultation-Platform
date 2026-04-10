@@ -71,7 +71,11 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="邮箱" prop="email">
+          <el-form-item
+            v-if="isRegister"
+            label="邮箱"
+            prop="email"
+          >
             <el-input
               v-model.trim="formModel.email"
               placeholder="请输入邮箱"
@@ -411,7 +415,6 @@ const toggleTab = () => {
 
 const fillDemoAccount = () => {
   formModel.username = 'test'
-  formModel.email = 'test@demo.com'
   formModel.password = '123456'
 }
 
