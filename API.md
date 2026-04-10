@@ -6,7 +6,7 @@
 
 ## 1. 基础约定
 
-- Base URL：`/api`
+- Base URL：``
 - Content-Type：`application/json`
 - 鉴权方式：登录成功后返回 `token`，前端后续请求放在 Header：`Authorization: Bearer <token>`
 - 时间格式：ISO 8601，例如 `2026-03-29T10:00:00Z`
@@ -47,7 +47,7 @@
 ### 2.1 接口信息
 
 - 方法：`POST`
-- 路径：`/api/auth/register`
+- 路径：`/auth/register`
 
 ### 2.2 请求参数
 
@@ -108,7 +108,7 @@
 ### 3.1 接口信息
 
 - 方法：`POST`
-- 路径：`/api/auth/login`
+- 路径：`/auth/login`
 
 ### 3.2 请求参数
 
@@ -175,7 +175,7 @@
 ### 5.1 获取科室列表
 
 - 方法：`GET`
-- 路径：`/api/departments`
+- 路径：`/departments`
 - 权限：所有角色
 
 #### 成功响应
@@ -203,7 +203,7 @@
 ### 6.1 获取医生列表
 
 - 方法：`GET`
-- 路径：`/api/doctors`
+- 路径：`/doctors`
 - 权限：所有角色
 
 #### 查询参数
@@ -242,7 +242,7 @@
 ### 7.1 获取医生排班
 
 - 方法：`GET`
-- 路径：`/api/schedules`
+- 路径：`/schedules`
 - 权限：所有角色
 
 #### 查询参数
@@ -279,7 +279,7 @@
 ### 8.1 创建预约
 
 - 方法：`POST`
-- 路径：`/api/appointments`
+- 路径：`/appointments`
 - 权限：患者
 
 #### 请求参数
@@ -311,7 +311,7 @@
 ### 8.2 获取患者预约列表
 
 - 方法：`GET`
-- 路径：`/api/appointments/patient`
+- 路径：`/appointments/patient`
 - 权限：患者
 
 #### 成功响应
@@ -342,7 +342,7 @@
 ### 9.1 获取就诊记录
 
 - 方法：`GET`
-- 路径：`/api/consultations`
+- 路径：`/consultations`
 - 权限：患者、医生
 
 #### 查询参数
@@ -382,7 +382,7 @@
 ### 10.1 住院登记
 
 - 方法：`POST`
-- 路径：`/api/hospitalizations`
+- 路径：`/hospitalizations`
 - 权限：管理员、医生
 
 #### 请求参数
@@ -418,7 +418,7 @@
 ### 11.1 获取公告列表
 
 - 方法：`GET`
-- 路径：`/api/notices`
+- 路径：`/notices`
 - 权限：所有角色
 
 #### 成功响应
@@ -448,7 +448,7 @@
 ### 12.1 充值
 
 - 方法：`POST`
-- 路径：`/api/recharge`
+- 路径：`/recharge`
 - 权限：患者
 
 #### 请求参数
@@ -479,7 +479,7 @@
 ### 12.2 缴费
 
 - 方法：`POST`
-- 路径：`/api/payment`
+- 路径：`/payment`
 - 权限：患者
 
 #### 请求参数
@@ -515,7 +515,7 @@
 ### 13.1 注册
 
 ```bash
-curl -X POST 'http://localhost:3000/api/auth/register' \
+curl -X POST 'http://localhost:3000/auth/register' \
   -H 'Content-Type: application/json' \
   -d '{
     "username":"zhangsan",
@@ -531,7 +531,7 @@ curl -X POST 'http://localhost:3000/api/auth/register' \
 ### 13.2 登录
 
 ```bash
-curl -X POST 'http://localhost:3000/api/auth/login' \
+curl -X POST 'http://localhost:3000/auth/login' \
   -H 'Content-Type: application/json' \
   -d '{
     "username":"zhangsan",
@@ -542,21 +542,21 @@ curl -X POST 'http://localhost:3000/api/auth/login' \
 ### 13.3 获取科室列表
 
 ```bash
-curl -X GET 'http://localhost:3000/api/departments' \
+curl -X GET 'http://localhost:3000/departments' \
   -H 'Authorization: Bearer jwt-token-demo'
 ```
 
 ### 13.4 获取医生列表
 
 ```bash
-curl -X GET 'http://localhost:3000/api/doctors?deptId=1' \
+curl -X GET 'http://localhost:3000/doctors?deptId=1' \
   -H 'Authorization: Bearer jwt-token-demo'
 ```
 
 ### 13.5 创建预约
 
 ```bash
-curl -X POST 'http://localhost:3000/api/appointments' \
+curl -X POST 'http://localhost:3000/appointments' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer jwt-token-demo' \
   -d '{

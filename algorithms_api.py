@@ -48,26 +48,26 @@ class SimilarReq(BaseModel):
     top_k: int = 3
 
 
-@app.post("/api/risk")
+@app.post("/risk")
 def api_risk(payload: SymptomInputSchema):
     level, reasons = risk_level(SymptomInput(**payload.model_dump()))
     return {"level": level, "reasons": reasons}
 
 
-@app.post("/api/recommend")
+@app.post("/recommend")
 def api_recommend(payload: DeptReq):
     results = recommend_department(payload.symptoms, payload.top_k)
     return {"results": [{"department": d, "score": s} for d, s in results]}
 
 
-@app.post("/api/slots")
+@app.post("/slots")
 def api_slots(payload: SlotsReq):
     slots = [Slot(**s.model_dump()) for s in payload.slots]
     best = choose_best_slots(slots, payload.top_k)
     return {"results": [s.__dict__ for s in best]}
 
 
-@app.post("/api/similar")
+@app.post("/similar")
 def api_similar(payload: SimilarReq):
     results = similar_cases(payload.query, payload.cases, payload.top_k)
     return {"results": [{"case": c, "score": score} for c, score in results]}
