@@ -4,3 +4,4 @@ dist/
 *.log
 .DS_Store
 "@ | Out-File -Encoding utf8 .gitignorehospital_database.sql
+hospital_database.sql
