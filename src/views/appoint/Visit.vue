@@ -38,7 +38,7 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="visits" style="width: 100%">
+      <el-table v-loading="loading" :data="visits" style="width: 100%">
         <el-table-column prop="id" label="就诊ID" width="100" />
         <el-table-column prop="patientName" label="患者姓名" />
         <el-table-column prop="department" label="科室" />
@@ -143,6 +143,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
 
 const filter = reactive({
   patientName: '',
@@ -156,6 +157,7 @@ const pagination = reactive({
 })
 
 const visits = ref([])
+const loading = ref(false)
 const diagnoseDialogVisible = ref(false)
 const selectedVisit = ref(null)
 const diagnoseFormRef = ref()
@@ -175,41 +177,31 @@ const diagnoseRules = {
   ]
 }
 
-const loadData = () => {
-  // 模拟数据
-  visits.value = [
-    {
-      id: 1,
-      patientName: '张三',
-      department: '内科',
-      doctorName: '张医生',
-      visitDate: '2026-04-06',
-      visitTime: '09:00',
-      symptoms: '发热、咳嗽、咽痛',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      patientName: '李四',
-      department: '外科',
-      doctorName: '李医生',
-      visitDate: '2026-04-06',
-      visitTime: '10:30',
-      symptoms: '腹痛、恶心、呕吐',
-      status: 'processing'
-    },
-    {
-      id: 3,
-      patientName: '王五',
-      department: '儿科',
-      doctorName: '王医生',
-      visitDate: '2026-04-06',
-      visitTime: '14:00',
-      symptoms: '感冒、发烧、流鼻涕',
-      status: 'pending'
-    }
-  ]
-  pagination.total = visits.value.length
+const loadData = async () => {
+  loading.value = true
+  try {
+    const params = {}
+    // 模拟医生ID，实际应该从登录信息中获取
+    const doctorId = 1
+    params.doctorId = doctorId
+    const data = await api.consultations.getList(params)
+    visits.value = (data || []).map(item => ({
+      id: item.consultationId,
+      patientId: item.patientId,
+      patientName: '患者' + item.patientId, // 实际应该从患者信息中获取
+      department: '内科', // 实际应该从科室信息中获取
+      doctorName: '医生' + item.doctorId, // 实际应该从医生信息中获取
+      visitDate: item.consultationDate.split('T')[0],
+      visitTime: item.consultationDate.split('T')[1].substring(0, 5),
+      symptoms: item.symptoms || '-',
+      status: 'completed' // 实际应该根据状态字段判断
+    }))
+    pagination.total = visits.value.length
+  } catch (error) {
+    ElMessage.error(error.message || '加载就诊记录失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const getStatusLabel = (status) => {
@@ -231,18 +223,18 @@ const getStatusTagType = (status) => {
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
+  pagination.current = 1
   loadData()
 }
 
 const resetFilter = () => {
   filter.patientName = ''
   filter.status = ''
+  pagination.current = 1
   loadData()
 }
 
 const refreshData = () => {
-  ElMessage.success('数据已刷新')
   loadData()
 }
 
@@ -259,17 +251,15 @@ const confirmDiagnosis = async () => {
   if (!diagnoseFormRef.value) return
   try {
     await diagnoseFormRef.value.validate()
-    ElMessage.success('诊断保存成功')
+    ElMessage.warning('当前后端暂未提供诊断保存接口')
     diagnoseDialogVisible.value = false
-    loadData()
   } catch {
     ElMessage.warning('请完善诊断信息')
   }
 }
 
 const handleComplete = (id) => {
-  ElMessage.success('就诊已完成')
-  loadData()
+  ElMessage.warning('当前后端暂未提供就诊完成接口')
 }
 
 const handleSizeChange = (size) => {
@@ -282,8 +272,8 @@ const handleCurrentChange = (current) => {
   loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadData()
 })
 </script>
 

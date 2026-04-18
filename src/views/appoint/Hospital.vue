@@ -37,7 +37,7 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="hospitals" style="width: 100%">
+      <el-table v-loading="loading" :data="hospitals" style="width: 100%">
         <el-table-column prop="id" label="住院ID" width="100" />
         <el-table-column prop="patientName" label="患者姓名" />
         <el-table-column prop="department" label="科室" />
@@ -162,6 +162,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
 
 const filter = reactive({
   patientName: '',
@@ -174,23 +175,10 @@ const pagination = reactive({
   total: 0
 })
 
-const departments = ref([
-  { id: 1, name: '内科' },
-  { id: 2, name: '外科' },
-  { id: 3, name: '儿科' },
-  { id: 4, name: '妇产科' },
-  { id: 5, name: '骨科' }
-])
-
-const doctors = ref([
-  { id: 1, name: '张医生', department: '内科' },
-  { id: 2, name: '李医生', department: '外科' },
-  { id: 3, name: '王医生', department: '儿科' },
-  { id: 4, name: '赵医生', department: '妇产科' },
-  { id: 5, name: '钱医生', department: '骨科' }
-])
-
+const departments = ref([])
+const doctors = ref([])
 const hospitals = ref([])
+const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增住院')
 const formRef = ref()
@@ -238,54 +226,86 @@ const rules = {
   ]
 }
 
-const loadData = () => {
-  // 模拟数据
-  hospitals.value = [
-    {
-      id: 1,
-      patientName: '张三',
-      department: '内科',
-      doctorName: '张医生',
-      roomNumber: '301',
-      bedNumber: '2',
-      admissionDate: '2026-04-01',
-      dischargeDate: '',
-      status: 'in'
-    },
-    {
-      id: 2,
-      patientName: '李四',
-      department: '外科',
-      doctorName: '李医生',
-      roomNumber: '402',
-      bedNumber: '1',
-      admissionDate: '2026-04-03',
-      dischargeDate: '',
-      status: 'in'
-    },
-    {
-      id: 3,
-      patientName: '王五',
-      department: '骨科',
-      doctorName: '钱医生',
-      roomNumber: '503',
-      bedNumber: '3',
-      admissionDate: '2026-03-28',
-      dischargeDate: '2026-04-05',
-      status: 'out'
-    }
-  ]
-  pagination.total = hospitals.value.length
+const loadDepartments = async () => {
+  try {
+    const data = await api.departments.getList()
+    departments.value = (data || []).map(item => ({
+      id: item.deptId,
+      name: item.deptName
+    }))
+  } catch (error) {
+    ElMessage.error('加载科室失败')
+  }
+}
+
+const loadDoctors = async () => {
+  try {
+    const data = await api.doctors.getList()
+    doctors.value = (data || []).map(item => ({
+      id: item.doctorId,
+      name: item.realName
+    }))
+  } catch (error) {
+    ElMessage.error('加载医生失败')
+  }
+}
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    // 这里应该调用获取住院列表的API，暂时使用模拟数据
+    hospitals.value = [
+      {
+        id: 1,
+        patientName: '张三',
+        department: '内科',
+        doctorName: '张医生',
+        roomNumber: '301',
+        bedNumber: '2',
+        admissionDate: '2026-04-01',
+        dischargeDate: '',
+        status: 'in'
+      },
+      {
+        id: 2,
+        patientName: '李四',
+        department: '外科',
+        doctorName: '李医生',
+        roomNumber: '402',
+        bedNumber: '1',
+        admissionDate: '2026-04-03',
+        dischargeDate: '',
+        status: 'in'
+      },
+      {
+        id: 3,
+        patientName: '王五',
+        department: '骨科',
+        doctorName: '钱医生',
+        roomNumber: '503',
+        bedNumber: '3',
+        admissionDate: '2026-03-28',
+        dischargeDate: '2026-04-05',
+        status: 'out'
+      }
+    ]
+    pagination.total = hospitals.value.length
+  } catch (error) {
+    ElMessage.error(error.message || '加载住院记录失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
+  pagination.current = 1
   loadData()
 }
 
 const resetFilter = () => {
   filter.patientName = ''
   filter.status = ''
+  pagination.current = 1
   loadData()
 }
 
@@ -322,19 +342,27 @@ const handleEdit = (row) => {
 }
 
 const handleDischarge = (id) => {
-  ElMessage.success('患者已出院')
-  loadData()
+  ElMessage.warning('当前后端暂未提供出院接口')
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.success('保存成功')
+    // 模拟患者ID，实际应该从患者信息中获取
+    const patientId = 1
+    await api.hospitalizations.create({
+      patientId,
+      doctorId: form.doctorId,
+      deptId: form.departmentId,
+      admissionDate: form.admissionDate,
+      reason: form.reason
+    })
+    ElMessage.success('住院登记成功')
     dialogVisible.value = false
     loadData()
-  } catch {
-    ElMessage.warning('请完善表单信息')
+  } catch (error) {
+    ElMessage.error(error.message || '住院登记失败')
   }
 }
 
@@ -348,8 +376,10 @@ const handleCurrentChange = (current) => {
   loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadDepartments()
+  await loadDoctors()
+  await loadData()
 })
 </script>
 

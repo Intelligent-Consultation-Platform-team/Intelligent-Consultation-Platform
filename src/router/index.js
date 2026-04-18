@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-const AuthPlaceholder = { template: '<div></div>' }
+const AuthPage = () => import('../App.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -12,7 +12,7 @@ const router = createRouter({
     {
       path: '/auth/login',
       name: 'AuthLogin',
-      component: AuthPlaceholder,
+      component: AuthPage,
       meta: {
         title: '登录',
         public: true
@@ -21,7 +21,7 @@ const router = createRouter({
     {
       path: '/auth/register',
       name: 'AuthRegister',
-      component: AuthPlaceholder,
+      component: AuthPage,
       meta: {
         title: '注册',
         public: true
@@ -155,6 +155,15 @@ const router = createRouter({
             title: '用户信息',
             roles: ['admin']
           }
+        },
+        {
+          path: 'patient-account',
+          name: 'PatientAccount',
+          component: () => import('../views/user/PatientAccount.vue'),
+          meta: {
+            title: '患者账户',
+            roles: ['admin', 'patient']
+          }
         }
       ]
     }
@@ -175,7 +184,6 @@ router.beforeEach((to) => {
     }
   }
 
-  // token 过期处理
   if (session?.expiresIn && session?.loginAt) {
     const isExpired = Date.now() > session.loginAt + Number(session.expiresIn) * 1000
     if (isExpired) {
@@ -184,8 +192,10 @@ router.beforeEach((to) => {
     }
   }
 
-  const isLoggedIn = !!session
-  const hasRole = !!session?.role
+  const role = session?.role
+  const requiredRoles = to.matched.flatMap((record) =>
+    Array.isArray(record.meta?.roles) ? record.meta.roles : []
+  )
 
   if (!session && !isPublicRoute) {
     return '/auth/login'
@@ -195,16 +205,12 @@ router.beforeEach((to) => {
     return '/home'
   }
 
-  // 角色守卫：路由配置了 roles 时必须匹配
-  const requiredRoles = to.matched
-    .flatMap((record) => (Array.isArray(record.meta?.roles) ? record.meta.roles : []))
-
   if (requiredRoles.length > 0) {
-    if (!isLoggedIn || !hasRole) {
+    if (!role) {
       return '/auth/login'
     }
 
-    if (!requiredRoles.includes(session.role)) {
+    if (!requiredRoles.includes(role)) {
       return '/home'
     }
   }

@@ -41,7 +41,7 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="doctors" style="width: 100%">
+      <el-table v-loading="loading" :data="doctors" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="姓名" />
         <el-table-column prop="department" label="所属科室" />
@@ -143,6 +143,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
 
 const filter = reactive({
   name: '',
@@ -155,15 +156,9 @@ const pagination = reactive({
   total: 0
 })
 
-const departments = ref([
-  { id: 1, name: '内科' },
-  { id: 2, name: '外科' },
-  { id: 3, name: '儿科' },
-  { id: 4, name: '妇产科' },
-  { id: 5, name: '骨科' }
-])
-
+const departments = ref([])
 const doctors = ref([])
+const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增医生')
 const formRef = ref()
@@ -201,71 +196,57 @@ const rules = {
   ]
 }
 
-const loadData = () => {
-  // 模拟数据
-  doctors.value = [
-    {
-      id: 1,
-      name: '张医生',
-      department: '内科',
-      title: '主任医师',
-      specialty: '心血管疾病',
-      phone: '13800138001',
-      email: 'zhang@example.com',
-      status: 1
-    },
-    {
-      id: 2,
-      name: '李医生',
-      department: '外科',
-      title: '副主任医师',
-      specialty: '普外科',
-      phone: '13800138002',
-      email: 'li@example.com',
-      status: 1
-    },
-    {
-      id: 3,
-      name: '王医生',
-      department: '儿科',
-      title: '主治医师',
-      specialty: '小儿内科',
-      phone: '13800138003',
-      email: 'wang@example.com',
-      status: 1
-    },
-    {
-      id: 4,
-      name: '赵医生',
-      department: '妇产科',
-      title: '主任医师',
-      specialty: '产科',
-      phone: '13800138004',
-      email: 'zhao@example.com',
-      status: 1
-    },
-    {
-      id: 5,
-      name: '钱医生',
-      department: '骨科',
-      title: '副主任医师',
-      specialty: '骨关节外科',
-      phone: '13800138005',
-      email: 'qian@example.com',
-      status: 1
+const loadDepartments = async () => {
+  try {
+    const data = await api.departments.getList()
+    departments.value = (data || []).map(item => ({
+      id: item.deptId,
+      name: item.deptName
+    }))
+  } catch (error) {
+    ElMessage.error('加载科室失败')
+  }
+}
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const params = {}
+    if (filter.department) {
+      params.deptId = filter.department
     }
-  ]
-  pagination.total = doctors.value.length
+    if (filter.name) {
+      params.name = filter.name
+    }
+    const data = await api.doctors.getList(params)
+    doctors.value = (data || []).map(item => ({
+      id: item.doctorId,
+      name: item.realName,
+      department: item.deptName || '-',
+      departmentId: item.deptId,
+      title: item.title || '-',
+      specialty: item.specialty || '-',
+      phone: '-',
+      email: '-',
+      status: item.status === 'available' ? 1 : 0
+    }))
+    pagination.total = doctors.value.length
+  } catch (error) {
+    ElMessage.error(error.message || '加载医生失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
+  pagination.current = 1
   loadData()
 }
 
 const resetFilter = () => {
   filter.name = ''
   filter.department = ''
+  pagination.current = 1
   loadData()
 }
 
@@ -296,17 +277,15 @@ const handleEdit = (row) => {
 }
 
 const handleDelete = (id) => {
-  ElMessage.success('删除成功')
-  loadData()
+  ElMessage.warning('当前后端暂未提供删除接口')
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.success('保存成功')
+    ElMessage.warning('当前后端暂未提供新增/编辑接口')
     dialogVisible.value = false
-    loadData()
   } catch {
     ElMessage.warning('请完善表单信息')
   }
@@ -322,8 +301,9 @@ const handleCurrentChange = (current) => {
   loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadDepartments()
+  await loadData()
 })
 </script>
 

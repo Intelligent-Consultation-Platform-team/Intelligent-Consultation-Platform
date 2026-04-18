@@ -41,7 +41,7 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="schedules" style="width: 100%">
+      <el-table v-loading="loading" :data="schedules" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="department" label="科室" />
         <el-table-column prop="doctorName" label="医生姓名" />
@@ -123,6 +123,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
 
 const filter = reactive({
   department: '',
@@ -135,15 +136,10 @@ const pagination = reactive({
   total: 0
 })
 
-const departments = ref([
-  { id: 1, name: '内科' },
-  { id: 2, name: '外科' },
-  { id: 3, name: '儿科' },
-  { id: 4, name: '妇产科' },
-  { id: 5, name: '骨科' }
-])
-
+const departments = ref([])
+const doctors = ref([])
 const schedules = ref([])
+const loading = ref(false)
 const bookDialogVisible = ref(false)
 const selectedSchedule = ref(null)
 const bookFormRef = ref()
@@ -157,71 +153,85 @@ const bookRules = {
   ]
 }
 
-const loadData = () => {
-  // 模拟数据
-  schedules.value = [
-    {
-      id: 1,
-      department: '内科',
-      doctorName: '张医生',
-      date: '2026-04-06',
-      timeRange: '上午 (8:00-12:00)',
-      maxNumber: 20,
-      remaining: 15
-    },
-    {
-      id: 2,
-      department: '外科',
-      doctorName: '李医生',
-      date: '2026-04-06',
-      timeRange: '下午 (14:00-18:00)',
-      maxNumber: 15,
-      remaining: 10
-    },
-    {
-      id: 3,
-      department: '儿科',
-      doctorName: '王医生',
-      date: '2026-04-07',
-      timeRange: '上午 (8:00-12:00)',
-      maxNumber: 25,
-      remaining: 25
-    },
-    {
-      id: 4,
-      department: '妇产科',
-      doctorName: '赵医生',
-      date: '2026-04-07',
-      timeRange: '下午 (14:00-18:00)',
-      maxNumber: 18,
-      remaining: 18
-    },
-    {
-      id: 5,
-      department: '骨科',
-      doctorName: '钱医生',
-      date: '2026-04-08',
-      timeRange: '上午 (8:00-12:00)',
-      maxNumber: 22,
-      remaining: 22
+const loadDepartments = async () => {
+  try {
+    const data = await api.departments.getList()
+    departments.value = (data || []).map(item => ({
+      id: item.deptId,
+      name: item.deptName
+    }))
+  } catch (error) {
+    ElMessage.error('加载科室失败')
+  }
+}
+
+const loadDoctors = async () => {
+  try {
+    const params = {}
+    if (filter.department) {
+      params.deptId = filter.department
     }
-  ]
-  pagination.total = schedules.value.length
+    const data = await api.doctors.getList(params)
+    doctors.value = (data || []).map(item => ({
+      id: item.doctorId,
+      name: item.realName,
+      deptId: item.deptId
+    }))
+  } catch (error) {
+    ElMessage.error('加载医生失败')
+  }
+}
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    await loadDoctors()
+    const schedulePromises = doctors.value.map(async (doctor) => {
+      const params = {
+        doctorId: doctor.id
+      }
+      if (filter.date) {
+        params.date = filter.date
+      }
+      try {
+        const data = await api.schedules.getList(params)
+        return (data || []).map(item => ({
+          id: item.scheduleId,
+          doctorId: item.doctorId,
+          doctorName: doctor.name,
+          department: departments.value.find(d => d.id === doctor.deptId)?.name || '-',
+          date: filter.date || '-',
+          timeRange: `${item.startTime} - ${item.endTime}`,
+          maxNumber: item.availableSlots || 0,
+          remaining: item.availableSlots || 0
+        }))
+      } catch (error) {
+        return []
+      }
+    })
+    const results = await Promise.all(schedulePromises)
+    schedules.value = results.flat()
+    pagination.total = schedules.value.length
+  } catch (error) {
+    ElMessage.error(error.message || '加载排班失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
+  pagination.current = 1
   loadData()
 }
 
 const resetFilter = () => {
   filter.department = ''
   filter.date = ''
+  pagination.current = 1
   loadData()
 }
 
 const refreshData = () => {
-  ElMessage.success('数据已刷新')
   loadData()
 }
 
@@ -235,11 +245,24 @@ const confirmBook = async () => {
   if (!bookFormRef.value) return
   try {
     await bookFormRef.value.validate()
+    if (!selectedSchedule.value) {
+      ElMessage.error('请选择排班信息')
+      return
+    }
+    // 模拟患者ID，实际应该从登录信息中获取
+    const patientId = 1
+    await api.appointments.create({
+      patientId,
+      doctorId: selectedSchedule.value.doctorId,
+      scheduleId: selectedSchedule.value.id,
+      appointmentDate: selectedSchedule.value.date,
+      appointmentTime: selectedSchedule.value.timeRange.split(' - ')[0]
+    })
     ElMessage.success('预约成功！请准时前往医院就诊。')
     bookDialogVisible.value = false
     loadData()
-  } catch {
-    ElMessage.warning('请完善预约信息')
+  } catch (error) {
+    ElMessage.error(error.message || '预约失败')
   }
 }
 
@@ -253,8 +276,9 @@ const handleCurrentChange = (current) => {
   loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadDepartments()
+  await loadData()
 })
 </script>
 

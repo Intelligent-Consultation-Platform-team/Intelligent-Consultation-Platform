@@ -98,7 +98,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-import { request } from '../../utils/request'
+import { api } from '../../utils/api'
 
 const filter = reactive({
   title: '',
@@ -147,7 +147,7 @@ const formatDate = (value) => {
 const loadData = async () => {
   loading.value = true
   try {
-    const data = await request('/notices')
+    const data = await api.notices.getList()
     notices.value = (data || []).map((item) => ({
       id: item.noticeId,
       title: item.title,

@@ -41,7 +41,7 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="schedules" style="width: 100%">
+      <el-table v-loading="loading" :data="schedules" style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="doctorName" label="医生姓名" />
         <el-table-column prop="department" label="所属科室" />
@@ -149,6 +149,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
 
 const filter = reactive({
   doctorId: '',
@@ -161,15 +162,9 @@ const pagination = reactive({
   total: 0
 })
 
-const doctors = ref([
-  { id: 1, name: '张医生', department: '内科' },
-  { id: 2, name: '李医生', department: '外科' },
-  { id: 3, name: '王医生', department: '儿科' },
-  { id: 4, name: '赵医生', department: '妇产科' },
-  { id: 5, name: '钱医生', department: '骨科' }
-])
-
+const doctors = ref([])
 const schedules = ref([])
+const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增排班')
 const formRef = ref()
@@ -198,54 +193,62 @@ const rules = {
   ]
 }
 
-const loadData = () => {
-  // 模拟数据
-  schedules.value = [
-    {
-      id: 1,
-      doctorId: 1,
-      doctorName: '张医生',
-      department: '内科',
-      date: '2026-04-06',
-      timeRange: '上午',
-      maxNumber: 20,
-      remaining: 15,
-      status: 1
-    },
-    {
-      id: 2,
-      doctorId: 2,
-      doctorName: '李医生',
-      department: '外科',
-      date: '2026-04-06',
-      timeRange: '下午',
-      maxNumber: 15,
-      remaining: 10,
-      status: 1
-    },
-    {
-      id: 3,
-      doctorId: 3,
-      doctorName: '王医生',
-      department: '儿科',
-      date: '2026-04-07',
-      timeRange: '上午',
-      maxNumber: 25,
-      remaining: 25,
-      status: 1
+const loadDoctors = async () => {
+  try {
+    const data = await api.doctors.getList()
+    doctors.value = (data || []).map(item => ({
+      id: item.doctorId,
+      name: item.realName,
+      department: item.deptName || '-'
+    }))
+  } catch (error) {
+    ElMessage.error('加载医生列表失败')
+  }
+}
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const params = {}
+    if (filter.doctorId) {
+      params.doctorId = filter.doctorId
     }
-  ]
-  pagination.total = schedules.value.length
+    if (filter.date) {
+      params.date = filter.date
+    }
+    const data = await api.schedules.getList(params)
+    schedules.value = (data || []).map(item => {
+      // 查找对应的医生信息
+      const doctor = doctors.value.find(d => d.id === item.doctorId) || {}
+      return {
+        id: item.scheduleId,
+        doctorId: item.doctorId,
+        doctorName: doctor.name || '-',
+        department: doctor.department || '-',
+        date: item.date || '-',
+        timeRange: `${item.startTime} - ${item.endTime}`,
+        maxNumber: item.availableSlots || 0,
+        remaining: item.availableSlots || 0,
+        status: item.status === 'active' ? 1 : 0
+      }
+    })
+    pagination.total = schedules.value.length
+  } catch (error) {
+    ElMessage.error(error.message || '加载排班失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
+  pagination.current = 1
   loadData()
 }
 
 const resetFilter = () => {
   filter.doctorId = ''
   filter.date = ''
+  pagination.current = 1
   loadData()
 }
 
@@ -272,17 +275,15 @@ const handleEdit = (row) => {
 }
 
 const handleDelete = (id) => {
-  ElMessage.success('删除成功')
-  loadData()
+  ElMessage.warning('当前后端暂未提供删除接口')
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.success('保存成功')
+    ElMessage.warning('当前后端暂未提供新增/编辑接口')
     dialogVisible.value = false
-    loadData()
   } catch {
     ElMessage.warning('请完善表单信息')
   }
@@ -298,8 +299,9 @@ const handleCurrentChange = (current) => {
   loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadDoctors()
+  await loadData()
 })
 </script>
 
