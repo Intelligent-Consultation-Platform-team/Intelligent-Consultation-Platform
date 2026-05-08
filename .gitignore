@@ -1,2 +1,3 @@
 Intelligent-Consultation-Platform/Intelligent-Consultation-Platform-front/node_modules/.bin/vite
 "node_modules/" 
+"**/node_modules/" 
