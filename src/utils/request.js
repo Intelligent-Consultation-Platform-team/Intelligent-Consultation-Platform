@@ -1,6 +1,6 @@
 const SESSION_KEY = 'demo_session'
 
-const getSession = () => {
+export const getSession = () => {
   const raw = localStorage.getItem(SESSION_KEY)
   if (!raw) return null
   try {
@@ -9,6 +9,15 @@ const getSession = () => {
     localStorage.removeItem(SESSION_KEY)
     return null
   }
+}
+
+export const clearSession = () => {
+  localStorage.removeItem(SESSION_KEY)
+}
+
+export const isSessionExpired = (session) => {
+  if (!session?.expiresIn || !session?.loginAt) return false
+  return Date.now() > session.loginAt + Number(session.expiresIn) * 1000
 }
 
 const buildQuery = (params = {}) => {
@@ -35,20 +44,29 @@ export const request = async (url, options = {}) => {
   const token = session?.token
   const tokenType = session?.tokenType || 'Bearer'
 
-  const response = await fetch(`${url}${buildQuery(params)}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(withAuth && token ? { Authorization: `${tokenType} ${token}` } : {}),
-      ...headers,
-    },
-    body: data ? JSON.stringify(data) : undefined,
-  })
+  let response
+  try {
+    response = await fetch(`${url}${buildQuery(params)}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(withAuth && token ? { Authorization: `${tokenType} ${token}` } : {}),
+        ...headers,
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    })
+  } catch {
+    throw new Error('网络异常，请稍后重试')
+  }
 
   if (response.status === 401) {
-    localStorage.removeItem(SESSION_KEY)
+    clearSession()
     window.location.href = '/auth/login'
     throw new Error('登录已过期，请重新登录')
+  }
+
+  if (response.status === 403) {
+    throw new Error('暂无权限访问该资源')
   }
 
   let result = null
@@ -59,7 +77,7 @@ export const request = async (url, options = {}) => {
   }
 
   if (!response.ok || result?.code !== 0) {
-    throw new Error(result?.message || '请求失败')
+    throw new Error(result?.message || `请求失败（${response.status}）`)
   }
 
   return result.data

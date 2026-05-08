@@ -68,7 +68,7 @@
       <el-container class="layout-container">
         <el-aside width="220px" class="sidebar">
           <div class="brand">智能咨询平台</div>
-          <el-menu :default-active="route.path" class="menu" router>
+          <el-menu :default-active="route.path" class="menu" router :collapse-transition="false">
             <template v-for="item in filteredMenu" :key="item.index">
               <el-menu-item v-if="!item.children" :index="item.path">{{ item.label }}</el-menu-item>
               <el-sub-menu v-else :index="item.path">
@@ -104,8 +104,8 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from './utils/api'
+import { clearSession, getSession, isSessionExpired, setSession } from './utils/session'
 
-const SESSION_KEY = 'demo_session'
 const route = useRoute()
 const router = useRouter()
 const formRef = ref()
@@ -117,14 +117,17 @@ const currentUser = reactive({ username: '', realName: '', role: '' })
 const formModel = reactive({ username: '', realName: '', phone: '', email: '', password: '', confirmPassword: '', role: '' })
 const roleText = { admin: '管理员', doctor: '医生', patient: '患者' }
 const isRegister = computed(() => activeTab.value === 'register')
-const isDoctor = computed(() => currentUser.role === 'doctor')
-const isPatient = computed(() => currentUser.role === 'patient')
 
 const validateConfirmPassword = (_, value, callback) => {
   if (!isRegister.value) return callback()
   if (!value) return callback(new Error('请再次输入密码'))
   if (value !== formModel.password) return callback(new Error('两次输入的密码不一致'))
   callback()
+}
+
+const normalizeRole = (role) => {
+  if (role === 'admin' || role === 'doctor' || role === 'patient') return role
+  return 'patient'
 }
 
 const menuConfig = [
@@ -179,6 +182,13 @@ const filteredMenu = computed(() => {
   return filterItems(menuConfig)
 })
 
+const normalizePathByRole = (role) => {
+  if (role === 'doctor') return '/appoint/visit'
+  if (role === 'patient') return '/appoint/book'
+  if (role === 'admin') return '/home'
+  return '/home'
+}
+
 const rules = computed(() => ({
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -206,27 +216,21 @@ const rules = computed(() => ({
   confirmPassword: isRegister.value ? [{ validator: validateConfirmPassword, trigger: ['blur', 'change'] }] : [],
 }))
 
-const getSession = () => {
-  const raw = localStorage.getItem(SESSION_KEY)
-  if (!raw) return null
-  try { return JSON.parse(raw) } catch { localStorage.removeItem(SESSION_KEY); return null }
-}
-
 const saveSession = (data) => {
-  localStorage.setItem(SESSION_KEY, JSON.stringify({ ...data, loginAt: Date.now() }))
+  setSession(data)
 }
 
 const restoreSession = () => {
   const session = getSession()
-  if (!session) return
-  if (session.expiresIn && session.loginAt && Date.now() > session.loginAt + Number(session.expiresIn) * 1000) {
-    localStorage.removeItem(SESSION_KEY)
-    return
+  if (!session || isSessionExpired(session)) {
+    clearSession()
+    return false
   }
   currentUser.username = session.username || ''
   currentUser.realName = session.realName || ''
-  currentUser.role = session.role || ''
+  currentUser.role = normalizeRole(session.role)
   isAuthenticated.value = true
+  return true
 }
 
 const clearForm = () => {
@@ -237,11 +241,13 @@ const clearForm = () => {
   formModel.password = ''
   formModel.confirmPassword = ''
   formModel.role = ''
-  formRef.value?.clearValidate()
+  formRef.value?.resetFields?.()
+  formRef.value?.clearValidate?.()
 }
 
 const toggleTab = () => {
-  router.push(isRegister.value ? '/auth/login' : '/auth/register')
+  activeTab.value = isRegister.value ? 'login' : 'register'
+  router.replace(isRegister.value ? '/auth/login' : '/auth/register')
 }
 
 const fillDemo = () => {
@@ -250,54 +256,51 @@ const fillDemo = () => {
 }
 
 const handleSubmit = async () => {
-  if (!formRef.value) return
+  if (!formRef.value || loading.value) return
   try {
     await formRef.value.validate()
     loading.value = true
 
     if (isRegister.value) {
-      // 确保所有必要的参数都被正确传递
       const registerData = {
         username: formModel.username.trim(),
-        nickname: formModel.realName.trim(), // 后端期望的字段名是nickname
+        nickname: formModel.realName.trim(),
         phone: formModel.phone.trim(),
         email: formModel.email.trim(),
         password: formModel.password,
         confirmPassword: formModel.confirmPassword,
-        role: formModel.role
+        role: normalizeRole(formModel.role),
       }
-      // 打印参数，便于调试
-      console.log('注册参数:', registerData)
       await api.auth.register(registerData)
       ElMessage.success('注册成功，请登录')
       activeTab.value = 'login'
-      router.push('/auth/login')
+      router.replace('/auth/login')
       clearForm()
       return
     }
 
     const data = await api.auth.login({
-      username: formModel.username,
+      username: formModel.username.trim(),
       password: formModel.password,
     })
 
-    const user = data?.user || {}
-    currentUser.username = user.username || formModel.username
-    currentUser.realName = user.realName || user.nickname || user.username || formModel.username
-    currentUser.role = user.role || 'patient'
+    const user = data?.user || data?.data || {}
+    currentUser.username = user.username || formModel.username.trim()
+    currentUser.realName = user.realName || user.nickname || user.username || formModel.username.trim()
+    currentUser.role = normalizeRole(user.role)
 
     saveSession({
       username: currentUser.username,
       realName: currentUser.realName,
       role: currentUser.role,
-      token: data?.token || '',
+      token: data?.token || data?.accessToken || '',
       tokenType: data?.tokenType || 'Bearer',
       expiresIn: data?.expiresIn,
     })
 
     isAuthenticated.value = true
     ElMessage.success('登录成功')
-    router.push('/home')
+    router.replace(normalizePathByRole(currentUser.role))
   } catch (error) {
     ElMessage.error(error?.message || '请求失败')
   } finally {
@@ -306,20 +309,28 @@ const handleSubmit = async () => {
 }
 
 const logout = () => {
-  localStorage.removeItem(SESSION_KEY)
+  clearSession()
   isAuthenticated.value = false
   currentUser.username = ''
   currentUser.realName = ''
   currentUser.role = ''
   clearForm()
-  router.push('/auth/login')
+  activeTab.value = 'login'
+  router.replace('/auth/login')
 }
 
 watch(
   () => route.path,
   (path) => {
-    if (path === '/auth/register') activeTab.value = 'register'
-    else if (path === '/auth/login') activeTab.value = 'login'
+    if (path === '/auth/register') {
+      activeTab.value = 'register'
+      return
+    }
+    if (path === '/auth/login') {
+      activeTab.value = 'login'
+      return
+    }
+    if (isAuthenticated.value && !path.startsWith('/auth')) return
   },
   { immediate: true }
 )
@@ -327,7 +338,9 @@ watch(
 watch(activeTab, () => clearForm())
 
 onMounted(() => {
-  restoreSession()
+  const restored = restoreSession()
+  if (restored) router.replace(normalizePathByRole(currentUser.role))
+  else router.replace(route.path === '/auth/register' ? '/auth/register' : '/auth/login')
 })
 </script>
 
