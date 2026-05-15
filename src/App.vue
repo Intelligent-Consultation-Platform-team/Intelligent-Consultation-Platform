@@ -78,6 +78,7 @@
                 </el-menu-item>
               </el-sub-menu>
             </template>
+            <el-menu-item index="/ai-consultation">AI 问诊</el-menu-item>
           </el-menu>
         </el-aside>
 
@@ -95,6 +96,8 @@
           </el-main>
         </el-container>
       </el-container>
+
+      <ConsultationFloatingBot v-model:visible="botVisible" />
     </div>
   </div>
 </template>
@@ -103,6 +106,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRoute, useRouter } from 'vue-router'
+import ConsultationFloatingBot from './components/aiConsultation/ConsultationFloatingBot.vue'
 import { api } from './utils/api'
 import { clearSession, getSession, isSessionExpired, setSession } from './utils/session'
 
@@ -112,6 +116,7 @@ const formRef = ref()
 const loading = ref(false)
 const activeTab = ref(route.path === '/auth/register' ? 'register' : 'login')
 const isAuthenticated = ref(false)
+const botVisible = ref(true)
 
 const currentUser = reactive({ username: '', realName: '', role: '' })
 const formModel = reactive({ username: '', realName: '', phone: '', email: '', password: '', confirmPassword: '', role: '' })

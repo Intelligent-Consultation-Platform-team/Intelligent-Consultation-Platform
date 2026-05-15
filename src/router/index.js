@@ -36,6 +36,42 @@ const router = createRouter({
       }
     },
     {
+      path: '/ai-consultation',
+      name: 'AiConsultationIndex',
+      component: () => import('../views/aiConsultation/index.vue'),
+      meta: {
+        title: 'AI 问诊',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/ai-consultation/chat/:sessionId',
+      name: 'AiConsultationChat',
+      component: () => import('../views/aiConsultation/chat.vue'),
+      meta: {
+        title: 'AI 问诊对话',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/ai-consultation/history',
+      name: 'AiConsultationHistory',
+      component: () => import('../views/aiConsultation/history.vue'),
+      meta: {
+        title: 'AI 问诊历史',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/ai-consultation/detail/:sessionId',
+      name: 'AiConsultationDetail',
+      component: () => import('../views/aiConsultation/detail.vue'),
+      meta: {
+        title: 'AI 问诊详情',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
       path: '/manage',
       name: 'Manage',
       component: () => import('../views/Manage.vue'),

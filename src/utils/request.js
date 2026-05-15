@@ -76,7 +76,8 @@ export const request = async (url, options = {}) => {
     throw new Error('接口返回格式错误')
   }
 
-  if (!response.ok || result?.code !== 0) {
+  const successCode = result?.code === 0 || result?.code === 200 || result?.success === true
+  if (!response.ok || !successCode) {
     throw new Error(result?.message || `请求失败（${response.status}）`)
   }
 
