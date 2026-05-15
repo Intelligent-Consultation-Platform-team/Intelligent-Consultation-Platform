@@ -20,7 +20,7 @@ export const isSessionExpired = (session) => {
   return Date.now() > session.loginAt + Number(session.expiresIn) * 1000
 }
 
-const buildQuery = (params = {}) => {
+export const buildQuery = (params = {}) => {
   const search = new URLSearchParams()
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {

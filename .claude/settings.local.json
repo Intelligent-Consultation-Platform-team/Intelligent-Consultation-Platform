@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh --version)",
+      "Bash(C:/Program Files/GitHub CLI/gh auth *)",
+      "Bash(curl *)",
+      "Bash(ssh-add *)",
+      "Bash(ssh *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(java --version)",
+      "Bash(npm --version)",
+      "Bash(mysql --version)",
+      "Bash(mysqladmin -u root -p123456 ping)",
+      "Bash(mysqld --version)",
+      "Bash(./mvnw spring-boot:run -DskipTests)",
+      "Bash(npm install *)",
+      "Bash(netstat -ano)",
+      "Bash(echo \"Backend PID: $!\")",
+      "Bash(nohup npm run dev)",
+      "Bash(echo \"Frontend PID: $!\")",
+      "Bash(./mvnw --version)",
+      "Bash(nohup mvn spring-boot:run -DskipTests)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(npx vitest *)"
+    ]
+  }
+}
