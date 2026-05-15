@@ -9,6 +9,7 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.sql.Timestamp;
 
 /**
  *  系统公告服务实现类。
@@ -23,6 +24,29 @@ public class NoticesServiceImpl extends ServiceImpl<NoticesMapper, Notices> impl
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .eq("status", "active");
         return list(queryWrapper);
+    }
+
+    @Override
+    public boolean addNotice(Notices notices) {
+        notices.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        notices.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        return save(notices);
+    }
+
+    @Override
+    public boolean updateNotice(Notices notices) {
+        notices.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        return updateById(notices);
+    }
+
+    @Override
+    public boolean deleteNotice(Long noticeId) {
+        return removeById(noticeId);
+    }
+
+    @Override
+    public Notices getNoticeById(Long noticeId) {
+        return getById(noticeId);
     }
 
 }

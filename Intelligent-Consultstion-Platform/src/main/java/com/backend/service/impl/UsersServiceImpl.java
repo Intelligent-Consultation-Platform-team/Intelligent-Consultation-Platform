@@ -29,13 +29,14 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Override
     public Long userRegister(UserRegisterRequest userRegisterRequest) {
         String username = userRegisterRequest.getUsername();
-        String nickname = userRegisterRequest.getNickname();
+        String realName = userRegisterRequest.getRealName();
+        String phone = userRegisterRequest.getPhone();
         String email = userRegisterRequest.getEmail();
         String password = userRegisterRequest.getPassword();
         String confirmPassword = userRegisterRequest.getConfirmPassword();
         String role = userRegisterRequest.getRole();
 
-        if (StrUtil.hasBlank(username, nickname, email, password, confirmPassword, role)) {
+        if (StrUtil.hasBlank(username, realName, phone, email, password, confirmPassword, role)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
         }
 
@@ -47,8 +48,12 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名只能包含字母、数字和下划线");
         }
 
-        if (nickname.length() < 2 || nickname.length() > 20) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "昵称长度必须在2-20位之间");
+        if (realName.length() < 2 || realName.length() > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "真实姓名长度必须在2-20位之间");
+        }
+
+        if (!phone.matches("^1[3-9]\\d{9}$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号格式错误");
         }
 
         if (!Validator.isEmail(email)) {
@@ -63,8 +68,8 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入密码不一致");
         }
 
-        if (!role.matches("^(admin|doctor|patient)$")) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "角色必须是admin、doctor或patient");
+        if (!role.matches("^(patient|doctor)$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "角色必须是patient或doctor");
         }
 
         QueryWrapper queryWrapper = QueryWrapper.create()
@@ -81,13 +86,20 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             throw new BusinessException(ErrorCode.EMAIL_EXISTS, "邮箱已注册");
         }
 
+        queryWrapper = QueryWrapper.create()
+                .eq("phone", phone);
+        long phoneCount = count(queryWrapper);
+        if (phoneCount > 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号已注册");
+        }
+
         String encryptedPassword = PasswordUtils.encrypt(password);
 
         Users user = Users.builder()
                 .username(username)
                 .password(encryptedPassword)
-                .realName(nickname)
-                .phone("")
+                .realName(realName)
+                .phone(phone)
                 .email(email)
                 .role(role)
                 .status("active")
@@ -106,17 +118,19 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
     @Override
     public Map<String, Object> userLogin(UserLoginRequest userLoginRequest) {
         String username = userLoginRequest.getUsername();
-        String email = userLoginRequest.getEmail();
         String password = userLoginRequest.getPassword();
 
-        if (StrUtil.hasBlank(username, email, password)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
+        Users user = null;
+        
+        if (username.matches("^1[3-9]\\d{9}$")) {
+            QueryWrapper queryWrapper = QueryWrapper.create()
+                    .eq("phone", username);
+            user = getOne(queryWrapper);
+        } else {
+            QueryWrapper queryWrapper = QueryWrapper.create()
+                    .eq("username", username);
+            user = getOne(queryWrapper);
         }
-
-        QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq("username", username)
-                .eq("email", email);
-        Users user = getOne(queryWrapper);
 
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_OR_PASSWORD_ERROR, "用户名或密码错误");
@@ -136,7 +150,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("userId", user.getUserId());
         userInfo.put("username", user.getUsername());
-        userInfo.put("nickname", user.getRealName());
+        userInfo.put("realName", user.getRealName());
         userInfo.put("email", user.getEmail());
         userInfo.put("role", user.getRole());
         result.put("user", userInfo);

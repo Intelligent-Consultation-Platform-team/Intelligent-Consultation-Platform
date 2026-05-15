@@ -4,7 +4,7 @@ import com.backend.common.ResultUtils;
 import com.backend.model.entity.RechargeRecords;
 import com.backend.model.entity.PaymentRecords;
 import com.backend.service.PatientAccountService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +20,10 @@ import java.util.Map;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("/api")
+@RequestMapping("")
 public class PatientAccountController {
 
-    @Autowired
+    @Resource
     private PatientAccountService patientAccountService;
 
     /**

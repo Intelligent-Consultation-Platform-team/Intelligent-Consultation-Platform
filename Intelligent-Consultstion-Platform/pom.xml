@@ -69,7 +69,7 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
         </dependency>
-        <!--        openapi侧式网址 http://localhost:3000/swagger-ui/index.html  -->
+        <!--        openapi侧式网址 http://localhost:8123/swagger-ui/index.html  -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

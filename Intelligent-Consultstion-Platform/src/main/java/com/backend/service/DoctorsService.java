@@ -21,4 +21,36 @@ public interface DoctorsService extends IService<Doctors> {
      */
     List<Doctors> getDoctorsList(Integer deptId, String status);
 
+    /**
+     * 添加医生
+     *
+     * @param doctors 医生信息
+     * @return 是否成功
+     */
+    boolean addDoctor(Doctors doctors);
+
+    /**
+     * 更新医生信息
+     *
+     * @param doctors 医生信息
+     * @return 是否成功
+     */
+    boolean updateDoctor(Doctors doctors);
+
+    /**
+     * 删除医生
+     *
+     * @param doctorId 医生ID
+     * @return 是否成功
+     */
+    boolean deleteDoctor(Long doctorId);
+
+    /**
+     * 根据ID获取医生信息
+     *
+     * @param doctorId 医生ID
+     * @return 医生信息
+     */
+    Doctors getDoctorById(Long doctorId);
+
 }

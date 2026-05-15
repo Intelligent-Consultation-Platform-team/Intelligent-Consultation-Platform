@@ -3,7 +3,7 @@ package com.backend.controller;
 import com.backend.common.ResultUtils;
 import com.backend.model.entity.Appointments;
 import com.backend.service.AppointmentsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,10 +14,10 @@ import java.util.List;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("/api/appointments")
+@RequestMapping("/appointments")
 public class AppointmentsController {
 
-    @Autowired
+    @Resource
     private AppointmentsService appointmentsService;
 
     /**

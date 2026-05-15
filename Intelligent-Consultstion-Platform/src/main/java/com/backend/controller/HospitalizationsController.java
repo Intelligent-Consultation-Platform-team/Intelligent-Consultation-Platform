@@ -3,7 +3,7 @@ package com.backend.controller;
 import com.backend.common.ResultUtils;
 import com.backend.model.entity.Hospitalizations;
 import com.backend.service.HospitalizationsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("/api/hospitalizations")
+@RequestMapping("/hospitalizations")
 public class HospitalizationsController {
 
-    @Autowired
+    @Resource
     private HospitalizationsService hospitalizationsService;
 
     /**

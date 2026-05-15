@@ -3,7 +3,7 @@ package com.backend.controller;
 import com.backend.common.ResultUtils;
 import com.backend.model.entity.Consultations;
 import com.backend.service.ConsultationsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,10 +17,10 @@ import java.util.List;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("/api/consultations")
+@RequestMapping("/consultations")
 public class ConsultationsController {
 
-    @Autowired
+    @Resource
     private ConsultationsService consultationsService;
 
     /**

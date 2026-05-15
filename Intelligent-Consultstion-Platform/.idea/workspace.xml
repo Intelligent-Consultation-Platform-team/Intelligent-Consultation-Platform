@@ -7,13 +7,67 @@
     <list default="true" id="37d48f2c-fa4e-46bb-9a30-28165a7d40d3" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/AppointmentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/AppointmentsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/ConsultationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/ConsultationsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/DepartmentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/DepartmentsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/DoctorsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/DoctorsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/HospitalizationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/HospitalizationsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/NoticesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/NoticesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/PatientAccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/PatientAccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/SchedulesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/SchedulesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserLoginRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserLoginRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserRegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserRegisterRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/DepartmentsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/DepartmentsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/DoctorsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/DoctorsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/NoticesService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/NoticesService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/SchedulesService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/SchedulesService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/DepartmentsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/DepartmentsServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/DoctorsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/DoctorsServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/NoticesServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/NoticesServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/SchedulesServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/SchedulesServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/UsersServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/UsersServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/IntelligentConsultstionPlatformApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/IntelligentConsultstionPlatformApplication.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/BaseResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/BaseResponse.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/DeleteRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/DeleteRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/PageRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/PageRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/ResultUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/ResultUtils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/CorsConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/AppointmentsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/AppointmentsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/AuthController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/AuthController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/ConsultationsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/ConsultationsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/DepartmentsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/DepartmentsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/DoctorsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/DoctorsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/HospitalizationsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/HospitalizationsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/NoticesController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/NoticesController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/SchedulesController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/SchedulesController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/UsersController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/UsersController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/BusinessException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/BusinessException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/ErrorCode.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/ErrorCode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/GlobalExceptionHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/ThrowUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/ThrowUtils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/generator/MyBatisCodeGenerator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/generator/MyBatisCodeGenerator.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/UsersMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/UsersMapper.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserLoginRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserLoginRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserRegisterRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserRegisterRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users$UsersBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users$UsersBuilder.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DepartmentsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DepartmentsService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DoctorsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DoctorsService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/NoticesService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/NoticesService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/SchedulesService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/SchedulesService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/UsersService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/UsersService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DepartmentsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DepartmentsServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DoctorsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DoctorsServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/NoticesServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/NoticesServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/SchedulesServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/SchedulesServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/UsersServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/UsersServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/utils/JwtUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/utils/JwtUtils.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/utils/PasswordUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/utils/PasswordUtils.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,10 +91,14 @@
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
+        <option name="localRepository" value="D:\App\Maven\apache-maven-3.9.6-bin\apache-maven-3.9.6\mvn_repo" />
         <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
         <option name="userSettingsFile" value="D:\App\Maven\apache-maven-3.9.6-bin\apache-maven-3.9.6\conf\settings.xml" />
       </MavenGeneralSettings>
     </option>
+  </component>
+  <component name="MavenRunner">
+    <option name="skipTests" value="true" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
@@ -53,34 +111,57 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.IntelligentConsultstionPlatformApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;lej&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.completion&quot;,
-    &quot;typescript.add.unambiguous.imports.on.the.fly&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
-    &quot;应用程序.MyBatisCodeGenerator.executor&quot;: &quot;Run&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Maven.backend [clean,install,-U].executor": "Run",
+    "Maven.backend [clean].executor": "Run",
+    "Maven.backend [compile].executor": "Run",
+    "Maven.backend [deploy].executor": "Run",
+    "Maven.backend [install].executor": "Run",
+    "Maven.backend [package].executor": "Run",
+    "Maven.backend [site].executor": "Run",
+    "Maven.backend [test].executor": "Run",
+    "Maven.backend [validate].executor": "Run",
+    "Maven.backend [verify].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.IntelligentConsultstionPlatformApplication.executor": "Run",
+    "git-widget-placeholder": "lej",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/学校/大三下/软件工程实训/project/Intelligent-Consultstion-Platform",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "模块",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "MavenSettings",
+    "typescript.add.unambiguous.imports.on.the.fly": "true",
+    "vue.rearranger.settings.migration": "true",
+    "应用程序.IntelligentConsultstionPlatformApplication.executor": "Run",
+    "应用程序.MyBatisCodeGenerator.executor": "Run"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="mvn clean" />
+      <command value="mvn clean install -U" />
+      <command value="mvn install" />
+    </option>
+  </component>
   <component name="RunManager" selected="Spring Boot.IntelligentConsultstionPlatformApplication">
     <configuration name="MyBatisCodeGenerator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.backend.generator.MyBatisCodeGenerator" />
@@ -120,8 +201,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.28539.33" />
+        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-IU-252.28539.33" />
       </set>
     </attachedChunks>
   </component>
@@ -138,6 +219,12 @@
       <workItem from="1775459602281" duration="5158000" />
       <workItem from="1775527650768" duration="613000" />
       <workItem from="1775538425391" duration="91000" />
+      <workItem from="1775629030958" duration="7000" />
+      <workItem from="1775807026784" duration="1985000" />
+      <workItem from="1775809043402" duration="700000" />
+      <workItem from="1775809763904" duration="1782000" />
+      <workItem from="1775811723506" duration="91000" />
+      <workItem from="1778841827922" duration="5917000" />
     </task>
     <servers />
   </component>

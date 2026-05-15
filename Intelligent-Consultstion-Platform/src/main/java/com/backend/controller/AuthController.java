@@ -5,8 +5,8 @@ import com.backend.common.ResultUtils;
 import com.backend.model.dto.UserLoginRequest;
 import com.backend.model.dto.UserRegisterRequest;
 import com.backend.service.UsersService;
+import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,11 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *  认证控制器。
+ *
+ * @author 佳尔宇柔
+ */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
+    @Resource
     private UsersService usersService;
 
     @PostMapping("/register")
@@ -29,6 +34,7 @@ public class AuthController {
         Map<String, Object> data = new HashMap<>();
         data.put("userId", userId);
         data.put("username", userRegisterRequest.getUsername());
+        data.put("realName", userRegisterRequest.getRealName());
         data.put("role", userRegisterRequest.getRole());
         data.put("createdAt", new java.util.Date().toInstant());
         

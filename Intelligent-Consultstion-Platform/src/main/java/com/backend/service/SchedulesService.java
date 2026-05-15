@@ -21,4 +21,36 @@ public interface SchedulesService extends IService<Schedules> {
      */
     List<Schedules> getDoctorSchedules(Integer doctorId, String date);
 
+    /**
+     * 添加排班
+     *
+     * @param schedules 排班信息
+     * @return 是否成功
+     */
+    boolean addSchedule(Schedules schedules);
+
+    /**
+     * 更新排班信息
+     *
+     * @param schedules 排班信息
+     * @return 是否成功
+     */
+    boolean updateSchedule(Schedules schedules);
+
+    /**
+     * 删除排班
+     *
+     * @param scheduleId 排班ID
+     * @return 是否成功
+     */
+    boolean deleteSchedule(Long scheduleId);
+
+    /**
+     * 根据ID获取排班信息
+     *
+     * @param scheduleId 排班ID
+     * @return 排班信息
+     */
+    Schedules getScheduleById(Long scheduleId);
+
 }

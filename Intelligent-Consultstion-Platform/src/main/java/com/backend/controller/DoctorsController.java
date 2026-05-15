@@ -3,11 +3,8 @@ package com.backend.controller;
 import com.backend.common.ResultUtils;
 import com.backend.model.entity.Doctors;
 import com.backend.service.DoctorsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,10 +14,10 @@ import java.util.List;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("/api/doctors")
+@RequestMapping("/doctors")
 public class DoctorsController {
 
-    @Autowired
+    @Resource
     private DoctorsService doctorsService;
 
     /**
@@ -36,6 +33,54 @@ public class DoctorsController {
             @RequestParam(required = false) String status) {
         List<Doctors> doctorsList = doctorsService.getDoctorsList(deptId, status);
         return ResultUtils.success(doctorsList);
+    }
+
+    /**
+     * 添加医生
+     *
+     * @param doctors 医生信息
+     * @return 操作结果
+     */
+    @PostMapping
+    public Object addDoctor(@RequestBody Doctors doctors) {
+        boolean result = doctorsService.addDoctor(doctors);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 更新医生信息
+     *
+     * @param doctors 医生信息
+     * @return 操作结果
+     */
+    @PutMapping
+    public Object updateDoctor(@RequestBody Doctors doctors) {
+        boolean result = doctorsService.updateDoctor(doctors);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 删除医生
+     *
+     * @param doctorId 医生ID
+     * @return 操作结果
+     */
+    @DeleteMapping("/{doctorId}")
+    public Object deleteDoctor(@PathVariable Long doctorId) {
+        boolean result = doctorsService.deleteDoctor(doctorId);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 根据ID获取医生信息
+     *
+     * @param doctorId 医生ID
+     * @return 医生信息
+     */
+    @GetMapping("/{doctorId}")
+    public Object getDoctorById(@PathVariable Long doctorId) {
+        Doctors doctor = doctorsService.getDoctorById(doctorId);
+        return ResultUtils.success(doctor);
     }
 
 }

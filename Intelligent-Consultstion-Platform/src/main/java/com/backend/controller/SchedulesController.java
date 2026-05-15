@@ -3,11 +3,8 @@ package com.backend.controller;
 import com.backend.common.ResultUtils;
 import com.backend.model.entity.Schedules;
 import com.backend.service.SchedulesService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -17,10 +14,10 @@ import java.util.List;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("/api/schedules")
+@RequestMapping("/schedules")
 public class SchedulesController {
 
-    @Autowired
+    @Resource
     private SchedulesService schedulesService;
 
     /**
@@ -36,6 +33,54 @@ public class SchedulesController {
             @RequestParam(required = false) String date) {
         List<Schedules> schedulesList = schedulesService.getDoctorSchedules(doctorId, date);
         return ResultUtils.success(schedulesList);
+    }
+
+    /**
+     * 添加排班
+     *
+     * @param schedules 排班信息
+     * @return 操作结果
+     */
+    @PostMapping
+    public Object addSchedule(@RequestBody Schedules schedules) {
+        boolean result = schedulesService.addSchedule(schedules);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 更新排班信息
+     *
+     * @param schedules 排班信息
+     * @return 操作结果
+     */
+    @PutMapping
+    public Object updateSchedule(@RequestBody Schedules schedules) {
+        boolean result = schedulesService.updateSchedule(schedules);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 删除排班
+     *
+     * @param scheduleId 排班ID
+     * @return 操作结果
+     */
+    @DeleteMapping("/{scheduleId}")
+    public Object deleteSchedule(@PathVariable Long scheduleId) {
+        boolean result = schedulesService.deleteSchedule(scheduleId);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 根据ID获取排班信息
+     *
+     * @param scheduleId 排班ID
+     * @return 排班信息
+     */
+    @GetMapping("/{scheduleId}")
+    public Object getScheduleById(@PathVariable Long scheduleId) {
+        Schedules schedule = schedulesService.getScheduleById(scheduleId);
+        return ResultUtils.success(schedule);
     }
 
 }
