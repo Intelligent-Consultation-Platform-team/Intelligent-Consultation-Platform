@@ -79,7 +79,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
 
@@ -118,8 +118,43 @@ const resetFilter = () => { filter.title = ''; pagination.current = 1 }
 const resetForm = () => { form.id = ''; form.title = ''; form.content = ''; formRef.value?.clearValidate?.() }
 const handleAdd = () => { dialogTitle.value = '新增公告'; resetForm(); dialogVisible.value = true }
 const handleEdit = (row) => { form.id = row.id; form.title = row.title; form.content = row.content; dialogTitle.value = '编辑公告'; dialogVisible.value = true }
-const handleDelete = () => ElMessage.warning('当前后端暂未提供删除接口')
-const handleSubmit = async () => { if (!formRef.value || submitLoading.value) return; try { await formRef.value.validate(); submitLoading.value = true; ElMessage.warning('当前后端暂未提供新增/编辑接口'); dialogVisible.value = false } catch { ElMessage.warning('请完善表单信息') } finally { submitLoading.value = false } }
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定删除该公告吗？', '提示', { type: 'warning' })
+    await api.notices.remove(id)
+    ElMessage.success('删除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error(error?.message || '删除失败')
+    }
+  }
+}
+const handleSubmit = async () => {
+  if (!formRef.value || submitLoading.value) return
+  try {
+    await formRef.value.validate()
+    submitLoading.value = true
+    const payload = { title: form.title, content: form.content }
+    if (form.id) {
+      await api.notices.update({ noticeId: form.id, ...payload })
+      ElMessage.success('编辑成功')
+    } else {
+      await api.notices.create(payload)
+      ElMessage.success('新增成功')
+    }
+    dialogVisible.value = false
+    await loadData()
+  } catch (error) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.warning('请完善表单信息')
+    }
+  } finally {
+    submitLoading.value = false
+  }
+}
 
 onMounted(loadData)
 </script>

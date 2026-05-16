@@ -58,7 +58,12 @@
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">
               编辑
             </el-button>
-            <el-button v-if="scope.row.status === 'in'" type="success" size="small" @click="handleDischarge(scope.row.id)">
+            <el-button
+              v-if="scope.row.status === 'in'"
+              type="success"
+              size="small"
+              @click="handleDischarge(scope.row.id)"
+            >
               出院
             </el-button>
           </template>
@@ -77,17 +82,8 @@
       </div>
     </el-card>
 
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      width="600px"
-    >
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="100px"
-      >
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="患者姓名" prop="patientName">
           <el-input v-model="form.patientName" placeholder="请输入患者姓名" />
         </el-form-item>
@@ -98,31 +94,13 @@
           <el-input v-model="form.phone" placeholder="请输入联系电话" />
         </el-form-item>
         <el-form-item label="科室" prop="departmentId">
-          <el-select
-            v-model="form.departmentId"
-            placeholder="选择科室"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="dept in departments"
-              :key="dept.id"
-              :label="dept.name"
-              :value="dept.id"
-            />
+          <el-select v-model="form.departmentId" placeholder="选择科室" style="width: 100%">
+            <el-option v-for="dept in departments" :key="dept.id" :label="dept.name" :value="dept.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="主治医生" prop="doctorId">
-          <el-select
-            v-model="form.doctorId"
-            placeholder="选择医生"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="doctor in doctors"
-              :key="doctor.id"
-              :label="doctor.name"
-              :value="doctor.id"
-            />
+          <el-select v-model="form.doctorId" placeholder="选择医生" style="width: 100%">
+            <el-option v-for="doctor in doctors" :key="doctor.id" :label="doctor.name" :value="doctor.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="病房号" prop="roomNumber">
@@ -132,20 +110,10 @@
           <el-input v-model="form.bedNumber" placeholder="请输入床位号" />
         </el-form-item>
         <el-form-item label="入院日期" prop="admissionDate">
-          <el-date-picker
-            v-model="form.admissionDate"
-            type="date"
-            placeholder="选择入院日期"
-            style="width: 100%"
-          />
+          <el-date-picker v-model="form.admissionDate" type="date" placeholder="选择入院日期" style="width: 100%" />
         </el-form-item>
         <el-form-item label="入院原因" prop="reason">
-          <el-input
-            v-model="form.reason"
-            type="textarea"
-            :rows="3"
-            placeholder="请输入入院原因"
-          />
+          <el-input v-model="form.reason" type="textarea" :rows="3" placeholder="请输入入院原因" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -164,17 +132,8 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
 
-const filter = reactive({
-  patientName: '',
-  status: ''
-})
-
-const pagination = reactive({
-  current: 1,
-  size: 10,
-  total: 0
-})
-
+const filter = reactive({ patientName: '', status: '' })
+const pagination = reactive({ current: 1, size: 10, total: 0 })
 const departments = ref([])
 const doctors = ref([])
 const hospitals = ref([])
@@ -182,58 +141,32 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增住院')
 const formRef = ref()
-const form = reactive({
-  id: '',
-  patientName: '',
-  idCard: '',
-  phone: '',
-  departmentId: '',
-  doctorId: '',
-  roomNumber: '',
-  bedNumber: '',
-  admissionDate: '',
-  dischargeDate: '',
-  reason: ''
-})
+const form = reactive({ id: '', patientName: '', idCard: '', phone: '', departmentId: '', doctorId: '', roomNumber: '', bedNumber: '', admissionDate: '', dischargeDate: '', reason: '' })
 
 const rules = {
-  patientName: [
-    { required: true, message: '请输入患者姓名', trigger: 'blur' }
-  ],
-  idCard: [
-    { required: true, message: '请输入身份证号', trigger: 'blur' }
-  ],
-  phone: [
-    { required: true, message: '请输入联系电话', trigger: 'blur' }
-  ],
-  departmentId: [
-    { required: true, message: '请选择科室', trigger: 'change' }
-  ],
-  doctorId: [
-    { required: true, message: '请选择主治医生', trigger: 'change' }
-  ],
-  roomNumber: [
-    { required: true, message: '请输入病房号', trigger: 'blur' }
-  ],
-  bedNumber: [
-    { required: true, message: '请输入床位号', trigger: 'blur' }
-  ],
-  admissionDate: [
-    { required: true, message: '请选择入院日期', trigger: 'change' }
-  ],
-  reason: [
-    { required: true, message: '请输入入院原因', trigger: 'blur' }
-  ]
+  patientName: [{ required: true, message: '请输入患者姓名', trigger: 'blur' }],
+  idCard: [{ required: true, message: '请输入身份证号', trigger: 'blur' }],
+  phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
+  departmentId: [{ required: true, message: '请选择科室', trigger: 'change' }],
+  doctorId: [{ required: true, message: '请选择主治医生', trigger: 'change' }],
+  roomNumber: [{ required: true, message: '请输入病房号', trigger: 'blur' }],
+  bedNumber: [{ required: true, message: '请输入床位号', trigger: 'blur' }],
+  admissionDate: [{ required: true, message: '请选择入院日期', trigger: 'change' }],
+  reason: [{ required: true, message: '请输入入院原因', trigger: 'blur' }]
+}
+
+const formatDate = (value) => {
+  if (!value) return ''
+  if (typeof value === 'string') return value.split('T')[0]
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
 }
 
 const loadDepartments = async () => {
   try {
     const data = await api.departments.getList()
-    departments.value = (data || []).map(item => ({
-      id: item.deptId,
-      name: item.deptName
-    }))
-  } catch (error) {
+    departments.value = (data || []).map(item => ({ id: item.deptId ?? item.id, name: item.deptName ?? item.name }))
+  } catch {
     ElMessage.error('加载科室失败')
   }
 }
@@ -241,11 +174,8 @@ const loadDepartments = async () => {
 const loadDoctors = async () => {
   try {
     const data = await api.doctors.getList()
-    doctors.value = (data || []).map(item => ({
-      id: item.doctorId,
-      name: item.realName
-    }))
-  } catch (error) {
+    doctors.value = (data || []).map(item => ({ id: item.doctorId ?? item.id, name: item.realName ?? item.name }))
+  } catch {
     ElMessage.error('加载医生失败')
   }
 }
@@ -253,109 +183,28 @@ const loadDoctors = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    // 这里应该调用获取住院列表的API，暂时使用模拟数据
-    hospitals.value = [
-      {
-        id: 1,
-        patientName: '张三',
-        department: '内科',
-        doctorName: '张医生',
-        roomNumber: '301',
-        bedNumber: '2',
-        admissionDate: '2026-04-01',
-        dischargeDate: '',
-        status: 'in'
-      },
-      {
-        id: 2,
-        patientName: '李四',
-        department: '外科',
-        doctorName: '李医生',
-        roomNumber: '402',
-        bedNumber: '1',
-        admissionDate: '2026-04-03',
-        dischargeDate: '',
-        status: 'in'
-      },
-      {
-        id: 3,
-        patientName: '王五',
-        department: '骨科',
-        doctorName: '钱医生',
-        roomNumber: '503',
-        bedNumber: '3',
-        admissionDate: '2026-03-28',
-        dischargeDate: '2026-04-05',
-        status: 'out'
-      }
-    ]
-    pagination.total = hospitals.value.length
-  } catch (error) {
-    ElMessage.error(error.message || '加载住院记录失败')
+    hospitals.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
 }
 
-const handleSearch = () => {
-  pagination.current = 1
-  loadData()
-}
-
-const resetFilter = () => {
-  filter.patientName = ''
-  filter.status = ''
-  pagination.current = 1
-  loadData()
-}
-
-const handleAdd = () => {
-  form.id = ''
-  form.patientName = ''
-  form.idCard = ''
-  form.phone = ''
-  form.departmentId = ''
-  form.doctorId = ''
-  form.roomNumber = ''
-  form.bedNumber = ''
-  form.admissionDate = ''
-  form.dischargeDate = ''
-  form.reason = ''
-  dialogTitle.value = '新增住院'
-  dialogVisible.value = true
-}
-
-const handleEdit = (row) => {
-  form.id = row.id
-  form.patientName = row.patientName
-  form.idCard = row.idCard || ''
-  form.phone = row.phone || ''
-  form.departmentId = row.departmentId || ''
-  form.doctorId = row.doctorId || ''
-  form.roomNumber = row.roomNumber
-  form.bedNumber = row.bedNumber
-  form.admissionDate = row.admissionDate
-  form.dischargeDate = row.dischargeDate
-  form.reason = row.reason || ''
-  dialogTitle.value = '编辑住院'
-  dialogVisible.value = true
-}
-
-const handleDischarge = (id) => {
-  ElMessage.warning('当前后端暂未提供出院接口')
-}
+const handleSearch = () => { pagination.current = 1; loadData() }
+const resetFilter = () => { filter.patientName = ''; filter.status = ''; pagination.current = 1; loadData() }
+const handleAdd = () => { Object.assign(form, { id: '', patientName: '', idCard: '', phone: '', departmentId: '', doctorId: '', roomNumber: '', bedNumber: '', admissionDate: '', dischargeDate: '', reason: '' }); dialogTitle.value = '新增住院'; dialogVisible.value = true }
+const handleEdit = (row) => { Object.assign(form, { id: row.id, patientName: row.patientName, idCard: row.idCard || '', phone: row.phone || '', departmentId: row.departmentId || '', doctorId: row.doctorId || '', roomNumber: row.roomNumber || '', bedNumber: row.bedNumber || '', admissionDate: row.admissionDate || '', dischargeDate: row.dischargeDate || '', reason: row.reason || '' }); dialogTitle.value = '编辑住院'; dialogVisible.value = true }
+const handleDischarge = () => { ElMessage.info('当前后端仅开放住院登记接口，出院功能待后端补齐后再接入') }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    // 模拟患者ID，实际应该从患者信息中获取
-    const patientId = 1
     await api.hospitalizations.create({
-      patientId,
+      patientId: form.id || undefined,
       doctorId: form.doctorId,
       deptId: form.departmentId,
-      admissionDate: form.admissionDate,
+      admissionDate: formatDate(form.admissionDate),
       reason: form.reason
     })
     ElMessage.success('住院登记成功')
@@ -366,56 +215,18 @@ const handleSubmit = async () => {
   }
 }
 
-const handleSizeChange = (size) => {
-  pagination.size = size
-  loadData()
-}
+const handleSizeChange = (size) => { pagination.size = size; loadData() }
+const handleCurrentChange = (current) => { pagination.current = current; loadData() }
 
-const handleCurrentChange = (current) => {
-  pagination.current = current
-  loadData()
-}
-
-onMounted(async () => {
-  await loadDepartments()
-  await loadDoctors()
-  await loadData()
-})
+onMounted(async () => { await loadDepartments(); await loadDoctors(); await loadData() })
 </script>
 
 <style scoped>
-.hospital {
-  padding: 20px 0;
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.page-header h3 {
-  margin: 0;
-  color: #1f2d3d;
-}
-
-.filter-card {
-  margin-bottom: 20px;
-}
-
-.table-card {
-  margin-top: 20px;
-}
-
-.pagination {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-}
+.hospital { padding: 20px 0; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.page-header h3 { margin: 0; color: #1f2d3d; }
+.filter-card { margin-bottom: 20px; }
+.table-card { margin-top: 20px; }
+.pagination { margin-top: 20px; display: flex; justify-content: flex-end; }
+.dialog-footer { display: flex; justify-content: flex-end; }
 </style>

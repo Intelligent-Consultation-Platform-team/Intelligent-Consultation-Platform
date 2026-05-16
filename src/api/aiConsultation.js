@@ -33,5 +33,8 @@ export const aiConsultationApi = {
   uploadFile: (data) => request(`${API_BASE_URL}/api/ai-consultation/upload`, {
     method: 'POST',
     data,
+    headers: {
+      Accept: 'application/json',
+    },
   }),
 }

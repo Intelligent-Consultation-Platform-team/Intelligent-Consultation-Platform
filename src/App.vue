@@ -137,6 +137,7 @@ const normalizeRole = (role) => {
 
 const menuConfig = [
   { index: 'home', label: '系统首页', path: '/home', roles: ['admin', 'doctor', 'patient'] },
+  { index: 'ai-consultation', label: 'AI 问诊', path: '/ai-consultation', roles: ['admin', 'doctor', 'patient'] },
   {
     index: 'manage',
     label: '信息管理',
@@ -305,7 +306,7 @@ const handleSubmit = async () => {
 
     isAuthenticated.value = true
     ElMessage.success('登录成功')
-    router.replace(normalizePathByRole(currentUser.role))
+    router.replace('/home')
   } catch (error) {
     ElMessage.error(error?.message || '请求失败')
   } finally {

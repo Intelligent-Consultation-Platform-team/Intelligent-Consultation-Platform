@@ -141,7 +141,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
 
@@ -220,15 +220,15 @@ const loadData = async () => {
     }
     const data = await api.doctors.getList(params)
     doctors.value = (data || []).map(item => ({
-      id: item.doctorId,
-      name: item.realName,
+      id: item.doctorId ?? item.id,
+      name: item.realName ?? item.name,
       department: item.deptName || '-',
-      departmentId: item.deptId,
+      departmentId: item.deptId ?? item.departmentId ?? '',
       title: item.title || '-',
       specialty: item.specialty || '-',
-      phone: '-',
-      email: '-',
-      status: item.status === 'available' ? 1 : 0
+      phone: item.phone || '-',
+      email: item.email || '-',
+      status: item.status === 'available' || item.status === 1 ? 1 : 0
     }))
     pagination.total = doctors.value.length
   } catch (error) {
@@ -276,18 +276,47 @@ const handleEdit = (row) => {
   dialogVisible.value = true
 }
 
-const handleDelete = (id) => {
-  ElMessage.warning('当前后端暂未提供删除接口')
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定删除该医生吗？', '提示', { type: 'warning' })
+    await api.doctors.remove(id)
+    ElMessage.success('删除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error(error?.message || '删除失败')
+    }
+  }
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.warning('当前后端暂未提供新增/编辑接口')
+    const payload = {
+      realName: form.name,
+      deptId: form.departmentId,
+      title: form.title,
+      specialty: form.specialty,
+      phone: form.phone,
+      email: form.email,
+      status: form.status
+    }
+    if (form.id) {
+      await api.doctors.update(form.id, payload)
+      ElMessage.success('编辑成功')
+    } else {
+      await api.doctors.create(payload)
+      ElMessage.success('新增成功')
+    }
     dialogVisible.value = false
-  } catch {
-    ElMessage.warning('请完善表单信息')
+    await loadData()
+  } catch (error) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.warning('请完善表单信息')
+    }
   }
 }
 

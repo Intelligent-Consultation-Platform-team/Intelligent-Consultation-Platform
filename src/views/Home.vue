@@ -72,7 +72,10 @@
       <template #header>
         <div class="card-header">
           <span>{{ isDoctor ? '医生工作台' : '最近活动' }}</span>
-          <el-button type="primary" plain size="small">查看全部</el-button>
+          <div class="header-actions">
+            <el-button type="primary" plain size="small" @click="goAiConsultation">AI 问诊</el-button>
+            <el-button type="primary" plain size="small">查看全部</el-button>
+          </div>
         </div>
       </template>
 
@@ -105,6 +108,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 const SESSION_KEY = 'demo_session'
@@ -114,6 +118,7 @@ const getSession = () => {
   try { return JSON.parse(raw) } catch { localStorage.removeItem(SESSION_KEY); return null }
 }
 
+const router = useRouter()
 const currentUser = ref({ username: '', realName: '', role: '' })
 const currentDate = computed(() => new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
 const roleLabels = { admin: '管理员', doctor: '医生', patient: '患者' }
@@ -129,6 +134,7 @@ const patientStats = computed(() => [{ label: '我的预约', value: 8 }, { labe
 const doctorDashboard = computed(() => [{ label: '今日接诊', value: 18 }, { label: '待处理预约', value: 6 }, { label: '已完成就诊', value: 24 }])
 const recentActivities = ref([{ time: '2026-04-06 09:30', type: '登录', content: '用户登录系统', user: '测试用户' }, { time: '2026-04-06 08:45', type: '预约', content: '预约了内科张医生', user: '测试用户' }, { time: '2026-04-05 16:20', type: '注册', content: '新用户注册', user: '系统' }])
 const getTypeTagType = (type) => ({ 登录: 'success', 预约: 'primary', 注册: 'info', 操作: 'warning' }[type] || 'default')
+const goAiConsultation = () => router.push('/ai-consultation')
 
 onMounted(() => {
   const session = getSession()
@@ -140,7 +146,8 @@ onMounted(() => {
 <style scoped>
 .home-page { padding: 20px 0; }
 .welcome-card { margin-bottom: 20px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; }
+.card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.header-actions { display: flex; gap: 8px; }
 .welcome-content { padding: 20px 0; }
 .welcome-content h3 { margin: 0 0 12px 0; color: #1f2d3d; }
 .welcome-content p { margin: 8px 0; color: #6b7280; }

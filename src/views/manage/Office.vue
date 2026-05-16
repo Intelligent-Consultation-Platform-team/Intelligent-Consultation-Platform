@@ -71,7 +71,7 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
 
@@ -89,6 +89,7 @@ const rules = { name: [{ required: true, message: '请输入科室名称', trigg
 const filteredOffices = computed(() => offices.value.filter((item) => !filter.name || item.name?.includes(filter.name)))
 const pagedOffices = computed(() => filteredOffices.value.slice((pagination.current - 1) * pagination.size, pagination.current * pagination.size))
 const formatDate = (value) => (value ? String(value).replace('T', ' ').slice(0, 19) : '-')
+const buildDepartmentPayload = () => ({ deptName: form.name.trim(), description: form.description.trim() })
 
 const loadData = async () => {
   loading.value = true
@@ -103,13 +104,49 @@ const loadData = async () => {
     loading.value = false
   }
 }
-const handleSearch = () => { pagination.current = 1 }
-const resetFilter = () => { filter.name = ''; pagination.current = 1 }
+const handleSearch = () => { pagination.current = 1; loadData() }
+const resetFilter = () => { filter.name = ''; pagination.current = 1; loadData() }
 const resetForm = () => { form.id = ''; form.name = ''; form.description = ''; formRef.value?.clearValidate?.() }
 const handleAdd = () => { dialogTitle.value = '新增科室'; resetForm(); dialogVisible.value = true }
 const handleEdit = (row) => { form.id = row.id; form.name = row.name; form.description = row.description === '-' ? '' : row.description; dialogTitle.value = '编辑科室'; dialogVisible.value = true }
-const handleDelete = () => ElMessage.warning('当前后端暂未提供删除接口')
-const handleSubmit = async () => { if (!formRef.value || submitLoading.value) return; try { await formRef.value.validate(); submitLoading.value = true; ElMessage.warning('当前后端暂未提供新增/编辑接口'); dialogVisible.value = false } catch { ElMessage.warning('请完善表单信息') } finally { submitLoading.value = false } }
+
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定删除该科室吗？', '提示', { type: 'warning' })
+    await api.departments.remove(id)
+    ElMessage.success('删除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error(error?.message || '删除失败')
+    }
+  }
+}
+const handleSubmit = async () => {
+  if (!formRef.value || submitLoading.value) return
+  try {
+    await formRef.value.validate()
+    submitLoading.value = true
+    const payload = buildDepartmentPayload()
+    if (form.id) {
+      await api.departments.update({ deptId: form.id, ...payload })
+      ElMessage.success('编辑成功')
+    } else {
+      await api.departments.create(payload)
+      ElMessage.success('新增成功')
+    }
+    dialogVisible.value = false
+    await loadData()
+  } catch (error) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.warning('请完善表单信息')
+    }
+  } finally {
+    submitLoading.value = false
+  }
+}
 onMounted(loadData)
 </script>
 

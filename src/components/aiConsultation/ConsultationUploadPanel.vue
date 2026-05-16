@@ -5,6 +5,7 @@
       action="#"
       :auto-upload="false"
       :show-file-list="false"
+      :before-upload="beforeUpload"
       :on-change="handleChange"
     >
       <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
@@ -31,9 +32,10 @@ const visibleModel = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val),
 })
+const beforeUpload = () => false
 const handleChange = (file) => {
   previewName.value = file?.name || ''
-  emit('change', file)
+  emit('change', file?.raw || file)
 }
 </script>
 

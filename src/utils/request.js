@@ -45,15 +45,16 @@ export const request = async (url, options = {}) => {
   const tokenType = session?.tokenType || 'Bearer'
 
   let response
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
   try {
     response = await fetch(`${url}${buildQuery(params)}`, {
       method,
       headers: {
-        'Content-Type': 'application/json',
+        ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
         ...(withAuth && token ? { Authorization: `${tokenType} ${token}` } : {}),
         ...headers,
       },
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
     })
   } catch {
     throw new Error('网络异常，请稍后重试')

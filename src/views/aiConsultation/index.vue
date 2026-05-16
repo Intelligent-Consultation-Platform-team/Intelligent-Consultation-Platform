@@ -25,6 +25,11 @@
           class="mb16"
         />
 
+        <el-space wrap class="mb16">
+          <el-button type="primary" @click="goChat">进入问诊大厅</el-button>
+          <el-button @click="goHistory">查看历史问诊</el-button>
+        </el-space>
+
         <ConsultationQuickTags :tags="quickTags" @select="handleTagSelect" />
 
         <el-input
@@ -92,6 +97,9 @@ const handleStartConsultation = async () => {
 
 const goHistory = () => {
   router.push('/ai-consultation/history')
+}
+const goChat = () => {
+  router.push('/ai-consultation')
 }
 </script>
 

@@ -87,7 +87,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
 
@@ -115,7 +115,7 @@ const rules = {
 const loadDoctors = async () => {
   try {
     const data = await api.doctors.getList()
-    doctors.value = (data || []).map(item => ({ id: item.doctorId, name: item.realName, department: item.deptName || '-' }))
+    doctors.value = (data || []).map(item => ({ id: item.doctorId ?? item.id, name: item.realName ?? item.name, department: item.deptName || '-' }))
   } catch {
     ElMessage.error('加载医生列表失败')
   }
@@ -132,11 +132,12 @@ const loadData = async () => {
       const doctor = doctors.value.find(d => d.id === item.doctorId) || {}
       return {
         id: item.scheduleId,
+        scheduleId: item.scheduleId,
         doctorId: item.doctorId,
         doctorName: doctor.name || '-',
         department: doctor.department || '-',
         date: item.date || '-',
-        timeRange: `${item.startTime} - ${item.endTime}`,
+        timeRange: `${String(item.startTime).slice(0, 5)} - ${String(item.endTime).slice(0, 5)}`,
         maxNumber: item.maxNumber ?? 0,
         remaining: item.remaining ?? item.availableSlots ?? 0,
         status: item.status === 'active' ? 1 : 0
@@ -155,16 +156,46 @@ const resetFilter = () => { filter.doctorId = ''; filter.date = ''; pagination.c
 const resetForm = () => { form.id = ''; form.doctorId = ''; form.date = ''; form.timeRange = ''; form.maxNumber = 20; form.status = 1 }
 const handleAdd = () => { resetForm(); dialogTitle.value = '新增排班'; dialogVisible.value = true }
 const handleEdit = (row) => { form.id = row.id; form.doctorId = row.doctorId; form.date = row.date; form.timeRange = row.timeRange.split(' - ')[0] || ''; form.maxNumber = row.maxNumber; form.status = row.status; dialogTitle.value = '编辑排班'; dialogVisible.value = true }
-const handleDelete = () => ElMessage.warning('当前后端暂未提供删除接口')
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定删除该排班吗？', '提示', { type: 'warning' })
+    await api.schedules.remove(id)
+    ElMessage.success('删除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error(error?.message || '删除失败')
+    }
+  }
+}
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
     submitLoading.value = true
-    ElMessage.warning('当前后端暂未提供新增/编辑接口')
+    const payload = {
+      doctorId: form.doctorId,
+      date: form.date,
+      startTime: form.timeRange === '上午' ? '08:00:00' : form.timeRange === '下午' ? '14:00:00' : '18:00:00',
+      endTime: form.timeRange === '上午' ? '12:00:00' : form.timeRange === '下午' ? '18:00:00' : '21:00:00',
+      maxNumber: form.maxNumber,
+      status: form.status
+    }
+    if (form.id) {
+      await api.schedules.update({ scheduleId: form.scheduleId || form.id, ...payload })
+      ElMessage.success('编辑成功')
+    } else {
+      await api.schedules.create(payload)
+      ElMessage.success('新增成功')
+    }
     dialogVisible.value = false
-  } catch {
-    ElMessage.warning('请完善表单信息')
+    await loadData()
+  } catch (error) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.warning('请完善表单信息')
+    }
   } finally {
     submitLoading.value = false
   }
