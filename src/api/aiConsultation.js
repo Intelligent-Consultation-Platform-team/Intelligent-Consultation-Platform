@@ -1,6 +1,5 @@
 import { request } from '../utils/request'
 
-const API_BASE_URL = ''
 
 export const aiConsultationApi = {
   createSession: (data) => request(`${API_BASE_URL}/api/ai-consultation/session`, {

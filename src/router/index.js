@@ -230,7 +230,7 @@ router.beforeEach((to) => {
 
   const role = session?.role
   const requiredRoles = to.matched.flatMap((record) =>
-    Array.isArray(record.meta?.roles) ? record.meta.roles : []
+    Array.isArray(record.meta?.roles) ? record.meta.roles : [],
   )
 
   if (!session && !isPublicRoute) {
@@ -251,6 +251,7 @@ router.beforeEach((to) => {
     }
   }
 
+  document.title = `${to.meta?.title ? `${to.meta.title} - ` : ''}智能咨询平台`
   return true
 })
 

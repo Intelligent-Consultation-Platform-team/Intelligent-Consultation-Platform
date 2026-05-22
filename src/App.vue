@@ -78,7 +78,6 @@
                 </el-menu-item>
               </el-sub-menu>
             </template>
-            <el-menu-item index="/ai-consultation">AI 问诊</el-menu-item>
           </el-menu>
         </el-aside>
 
@@ -88,7 +87,12 @@
               <div class="welcome">欢迎，{{ currentUser.realName || currentUser.username }}</div>
               <div class="role">当前角色：{{ roleText[currentUser.role] || '未知' }}</div>
             </div>
-            <el-button type="danger" plain @click="logout">退出登录</el-button>
+            <div class="header-actions">
+              <el-button text @click="botVisible = !botVisible">
+                {{ botVisible ? '隐藏 AI 助手' : '显示 AI 助手' }}
+              </el-button>
+              <el-button type="danger" plain @click="logout">退出登录</el-button>
+            </div>
           </el-header>
 
           <el-main class="main">
@@ -202,11 +206,11 @@ const rules = computed(() => ({
   ],
   realName: isRegister.value ? [
     { required: true, message: '请输入真实姓名', trigger: 'blur' },
-    { min: 2, max: 20, message: '真实姓名长度为 2-20 位', trigger: 'blur' }
+    { min: 2, max: 20, message: '真实姓名长度为 2-20 位', trigger: 'blur' },
   ] : [],
   phone: isRegister.value ? [
     { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' },
   ] : [],
   email: isRegister.value
     ? [
@@ -338,7 +342,7 @@ watch(
     }
     if (isAuthenticated.value && !path.startsWith('/auth')) return
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(activeTab, () => clearForm())
@@ -374,7 +378,8 @@ onMounted(() => {
 .sidebar { background: #1f2d3d; color: #fff; }
 .brand { height: 56px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; background: #16202b; }
 .menu { border-right: none; }
-.header { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 0 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #fff; padding: 0 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.header-actions { display: flex; align-items: center; gap: 12px; }
 .welcome { font-size: 16px; font-weight: 600; }
 .role { font-size: 13px; color: #6b7280; margin-top: 4px; }
 .main { padding: 20px; }
