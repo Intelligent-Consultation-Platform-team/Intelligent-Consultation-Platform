@@ -21,17 +21,19 @@ public class SchedulesController {
     private SchedulesService schedulesService;
 
     /**
-     * 获取医生排班
+     * 获取医生排班（包含医生信息）
      *
+     * @param deptId 科室ID
      * @param doctorId 医生ID
      * @param date 日期
-     * @return 排班列表
+     * @return 排班列表（包含医生信息）
      */
     @GetMapping
     public Object getDoctorSchedules(
+            @RequestParam(required = false) Integer deptId,
             @RequestParam(required = false) Integer doctorId,
             @RequestParam(required = false) String date) {
-        List<Schedules> schedulesList = schedulesService.getDoctorSchedules(doctorId, date);
+        List<?> schedulesList = schedulesService.getSchedulesWithDoctor(deptId, doctorId, date);
         return ResultUtils.success(schedulesList);
     }
 

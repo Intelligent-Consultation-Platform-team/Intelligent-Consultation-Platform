@@ -1,0 +1,164 @@
+<template>
+  <div class="notice">
+    <div class="page-header">
+      <div>
+        <h3>公告信息管理</h3>
+        <p>支持筛选、分页和弹窗编辑</p>
+      </div>
+      <el-button type="primary" @click="handleAdd">
+        <el-icon><Plus /></el-icon>
+        新增公告
+      </el-button>
+    </div>
+
+    <el-card shadow="never" class="filter-card">
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-input v-model="filter.title" placeholder="公告标题" clearable />
+        </el-col>
+        <el-col :span="8">
+          <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
+          <el-button @click="resetFilter">重置</el-button>
+        </el-col>
+      </el-row>
+    </el-card>
+
+    <el-card shadow="never" class="table-card">
+      <el-skeleton v-if="loading && !hasLoadedOnce" :rows="6" animated />
+      <el-empty v-else-if="!loading && !pagedNotices.length" description="暂无公告数据">
+        <el-button type="primary" @click="loadData">重新加载</el-button>
+      </el-empty>
+      <template v-else>
+        <el-table v-loading="loading" :data="pagedNotices" style="width: 100%">
+          <el-table-column prop="id" label="ID" width="80" />
+          <el-table-column prop="title" label="标题" />
+          <el-table-column prop="content" label="内容" show-overflow-tooltip />
+          <el-table-column prop="statusText" label="状态" width="100">
+            <template #default="scope">
+              <el-tag :type="scope.row.status === 'active' ? 'success' : 'info'">{{ scope.row.statusText }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createdAt" label="创建时间" width="180" />
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="scope">
+              <el-button type="primary" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+              <el-button type="danger" size="small" @click="handleDelete(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="pagination">
+          <el-pagination
+            v-model:current-page="pagination.current"
+            v-model:page-size="pagination.size"
+            :page-sizes="[10, 20, 50, 100]"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="filteredNotices.length"
+          />
+        </div>
+      </template>
+    </el-card>
+
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" @closed="resetForm">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="标题" prop="title">
+          <el-input v-model.trim="form.title" placeholder="请输入公告标题" />
+        </el-form-item>
+        <el-form-item label="内容" prop="content">
+          <el-input v-model.trim="form.content" type="textarea" :rows="4" placeholder="请输入公告内容" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" :loading="submitLoading" :disabled="submitLoading" @click="handleSubmit">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
+
+const filter = reactive({ title: '' })
+const pagination = reactive({ current: 1, size: 10 })
+const notices = ref([])
+const loading = ref(false)
+const submitLoading = ref(false)
+const hasLoadedOnce = ref(false)
+const dialogVisible = ref(false)
+const dialogTitle = ref('新增公告')
+const formRef = ref()
+const form = reactive({ id: '', title: '', content: '' })
+const rules = { title: [{ required: true, message: '请输入公告标题', trigger: 'blur' }], content: [{ required: true, message: '请输入公告内容', trigger: 'blur' }] }
+
+const filteredNotices = computed(() => notices.value.filter((item) => !filter.title || item.title?.includes(filter.title)))
+const pagedNotices = computed(() => filteredNotices.value.slice((pagination.current - 1) * pagination.size, pagination.current * pagination.size))
+const formatDate = (value) => (value ? String(value).replace('T', ' ').slice(0, 19) : '-')
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const data = await api.notices.getList()
+    notices.value = (data || []).map((item) => ({ id: item.noticeId ?? item.id, title: item.title, content: item.content, status: item.status, statusText: item.status === 'active' ? '启用' : '禁用', createdAt: formatDate(item.createdAt) }))
+    hasLoadedOnce.value = true
+    pagination.current = 1
+  } catch (error) {
+    ElMessage.error(error?.message || '加载公告失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleSearch = () => { pagination.current = 1 }
+const resetFilter = () => { filter.title = ''; pagination.current = 1 }
+const resetForm = () => { form.id = ''; form.title = ''; form.content = ''; formRef.value?.clearValidate?.() }
+const handleAdd = () => { dialogTitle.value = '新增公告'; resetForm(); dialogVisible.value = true }
+const handleEdit = (row) => { form.id = row.id; form.title = row.title; form.content = row.content; dialogTitle.value = '编辑公告'; dialogVisible.value = true }
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定删除该公告吗？', '提示', { type: 'warning' })
+    await api.notices.remove(id)
+    ElMessage.success('删除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error(error?.message || '删除失败')
+    }
+  }
+}
+const handleSubmit = async () => {
+  if (!formRef.value || submitLoading.value) return
+  try {
+    await formRef.value.validate()
+    submitLoading.value = true
+    const payload = { title: form.title, content: form.content }
+    if (form.id) {
+      await api.notices.update({ noticeId: form.id, ...payload })
+      ElMessage.success('编辑成功')
+    } else {
+      await api.notices.create(payload)
+      ElMessage.success('新增成功')
+    }
+    dialogVisible.value = false
+    await loadData()
+  } catch (error) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.warning('请完善表单信息')
+    }
+  } finally {
+    submitLoading.value = false
+  }
+}
+
+onMounted(loadData)
+</script>
+
+<style scoped>
+.notice{padding:20px 0}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.page-header h3{margin:0;color:#1f2d3d}.page-header p{margin:6px 0 0;color:#6b7280}.filter-card{margin-bottom:20px}.table-card{margin-top:20px}.pagination{margin-top:20px;display:flex;justify-content:flex-end}.dialog-footer{display:flex;justify-content:flex-end}
+</style>

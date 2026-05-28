@@ -1,5 +1,6 @@
 package com.backend.service;
 
+import com.backend.model.dto.ScheduleDTO;
 import com.backend.model.entity.Schedules;
 import com.mybatisflex.core.service.IService;
 
@@ -13,13 +14,23 @@ import java.util.List;
 public interface SchedulesService extends IService<Schedules> {
 
     /**
-     * 获取医生排班
+     * 获取医生排班（基础版本）
      *
      * @param doctorId 医生ID
      * @param date 日期
      * @return 排班列表
      */
     List<Schedules> getDoctorSchedules(Integer doctorId, String date);
+
+    /**
+     * 获取排班列表（包含医生信息）
+     *
+     * @param deptId 科室ID
+     * @param doctorId 医生ID
+     * @param date 日期
+     * @return 排班列表（包含医生信息）
+     */
+    List<ScheduleDTO> getSchedulesWithDoctor(Integer deptId, Integer doctorId, String date);
 
     /**
      * 添加排班

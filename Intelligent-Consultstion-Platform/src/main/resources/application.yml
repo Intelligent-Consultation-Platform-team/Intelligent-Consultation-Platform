@@ -8,3 +8,9 @@ spring:
     password: 123456
 server:
   port: 8123
+
+deepseek:
+  api-key: <你的api>
+  base-url: https://api.deepseek.com
+  model: deepseek-chat
+  timeout: 60000

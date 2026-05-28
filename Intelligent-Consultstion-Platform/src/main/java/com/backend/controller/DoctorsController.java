@@ -21,17 +21,17 @@ public class DoctorsController {
     private DoctorsService doctorsService;
 
     /**
-     * 获取医生列表
+     * 获取医生列表（包含用户信息）
      *
      * @param deptId 科室ID
      * @param status 状态
-     * @return 医生列表
+     * @return 医生列表（包含用户信息）
      */
     @GetMapping
     public Object getDoctorsList(
             @RequestParam(required = false) Integer deptId,
             @RequestParam(required = false) String status) {
-        List<Doctors> doctorsList = doctorsService.getDoctorsList(deptId, status);
+        List<?> doctorsList = doctorsService.getDoctorsWithUserInfo(deptId, status);
         return ResultUtils.success(doctorsList);
     }
 

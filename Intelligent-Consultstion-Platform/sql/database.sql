@@ -309,3 +309,12 @@ INSERT INTO payment_records (patient_id, hospitalization_id, amount, payment_dat
                                                                                                                (1, 1, 3000.00, '2026-03-25 10:00:00', 'online', 'paid'),
                                                                                                                (2, 2, 2000.00, '2026-03-26 14:00:00', 'online', 'paid'),
                                                                                                                (3, 3, 2500.00, '2026-03-27 09:00:00', 'online', 'unpaid');
+
+
+-- 删除旧的外键约束
+ALTER TABLE appointments DROP FOREIGN KEY appointments_ibfk_1;
+
+-- 添加新的外键约束（引用users表）
+ALTER TABLE appointments
+    ADD CONSTRAINT appointments_ibfk_1
+        FOREIGN KEY (patient_id) REFERENCES users(user_id);

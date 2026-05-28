@@ -1,5 +1,6 @@
 package com.backend.service;
 
+import com.backend.model.dto.DoctorDTO;
 import com.backend.model.entity.Doctors;
 import com.mybatisflex.core.service.IService;
 
@@ -20,6 +21,15 @@ public interface DoctorsService extends IService<Doctors> {
      * @return 医生列表
      */
     List<Doctors> getDoctorsList(Integer deptId, String status);
+
+    /**
+     * 获取医生列表（包含用户信息）
+     *
+     * @param deptId 科室ID
+     * @param status 状态
+     * @return 医生列表（包含用户信息）
+     */
+    List<DoctorDTO> getDoctorsWithUserInfo(Integer deptId, String status);
 
     /**
      * 添加医生

@@ -1,5 +1,8 @@
 package com.backend.service.impl;
 
+import com.backend.common.UserContext;
+import com.backend.exception.BusinessException;
+import com.backend.exception.ErrorCode;
 import com.backend.mapper.AppointmentsMapper;
 import com.backend.model.entity.Appointments;
 import com.backend.service.AppointmentsService;
@@ -20,6 +23,24 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
 
     @Override
     public Appointments createAppointment(Appointments appointments) {
+        Integer userId = UserContext.getUserId();
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "请先登录");
+        }
+        
+        if (appointments.getDoctorId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "医生ID不能为空");
+        }
+        
+        if (appointments.getScheduleId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "排班ID不能为空");
+        }
+        
+        if (appointments.getAppointmentDate() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "预约日期不能为空");
+        }
+        
+        appointments.setPatientId(userId);
         appointments.setStatus("pending");
         save(appointments);
         return appointments;
