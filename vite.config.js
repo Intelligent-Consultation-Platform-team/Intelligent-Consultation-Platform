@@ -12,6 +12,7 @@ const proxyPrefixes = [
   '/notices',
   '/recharge',
   '/payment',
+  '/api/ai-consultation',
 ]
 
 export default defineConfig(({ mode }) => {

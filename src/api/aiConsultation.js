@@ -2,34 +2,34 @@ import { request } from '../utils/request'
 
 
 export const aiConsultationApi = {
-  createSession: (data) => request(`${API_BASE_URL}/api/ai-consultation/session`, {
+  createSession: (data) => request('/api/ai-consultation/session', {
     method: 'POST',
     data,
   }),
 
-  sendMessage: (data) => request(`${API_BASE_URL}/api/ai-consultation/message`, {
+  sendMessage: (data) => request('/api/ai-consultation/message', {
     method: 'POST',
     data,
   }),
 
-  getSessionDetail: (sessionId) => request(`${API_BASE_URL}/api/ai-consultation/session/${sessionId}`),
+  getSessionDetail: (sessionId) => request(`/api/ai-consultation/session/${sessionId}`),
 
-  getSessionMessages: (sessionId, params) => request(`${API_BASE_URL}/api/ai-consultation/session/${sessionId}/messages`, {
+  getSessionMessages: (sessionId, params) => request(`/api/ai-consultation/session/${sessionId}/messages`, {
     params,
   }),
 
-  closeSession: (sessionId, data) => request(`${API_BASE_URL}/api/ai-consultation/session/${sessionId}/close`, {
+  closeSession: (sessionId, data) => request(`/api/ai-consultation/session/${sessionId}/close`, {
     method: 'POST',
     data,
   }),
 
-  getMySessions: (params) => request(`${API_BASE_URL}/api/ai-consultation/session/my`, {
+  getMySessions: (params) => request('/api/ai-consultation/session/my', {
     params,
   }),
 
-  getSessionRisk: (sessionId) => request(`${API_BASE_URL}/api/ai-consultation/session/${sessionId}/risk`),
+  getSessionRisk: (sessionId) => request(`/api/ai-consultation/session/${sessionId}/risk`),
 
-  uploadFile: (data) => request(`${API_BASE_URL}/api/ai-consultation/upload`, {
+  uploadFile: (data) => request('/api/ai-consultation/upload', {
     method: 'POST',
     data,
     headers: {
