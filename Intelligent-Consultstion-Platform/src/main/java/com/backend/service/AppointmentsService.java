@@ -48,4 +48,26 @@ public interface AppointmentsService extends IService<Appointments> {
      */
     void cancelAppointment(Integer appointmentId);
 
+    /**
+     * 患者到院签到，将预约状态改为 confirmed
+     *
+     * @param appointmentId 预约ID
+     */
+    void confirmAppointment(Integer appointmentId);
+
+    /**
+     * 医生完成就诊，将预约状态改为 completed
+     *
+     * @param appointmentId 预约ID
+     */
+    void completeAppointment(Integer appointmentId);
+
+    /**
+     * 医生获取自己的出诊列表（包含患者信息）
+     *
+     * @param doctorUserId 医生的用户ID
+     * @return 出诊列表
+     */
+    List<Map<String, Object>> getDoctorAppointments(Integer doctorUserId);
+
 }

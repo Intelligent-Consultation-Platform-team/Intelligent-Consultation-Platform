@@ -155,7 +155,7 @@ const loadData = async () => {
       return
     }
 
-    const data = await api.consultations.getList({ patientId: patientId })
+    const data = await api.consultation.getList({ patientId: patientId })
     visits.value = (data || []).map(item => {
       const { date, time } = formatDateTime(item.consultationDate)
       return {

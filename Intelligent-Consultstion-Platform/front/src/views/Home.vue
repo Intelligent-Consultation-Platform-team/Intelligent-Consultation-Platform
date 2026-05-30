@@ -191,7 +191,7 @@ const loadStatistics = async () => {
     // 如果是患者，加载预约数量
     const session = getSession()
     if (session?.userId && isPatient.value) {
-      const appointmentsData = await api.appointments.getPatientList(session.userId)
+      const appointmentsData = await api.appointment.getPatientList(session.userId)
       appointmentCount.value = Array.isArray(appointmentsData) ? appointmentsData.length : 0
     }
   } catch (error) {
@@ -210,7 +210,7 @@ const loadRecentActivities = async () => {
     }
 
     // 获取患者的预约记录作为最近活动
-    const appointmentsData = await api.appointments.getPatientList(session.userId)
+    const appointmentsData = await api.appointment.getPatientList(session.userId)
     if (Array.isArray(appointmentsData)) {
       recentActivities.value = appointmentsData.slice(0, 5).map(item => ({
         time: item.appointmentDate || item.createdAt || new Date().toLocaleString(),

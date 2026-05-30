@@ -247,7 +247,7 @@ const loadData = async () => {
     if (filter.patientName.trim()) params.patientName = filter.patientName.trim()
     if (filter.status) params.status = filter.status
 
-    const result = await api.appointments.getPage(params)
+    const result = await api.appointment.getPage(params)
     appointments.value = result?.records || result?.data?.records || []
     pagination.total = result?.total || result?.data?.total || 0
   } catch (e) {
@@ -313,7 +313,7 @@ const handleEdit = (row) => {
 
 const handleCancel = async (id) => {
   try {
-    await api.appointments.cancel(id)
+    await api.appointment.cancel(id)
     ElMessage.success('挂号已取消')
     await loadData()
   } catch (e) {
@@ -330,7 +330,7 @@ const handleSubmit = async () => {
       ElMessage.warning('请先登录')
       return
     }
-    await api.appointments.create({
+    await api.appointment.create({
       patientId: session.userId,
       doctorId: form.doctorId,
       scheduleId: 1,

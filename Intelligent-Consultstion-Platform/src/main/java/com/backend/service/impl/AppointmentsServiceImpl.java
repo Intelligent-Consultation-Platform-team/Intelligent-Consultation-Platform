@@ -264,4 +264,85 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 患者到院签到，将预约状态改为 confirmed
+     */
+    @Override
+    public void confirmAppointment(Integer appointmentId) {
+        if (appointmentId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "预约ID不能为空");
+        }
+        Appointments apt = getById(appointmentId);
+        if (apt == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "预约不存在");
+        }
+        if (!"pending".equals(apt.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "当前状态不支持签到操作");
+        }
+        apt.setStatus("confirmed");
+        updateById(apt);
+    }
+
+    /**
+     * 医生完成就诊，将预约状态改为 completed
+     */
+    @Override
+    public void completeAppointment(Integer appointmentId) {
+        if (appointmentId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "预约ID不能为空");
+        }
+        Appointments apt = getById(appointmentId);
+        if (apt == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "预约不存在");
+        }
+        if (!"processing".equals(apt.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "当前状态不支持完成操作");
+        }
+        apt.setStatus("completed");
+        updateById(apt);
+    }
+
+    /**
+     * 医生获取自己的出诊列表（包含患者信息）
+     */
+    public List<Map<String, Object>> getDoctorAppointments(Integer doctorUserId) {
+        Doctors doctor = doctorsMapper.selectOneByQuery(
+                QueryWrapper.create().eq("user_id", doctorUserId)
+        );
+        if (doctor == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "医生信息不存在");
+        }
+
+        List<Appointments> appointmentsList = list(
+                QueryWrapper.create()
+                        .eq("doctor_id", doctor.getDoctorId())
+                        .orderBy("appointment_date", false)
+        );
+
+        if (appointmentsList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Integer> patientIds = appointmentsList.stream()
+                .map(Appointments::getPatientId).distinct().collect(Collectors.toList());
+
+        Map<Integer, Users> patientMap = usersMapper.selectListByQuery(
+                QueryWrapper.create().in("user_id", patientIds)
+        ).stream().collect(Collectors.toMap(Users::getUserId, u -> u));
+
+        return appointmentsList.stream().map(apt -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("appointmentId", apt.getAppointmentId());
+            item.put("appointmentDate", apt.getAppointmentDate());
+            item.put("appointmentTime", apt.getAppointmentTime());
+            item.put("status", apt.getStatus());
+
+            Users patient = patientMap.get(apt.getPatientId());
+            item.put("patientId", apt.getPatientId());
+            item.put("patientName", patient != null ? patient.getRealName() : "患者" + apt.getPatientId());
+
+            return item;
+        }).collect(Collectors.toList());
+    }
+
 }

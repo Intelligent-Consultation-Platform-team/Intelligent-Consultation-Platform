@@ -101,7 +101,7 @@ const formatDate = (value) => (value ? String(value).replace('T', ' ').slice(0, 
 const loadData = async () => {
   loading.value = true
   try {
-    const data = await api.notices.getList()
+    const data = await api.notice.getList()
     notices.value = (data || []).map((item) => ({ id: item.noticeId ?? item.id, title: item.title, content: item.content, status: item.status, statusText: item.status === 'active' ? '启用' : '禁用', createdAt: formatDate(item.createdAt) }))
     hasLoadedOnce.value = true
     pagination.current = 1
@@ -120,7 +120,7 @@ const handleEdit = (row) => { form.id = row.id; form.title = row.title; form.con
 const handleDelete = async (id) => {
   try {
     await ElMessageBox.confirm('确定删除该公告吗？', '提示', { type: 'warning' })
-    await api.notices.remove(id)
+    await api.notice.remove(id)
     ElMessage.success('删除成功')
     await loadData()
   } catch (error) {
@@ -136,10 +136,10 @@ const handleSubmit = async () => {
     submitLoading.value = true
     const payload = { title: form.title, content: form.content }
     if (form.id) {
-      await api.notices.update({ noticeId: form.id, ...payload })
+      await api.notice.update({ noticeId: form.id, ...payload })
       ElMessage.success('编辑成功')
     } else {
-      await api.notices.create(payload)
+      await api.notice.create(payload)
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false

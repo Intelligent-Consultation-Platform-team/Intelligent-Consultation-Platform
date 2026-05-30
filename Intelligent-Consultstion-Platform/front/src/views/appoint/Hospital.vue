@@ -200,7 +200,7 @@ const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    await api.hospitalizations.create({
+    await api.hospitalization.create({
       patientId: form.id || undefined,
       doctorId: form.doctorId,
       deptId: form.departmentId,

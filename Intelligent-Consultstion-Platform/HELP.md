@@ -560,50 +560,51 @@
 
 ---
 
-### 预约模块 `/appointments`
+### 预约模块 `/appointment`
 
 #### 1. 创建预约
 - **方法**: POST
-- **路径**: `/appointments`
+- **路径**: `/appointment`
 - **描述**: 创建新的预约挂号
 - **请求体**:
 ```json
 {
   "patientId": 1,
+  "doctorId": 1,
   "scheduleId": 1,
-  "appointmentDate": "2026-05-30",
-  "timeSlot": "09:00-12:00",
-  "symptoms": "头痛、发热",
-  "status": "pending"
+  "appointmentDate": "2026-05-30"
 }
 ```
 - **响应示例**:
 ```json
 {
   "code": 0,
-  "message": "success",
+  "message": "预约成功",
   "data": {
     "appointmentId": 1,
-    "patientId": 1,
-    "scheduleId": 1,
-    "appointmentDate": "2026-05-30",
-    "status": "pending",
-    "createdAt": "2026-05-30T10:00:00Z"
+    "status": "pending"
   }
 }
 ```
 
-#### 2. 获取患者预约列表
+#### 2. 获取预约列表 / 分页
 - **方法**: GET
-- **路径**: `/appointments/patient`
-- **描述**: 获取指定患者的预约列表
+- **路径**: `/appointment`
+- **描述**: 分页查询所有预约，支持按患者姓名和状态筛选
 - **参数**:
-  - `patientId` (必填): 患者ID
+  - `current` (可选, 默认1): 当前页
+  - `size` (可选, 默认10): 每页条数
+  - `patientName` (可选): 患者姓名（模糊搜索）
+  - `status` (可选): 状态筛选
+
+#### 3. 获取患者预约列表
+- **方法**: GET
+- **路径**: `/appointment/patient/{patientId}`
+- **描述**: 获取指定患者的预约列表
 - **响应示例**:
 ```json
 {
   "code": 0,
-  "message": "success",
   "data": [
     {
       "appointmentId": 1,
@@ -611,136 +612,154 @@
       "doctorName": "李医生",
       "deptName": "内科",
       "appointmentDate": "2026-05-30",
-      "timeSlot": "09:00-12:00",
-      "status": "pending",
-      "queueNumber": 5
+      "status": "pending"
     }
   ]
 }
 ```
 
+#### 4. 医生获取出诊列表
+- **方法**: GET
+- **路径**: `/appointment/doctor`
+- **描述**: 医生获取自己的出诊列表（含患者信息）
+
+#### 5. 获取预约详情
+- **方法**: GET
+- **路径**: `/appointment/{appointmentId}`
+- **描述**: 根据ID获取预约详情
+
+#### 6. 取消预约
+- **方法**: PUT
+- **路径**: `/appointment/{appointmentId}/cancel`
+
+#### 7. 患者签到
+- **方法**: PUT
+- **路径**: `/appointment/{appointmentId}/confirm`
+
+#### 8. 完成就诊
+- **方法**: PUT
+- **路径**: `/appointment/{appointmentId}/complete`
+
 ---
 
-### 就诊记录模块 `/consultations`
+### 就诊记录模块 `/consultation`
 
-#### 1. 获取就诊记录
+#### 1. 获取就诊记录列表
 - **方法**: GET
-- **路径**: `/consultations`
+- **路径**: `/consultation`
 - **描述**: 获取就诊记录列表
 - **参数**:
   - `patientId` (可选): 患者ID
   - `doctorId` (可选): 医生ID
-- **响应示例**:
+
+#### 2. 获取就诊记录详情
+- **方法**: GET
+- **路径**: `/consultation/{consultationId}`
+
+#### 3. 医生填写病历（问诊）
+- **方法**: POST
+- **路径**: `/consultation`
+- **描述**: 医生填写病历并开处方，自动更新预约状态为 `processing`
+- **请求体**:
 ```json
 {
-  "code": 0,
-  "message": "success",
-  "data": [
-    {
-      "consultationId": 1,
-      "patientId": 1,
-      "doctorId": 1,
-      "appointmentId": 1,
-      "diagnosis": "上呼吸道感染",
-      "prescription": "阿莫西林胶囊 0.5g tid",
-      "advice": "多喝水，注意休息",
-      "consultationDate": "2026-05-30T10:30:00Z"
-    }
-  ]
+  "appointmentId": 1,
+  "doctorId": 1,
+  "patientId": 1,
+  "symptoms": "头痛、发热",
+  "diagnosis": "上呼吸道感染",
+  "treatment": "口服药物治疗",
+  "prescription": "阿莫西林胶囊 0.5g tid"
 }
 ```
 
 ---
 
-### 住院管理模块 `/hospitalizations`
+### 住院管理模块 `/hospitalization`
 
 #### 1. 住院登记
 - **方法**: POST
-- **路径**: `/hospitalizations`
-- **描述**: 创建住院登记
-- **请求体**:
-```json
-{
-  "patientId": 1,
-  "consultationId": 1,
-  "bedNumber": "301-01",
-  "admissionDate": "2026-05-30",
-  "diagnosis": "待确诊",
-  "attendingDoctor": "李医生",
-  "status": "admitted"
-}
-```
-- **响应示例**:
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "hospitalizationId": 1,
-    "patientId": 1,
-    "bedNumber": "301-01",
-    "admissionDate": "2026-05-30",
-    "status": "admitted"
-  }
-}
-```
+- **路径**: `/hospitalization`
 
 ---
 
-### 患者账户模块 `/patientAccount`
+### 系统公告模块 `/notice`
 
-#### 1. 账户充值
+#### 1. 获取公告列表
+- **方法**: GET
+- **路径**: `/notice`
+
+#### 2. 获取公告详情
+- **方法**: GET
+- **路径**: `/notice/{noticeId}`
+
+#### 3. 添加公告
 - **方法**: POST
-- **路径**: `/recharge`
-- **描述**: 患者账户充值
+- **路径**: `/notice`
+
+#### 4. 更新公告
+- **方法**: PUT
+- **路径**: `/notice`
+
+#### 5. 删除公告
+- **方法**: DELETE
+- **路径**: `/notice/{noticeId}`
+
+---
+
+### 患者账户模块 `/patient`
+
+#### 1. 获取余额
+- **方法**: GET
+- **路径**: `/patient/{patientId}/balance`
+
+#### 2. 账户充值
+- **方法**: POST
+- **路径**: `/patient/{patientId}/recharge`
 - **请求体**:
 ```json
 {
-  "patientId": 1,
   "amount": 1000.00,
   "paymentMethod": "alipay"
 }
 ```
-- **响应示例**:
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "recordId": 1,
-    "amount": 1000.00,
-    "balance": 1500.00,
-    "rechargeDate": "2026-05-30T10:00:00Z"
-  }
-}
-```
 
-#### 2. 费用缴纳
+#### 3. 费用缴纳
 - **方法**: POST
-- **路径**: `/payment`
-- **描述**: 缴纳医疗费用
+- **路径**: `/patient/{patientId}/payment`
 - **请求体**:
 ```json
 {
-  "patientId": 1,
   "consultationId": 1,
   "amount": 200.00,
-  "paymentMethod": "wechat"
+  "paymentMethod": "account"
 }
 ```
-- **响应示例**:
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": {
-    "paymentId": 1,
-    "amount": 200.00,
-    "balance": 1300.00,
-    "paymentDate": "2026-05-30T10:00:00Z"
-  }
-}
-```
+
+---
+
+### 业务流程状态流转
+
+#### 预约单状态 `appointments.status`
+| 状态 | 说明 |
+|------|------|
+| `pending` | 待确认（刚预约） |
+| `confirmed` | 已确认 / 已签到候诊 |
+| `processing` | 就诊中（医生正在接诊） |
+| `completed` | 已完成 |
+| `cancelled` | 已取消 |
+
+#### 缴费单状态 `payment_records.status`
+| 状态 | 说明 |
+|------|------|
+| `unpaid` | 待缴费 |
+| `paid` | 已缴费 |
+
+#### 住院状态 `hospitalizations.status`
+| 状态 | 说明 |
+|------|------|
+| `admitted` | 住院中 |
+| `discharged` | 已出院 |
 
 ---
 
@@ -948,19 +967,69 @@ curl -X GET http://localhost:8123/departments
 
 #### 4. 创建预约测试（需要Token）
 ```bash
-curl -X POST http://localhost:8123/appointments \
+curl -X POST http://localhost:8123/appointment \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <your_token>" \
   -d '{
     "patientId": 1,
+    "doctorId": 1,
     "scheduleId": 1,
-    "appointmentDate": "2026-05-30",
-    "timeSlot": "09:00-12:00",
-    "symptoms": "头痛"
+    "appointmentDate": "2026-05-30"
   }'
 ```
 
-#### 5. AI问诊会话测试
+#### 5. 患者签到测试（需要Token）
+```bash
+curl -X PUT http://localhost:8123/appointment/1/confirm \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### 6. 医生问诊测试（需要Token）
+```bash
+curl -X POST http://localhost:8123/consultation \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your_token>" \
+  -d '{
+    "appointmentId": 1,
+    "doctorId": 1,
+    "patientId": 1,
+    "symptoms": "头痛、发热",
+    "diagnosis": "上呼吸道感染",
+    "treatment": "口服药物治疗",
+    "prescription": "阿莫西林胶囊 0.5g tid"
+  }'
+```
+
+#### 7. 患者充值测试（需要Token）
+```bash
+curl -X POST http://localhost:8123/patient/1/recharge \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your_token>" \
+  -d '{
+    "amount": 1000.00,
+    "paymentMethod": "alipay"
+  }'
+```
+
+#### 8. 患者缴费测试（需要Token）
+```bash
+curl -X POST http://localhost:8123/patient/1/payment \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your_token>" \
+  -d '{
+    "consultationId": 1,
+    "amount": 200.00,
+    "paymentMethod": "account"
+  }'
+```
+
+#### 9. 获取患者余额（需要Token）
+```bash
+curl -X GET http://localhost:8123/patient/1/balance \
+  -H "Authorization: Bearer <your_token>"
+```
+
+#### 9. AI问诊会话测试
 ```bash
 # 创建会话
 curl -X POST http://localhost:8123/api/ai-consultation/session \

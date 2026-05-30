@@ -181,7 +181,7 @@ const submitBooking = async () => {
 
   submitting.value = true
   try {
-    await api.appointments.create({
+    await api.appointment.create({
       patientId: session.userId,
       doctorId: selectedSchedule.value.doctorId,
       scheduleId: selectedSchedule.value.scheduleId,

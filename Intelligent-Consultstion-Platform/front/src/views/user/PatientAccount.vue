@@ -182,9 +182,9 @@ const paymentRules = {
 // 获取余额
 const loadBalance = async () => {
   try {
-    const data = await api.patientAccount.getBalance(patientId)
+    const data = await api.patient.getBalance(patientId)
     if (data !== undefined && data !== null) {
-      balance.value = parseFloat(data) || 0
+      balance.value = parseFloat(data.balance ?? data) || 0
     }
   } catch (error) {
     console.error('获取余额失败', error)
@@ -220,8 +220,7 @@ const handleRechargeSubmit = async () => {
       ElMessage.error('请先登录')
       return
     }
-    const result = await api.patientAccount.recharge({
-      patientId: patientId,
+    const result = await api.patient.recharge(patientId, {
       amount: rechargeForm.amount,
       paymentMethod: rechargeForm.paymentMethod
     })
@@ -255,8 +254,7 @@ const handlePaymentSubmit = async () => {
       ElMessage.error('请先登录')
       return
     }
-    const result = await api.patientAccount.payment({
-      patientId: patientId,
+    const result = await api.patient.payment(patientId, {
       consultationId: paymentForm.consultationId || null,
       amount: paymentForm.amount,
       paymentMethod: paymentForm.paymentMethod

@@ -1,14 +1,12 @@
 package com.backend.controller;
 
+import com.backend.common.BaseResponse;
 import com.backend.common.ResultUtils;
 import com.backend.model.entity.RechargeRecords;
 import com.backend.model.entity.PaymentRecords;
 import com.backend.service.PatientAccountService;
 import jakarta.annotation.Resource;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -20,126 +18,101 @@ import java.util.Map;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("")
+@RequestMapping("/patient")
 public class PatientAccountController {
 
     @Resource
     private PatientAccountService patientAccountService;
 
     /**
+     * 获取患者余额
+     *
+     * @param patientId 患者ID
+     * @return 余额
+     */
+    @GetMapping("/{patientId}/balance")
+    public BaseResponse<Map<String, Object>> getBalance(@PathVariable Integer patientId) {
+        BigDecimal balance = patientAccountService.getBalance(patientId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("patientId", patientId);
+        data.put("balance", balance);
+        return ResultUtils.success(data);
+    }
+
+    /**
      * 充值
      *
+     * @param patientId 患者ID
      * @param request 充值请求
      * @return 充值结果
      */
-    @PostMapping("/recharge")
-    public Object recharge(@RequestBody RechargeRequest request) {
-        RechargeRecords rechargeRecords = patientAccountService.recharge(
-                request.getPatientId(),
+    @PostMapping("/{patientId}/recharge")
+    public BaseResponse<Map<String, Object>> recharge(
+            @PathVariable Integer patientId,
+            @RequestBody RechargeRequest request) {
+        RechargeRecords record = patientAccountService.recharge(
+                patientId,
                 request.getAmount(),
                 request.getPaymentMethod()
         );
-        BigDecimal balance = patientAccountService.getBalance(request.getPatientId());
-        Map<String, Object> result = new HashMap<>();
-        result.put("recordId", rechargeRecords.getRecordId());
-        result.put("amount", rechargeRecords.getAmount());
-        result.put("balance", balance);
-        result.put("rechargeDate", rechargeRecords.getRechargeDate());
-        return ResultUtils.success(result);
+        BigDecimal balance = patientAccountService.getBalance(patientId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("recordId", record.getRecordId());
+        data.put("amount", record.getAmount());
+        data.put("balance", balance);
+        data.put("rechargeDate", record.getRechargeDate());
+        return ResultUtils.success(data, "充值成功");
     }
 
     /**
      * 缴费
      *
+     * @param patientId 患者ID
      * @param request 缴费请求
      * @return 缴费结果
      */
-    @PostMapping("/payment")
-    public Object payment(@RequestBody PaymentRequest request) {
-        PaymentRecords paymentRecords = patientAccountService.payment(
-                request.getPatientId(),
+    @PostMapping("/{patientId}/payment")
+    public BaseResponse<Map<String, Object>> payment(
+            @PathVariable Integer patientId,
+            @RequestBody PaymentRequest request) {
+        PaymentRecords record = patientAccountService.payment(
+                patientId,
                 request.getConsultationId(),
                 request.getAmount(),
                 request.getPaymentMethod()
         );
-        BigDecimal balance = patientAccountService.getBalance(request.getPatientId());
-        Map<String, Object> result = new HashMap<>();
-        result.put("paymentId", paymentRecords.getPaymentId());
-        result.put("amount", paymentRecords.getAmount());
-        result.put("balance", balance);
-        result.put("paymentDate", paymentRecords.getPaymentDate());
-        return ResultUtils.success(result);
+        BigDecimal balance = patientAccountService.getBalance(patientId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("paymentId", record.getPaymentId());
+        data.put("amount", record.getAmount());
+        data.put("balance", balance);
+        data.put("paymentDate", record.getPaymentDate());
+        return ResultUtils.success(data, "缴费成功");
     }
 
     // 充值请求类
     public static class RechargeRequest {
-        private Integer patientId;
         private BigDecimal amount;
         private String paymentMethod;
 
-        public Integer getPatientId() {
-            return patientId;
-        }
-
-        public void setPatientId(Integer patientId) {
-            this.patientId = patientId;
-        }
-
-        public BigDecimal getAmount() {
-            return amount;
-        }
-
-        public void setAmount(BigDecimal amount) {
-            this.amount = amount;
-        }
-
-        public String getPaymentMethod() {
-            return paymentMethod;
-        }
-
-        public void setPaymentMethod(String paymentMethod) {
-            this.paymentMethod = paymentMethod;
-        }
+        public BigDecimal getAmount() { return amount; }
+        public void setAmount(BigDecimal amount) { this.amount = amount; }
+        public String getPaymentMethod() { return paymentMethod; }
+        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     }
 
     // 缴费请求类
     public static class PaymentRequest {
-        private Integer patientId;
         private Integer consultationId;
         private BigDecimal amount;
         private String paymentMethod;
 
-        public Integer getPatientId() {
-            return patientId;
-        }
-
-        public void setPatientId(Integer patientId) {
-            this.patientId = patientId;
-        }
-
-        public Integer getConsultationId() {
-            return consultationId;
-        }
-
-        public void setConsultationId(Integer consultationId) {
-            this.consultationId = consultationId;
-        }
-
-        public BigDecimal getAmount() {
-            return amount;
-        }
-
-        public void setAmount(BigDecimal amount) {
-            this.amount = amount;
-        }
-
-        public String getPaymentMethod() {
-            return paymentMethod;
-        }
-
-        public void setPaymentMethod(String paymentMethod) {
-            this.paymentMethod = paymentMethod;
-        }
+        public Integer getConsultationId() { return consultationId; }
+        public void setConsultationId(Integer consultationId) { this.consultationId = consultationId; }
+        public BigDecimal getAmount() { return amount; }
+        public void setAmount(BigDecimal amount) { this.amount = amount; }
+        public String getPaymentMethod() { return paymentMethod; }
+        public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
     }
 
 }

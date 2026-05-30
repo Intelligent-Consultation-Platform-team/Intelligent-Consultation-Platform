@@ -19,7 +19,7 @@ import java.util.Map;
  * @author 佳尔宇柔
  */
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("/appointment")
 public class AppointmentsController {
 
     @Resource
@@ -32,15 +32,40 @@ public class AppointmentsController {
      * @return 预约结果
      */
     @PostMapping
-    public Object createAppointment(@RequestBody Appointments appointments) {
+    public BaseResponse<Map<String, Object>> createAppointment(@RequestBody Appointments appointments) {
         Appointments result = appointmentsService.createAppointment(appointments);
-        return ResultUtils.success(result);
+        Map<String, Object> data = new HashMap<>();
+        data.put("appointmentId", result.getAppointmentId());
+        data.put("status", result.getStatus());
+        return ResultUtils.success(data, "预约成功");
     }
 
     /**
-     * 分页查询所有预约（供管理员/医生使用，支持按患者姓名模糊搜索、按状态筛选）
+     * 获取患者预约列表
+     *
+     * @param patientId 患者ID
+     * @return 预约列表
      */
-    @GetMapping("/page")
+    @GetMapping("/patient/{patientId}")
+    public BaseResponse<List<AppointmentDTO>> getPatientAppointments(@PathVariable Integer patientId) {
+        List<AppointmentDTO> list = appointmentsService.getPatientAppointments(patientId);
+        return ResultUtils.success(list);
+    }
+
+    /**
+     * 医生获取自己的出诊列表
+     */
+    @GetMapping("/doctor")
+    public BaseResponse<List<Map<String, Object>>> getDoctorAppointments() {
+        Integer userId = UserContext.getUserId();
+        List<Map<String, Object>> list = appointmentsService.getDoctorAppointments(userId);
+        return ResultUtils.success(list);
+    }
+
+    /**
+     * 分页查询所有预约（管理员/医生用）
+     */
+    @GetMapping
     public BaseResponse<Map<String, Object>> getAppointmentsPage(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "10") Integer size,
@@ -51,24 +76,39 @@ public class AppointmentsController {
     }
 
     /**
-     * 获取患者预约列表
-     *
-     * @param patientId 患者ID
-     * @return 预约列表
+     * 获取单个预约详情
      */
-    @GetMapping("/patient")
-    public Object getPatientAppointments(@RequestParam Integer patientId) {
-        List<AppointmentDTO> appointmentsList = appointmentsService.getPatientAppointments(patientId);
-        return ResultUtils.success(appointmentsList);
+    @GetMapping("/{appointmentId}")
+    public BaseResponse<Appointments> getAppointmentById(@PathVariable Integer appointmentId) {
+        Appointments appointment = appointmentsService.getById(appointmentId);
+        return ResultUtils.success(appointment);
     }
 
     /**
      * 取消预约
      */
-    @PutMapping("/cancel/{appointmentId}")
+    @PutMapping("/{appointmentId}/cancel")
     public BaseResponse<Void> cancelAppointment(@PathVariable Integer appointmentId) {
         appointmentsService.cancelAppointment(appointmentId);
         return ResultUtils.success(null, "预约已取消");
+    }
+
+    /**
+     * 患者到院签到（状态 pending -> confirmed）
+     */
+    @PutMapping("/{appointmentId}/confirm")
+    public BaseResponse<Void> confirmAppointment(@PathVariable Integer appointmentId) {
+        appointmentsService.confirmAppointment(appointmentId);
+        return ResultUtils.success(null, "签到成功");
+    }
+
+    /**
+     * 医生完成就诊（状态 processing -> completed）
+     */
+    @PutMapping("/{appointmentId}/complete")
+    public BaseResponse<Void> completeAppointment(@PathVariable Integer appointmentId) {
+        appointmentsService.completeAppointment(appointmentId);
+        return ResultUtils.success(null, "就诊已完成");
     }
 
 }
