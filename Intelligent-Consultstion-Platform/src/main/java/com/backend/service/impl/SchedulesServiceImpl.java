@@ -140,6 +140,13 @@ public class SchedulesServiceImpl extends ServiceImpl<SchedulesMapper, Schedules
 
     @Override
     public boolean addSchedule(Schedules schedules) {
+        // 设置默认可用号源
+        if (schedules.getAvailableSlots() == null) {
+            schedules.setAvailableSlots(20);
+        }
+        if (schedules.getStatus() == null) {
+            schedules.setStatus("available");
+        }
         return save(schedules);
     }
 

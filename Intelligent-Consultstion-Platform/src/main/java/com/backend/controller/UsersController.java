@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.backend.model.dto.ResetPasswordRequest;
 import com.backend.model.entity.Users;
 import com.backend.service.UsersService;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,6 +90,17 @@ public class UsersController {
     @GetMapping("page")
     public Page<Users> page(Page<Users> page) {
         return usersService.page(page);
+    }
+
+    /**
+     * 重置用户密码为默认密码123456
+     *
+     * @param request 重置密码请求
+     * @return 是否成功
+     */
+    @PostMapping("resetPassword")
+    public boolean resetPassword(@RequestBody ResetPasswordRequest request) {
+        return usersService.resetPassword(request.getUserId());
     }
 
 }

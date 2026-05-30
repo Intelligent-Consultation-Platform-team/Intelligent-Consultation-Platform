@@ -12,6 +12,7 @@ const proxyPrefixes = [
   '/notices',
   '/recharge',
   '/payment',
+  '/users',
   '/api/ai-consultation',
 ]
 
@@ -23,9 +24,17 @@ export default defineConfig(({ mode }) => {
     plugins: [vue()],
     server: {
       port: Number(env.VITE_DEV_PORT) || 3000,
-      open: true,
+      open: false,
       proxy: Object.fromEntries(
-        proxyPrefixes.map((prefix) => [prefix, { target, changeOrigin: true }]),
+        proxyPrefixes.map((prefix) => [
+          prefix,
+          {
+            target,
+            changeOrigin: true,
+            secure: false,
+            ws: false,
+          },
+        ]),
       ),
     },
   }

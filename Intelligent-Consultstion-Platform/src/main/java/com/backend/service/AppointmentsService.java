@@ -1,9 +1,11 @@
 package com.backend.service;
 
+import com.backend.model.dto.AppointmentDTO;
 import com.backend.model.entity.Appointments;
 import com.mybatisflex.core.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *  预约挂号服务接口。
@@ -21,11 +23,29 @@ public interface AppointmentsService extends IService<Appointments> {
     Appointments createAppointment(Appointments appointments);
 
     /**
-     * 获取患者预约列表
+     * 获取患者预约列表（包含详细信息）
      *
      * @param patientId 患者ID
      * @return 预约列表
      */
-    List<Appointments> getPatientAppointments(Integer patientId);
+    List<AppointmentDTO> getPatientAppointments(Integer patientId);
+
+    /**
+     * 分页查询所有预约（支持按患者姓名模糊搜索、按状态筛选）
+     *
+     * @param current      当前页
+     * @param size         每页大小
+     * @param patientName  患者姓名（可选，模糊搜索）
+     * @param status       状态（可选）
+     * @return 包含分页信息和数据列表
+     */
+    Map<String, Object> getAppointmentsPage(Integer current, Integer size, String patientName, String status);
+
+    /**
+     * 取消预约
+     *
+     * @param appointmentId 预约ID
+     */
+    void cancelAppointment(Integer appointmentId);
 
 }

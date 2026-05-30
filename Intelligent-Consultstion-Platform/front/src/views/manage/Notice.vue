@@ -30,7 +30,6 @@
       </el-empty>
       <template v-else>
         <el-table v-loading="loading" :data="pagedNotices" style="width: 100%">
-          <el-table-column prop="id" label="ID" width="80" />
           <el-table-column prop="title" label="标题" />
           <el-table-column prop="content" label="内容" show-overflow-tooltip />
           <el-table-column prop="statusText" label="状态" width="100">

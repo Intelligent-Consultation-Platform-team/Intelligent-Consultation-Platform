@@ -311,10 +311,15 @@ INSERT INTO payment_records (patient_id, hospitalization_id, amount, payment_dat
                                                                                                                (3, 3, 2500.00, '2026-03-27 09:00:00', 'online', 'unpaid');
 
 
--- 删除旧的外键约束
-ALTER TABLE appointments DROP FOREIGN KEY appointments_ibfk_1;
+-- ============================================
+-- 注意：如果数据库已经创建，需要执行以下修正语句
+-- ============================================
 
--- 添加新的外键约束（引用users表）
-ALTER TABLE appointments
-    ADD CONSTRAINT appointments_ibfk_1
-        FOREIGN KEY (patient_id) REFERENCES users(user_id);
+-- 修正appointments表的外键约束（恢复到正确引用patients表）
+-- 首先删除错误的外键约束
+-- ALTER TABLE appointments DROP FOREIGN KEY appointments_ibfk_1;
+
+-- 添加正确的外键约束（引用patients表）
+-- ALTER TABLE appointments
+--     ADD CONSTRAINT appointments_ibfk_1
+--         FOREIGN KEY (patient_id) REFERENCES patients(patient_id);

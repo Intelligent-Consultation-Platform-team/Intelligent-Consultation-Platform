@@ -267,9 +267,9 @@ const fillDemo = () => {
 
 const handleSubmit = async () => {
   if (!formRef.value || loading.value) return
+  loading.value = true
   try {
     await formRef.value.validate()
-    loading.value = true
 
     if (isRegister.value) {
       const registerData = {
@@ -294,7 +294,12 @@ const handleSubmit = async () => {
       password: formModel.password,
     })
 
-    const user = data?.user || data?.data || {}
+    if (!data || (!data.user && !data.token)) {
+      ElMessage.error(data?.message || '登录失败，请检查用户名和密码')
+      return
+    }
+
+    const user = data?.user || {}
     currentUser.username = user.username || formModel.username.trim()
     currentUser.realName = user.realName || user.nickname || user.username || formModel.username.trim()
     currentUser.role = normalizeRole(user.role)
@@ -303,6 +308,7 @@ const handleSubmit = async () => {
       username: currentUser.username,
       realName: currentUser.realName,
       role: currentUser.role,
+      userId: user.userId,
       token: data?.token || data?.accessToken || '',
       tokenType: data?.tokenType || 'Bearer',
       expiresIn: data?.expiresIn,
@@ -312,7 +318,7 @@ const handleSubmit = async () => {
     ElMessage.success('登录成功')
     router.replace('/home')
   } catch (error) {
-    ElMessage.error(error?.message || '请求失败')
+    ElMessage.error(error?.message || '登录失败，请检查用户名和密码')
   } finally {
     loading.value = false
   }

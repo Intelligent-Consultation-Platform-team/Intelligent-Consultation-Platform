@@ -1,13 +1,15 @@
 package com.backend.service;
 
+import com.backend.model.dto.DoctorAddRequest;
 import com.backend.model.dto.DoctorDTO;
+import com.backend.model.dto.DoctorUpdateRequest;
 import com.backend.model.entity.Doctors;
 import com.mybatisflex.core.service.IService;
 
 import java.util.List;
 
 /**
- *  医生服务接口。
+ * 医生服务接口。
  *
  * @author 佳尔宇柔
  */
@@ -32,20 +34,20 @@ public interface DoctorsService extends IService<Doctors> {
     List<DoctorDTO> getDoctorsWithUserInfo(Integer deptId, String status);
 
     /**
-     * 添加医生
+     * 添加医生（同时创建用户账户）
      *
-     * @param doctors 医生信息
+     * @param request 添加医生请求
      * @return 是否成功
      */
-    boolean addDoctor(Doctors doctors);
+    boolean addDoctor(DoctorAddRequest request);
 
     /**
-     * 更新医生信息
+     * 更新医生信息（同时更新用户信息）
      *
-     * @param doctors 医生信息
+     * @param request 更新医生请求
      * @return 是否成功
      */
-    boolean updateDoctor(Doctors doctors);
+    boolean updateDoctor(DoctorUpdateRequest request);
 
     /**
      * 删除医生

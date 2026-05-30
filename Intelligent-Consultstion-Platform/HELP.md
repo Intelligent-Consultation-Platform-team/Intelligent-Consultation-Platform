@@ -85,86 +85,913 @@
 
 ### 认证模块 `/auth`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| POST | /auth/login | 用户登录 |
-| POST | /auth/register | 用户注册 |
+#### 1. 用户注册
+- **方法**: POST
+- **路径**: `/auth/register`
+- **描述**: 用户注册新账号
+- **请求体**:
+```json
+{
+  "username": "string",
+  "password": "string",
+  "realName": "string",
+  "phone": "string",
+  "idCard": "string",
+  "role": "patient"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "注册成功",
+  "data": {
+    "userId": 1,
+    "username": "zhangsan",
+    "realName": "张三",
+    "role": "patient",
+    "createdAt": "2026-05-30T10:00:00Z"
+  }
+}
+```
+
+#### 2. 用户登录
+- **方法**: POST
+- **路径**: `/auth/login`
+- **描述**: 用户登录获取Token
+- **请求体**:
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "登录成功",
+  "data": {
+    "userId": 1,
+    "username": "zhangsan",
+    "realName": "张三",
+    "role": "patient",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+---
 
 ### 用户模块 `/users`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | /users/list | 获取用户列表 |
-| POST | /users | 添加用户 |
-| PUT | /users | 更新用户信息 |
-| DELETE | /users/{userId} | 删除用户 |
-| GET | /users/{userId} | 获取用户详情 |
+#### 1. 获取用户列表
+- **方法**: GET
+- **路径**: `/users/list`
+- **描述**: 获取所有用户列表
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "username": "zhangsan",
+      "realName": "张三",
+      "phone": "13800138000",
+      "role": "patient"
+    }
+  ]
+}
+```
+
+#### 2. 添加用户
+- **方法**: POST
+- **路径**: `/users/save`
+- **描述**: 添加新用户
+- **请求体**:
+```json
+{
+  "username": "string",
+  "password": "string",
+  "realName": "string",
+  "phone": "string",
+  "idCard": "string",
+  "role": "string"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 3. 更新用户信息
+- **方法**: PUT
+- **路径**: `/users/update`
+- **描述**: 更新用户信息
+- **请求体**:
+```json
+{
+  "id": 1,
+  "username": "string",
+  "realName": "string",
+  "phone": "string"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 4. 删除用户
+- **方法**: DELETE
+- **路径**: `/users/remove/{id}`
+- **描述**: 根据ID删除用户
+- **响应**: `true` 或 `false`
+
+#### 5. 获取用户详情
+- **方法**: GET
+- **路径**: `/users/getInfo/{id}`
+- **描述**: 根据ID获取用户详情
+- **响应示例**:
+```json
+{
+  "id": 1,
+  "username": "zhangsan",
+  "realName": "张三",
+  "phone": "13800138000",
+  "role": "patient"
+}
+```
+
+#### 6. 分页查询用户
+- **方法**: GET
+- **路径**: `/users/page`
+- **描述**: 分页查询用户列表
+- **参数**: `pageNumber`, `pageSize`
+
+---
 
 ### 科室模块 `/departments`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | /departments | 获取科室列表 |
-| GET | /departments/{deptId} | 获取科室详情 |
-| POST | /departments | 添加科室 |
-| PUT | /departments | 更新科室 |
-| DELETE | /departments/{deptId} | 删除科室 |
+#### 1. 获取科室列表
+- **方法**: GET
+- **路径**: `/departments`
+- **描述**: 获取所有科室列表
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "deptId": 1,
+      "deptName": "内科",
+      "location": "1号楼2层",
+      "description": "内科门诊",
+      "createdAt": "2026-05-30T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### 2. 获取科室详情
+- **方法**: GET
+- **路径**: `/departments/{deptId}`
+- **描述**: 根据ID获取科室详情
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "deptId": 1,
+    "deptName": "内科",
+    "location": "1号楼2层",
+    "description": "内科门诊",
+    "createdAt": "2026-05-30T10:00:00Z"
+  }
+}
+```
+
+#### 3. 添加科室
+- **方法**: POST
+- **路径**: `/departments`
+- **描述**: 添加新科室
+- **请求体**:
+```json
+{
+  "deptName": "string",
+  "location": "string",
+  "description": "string"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 4. 更新科室
+- **方法**: PUT
+- **路径**: `/departments`
+- **描述**: 更新科室信息
+- **请求体**:
+```json
+{
+  "deptId": 1,
+  "deptName": "string",
+  "location": "string",
+  "description": "string"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 5. 删除科室
+- **方法**: DELETE
+- **路径**: `/departments/{deptId}`
+- **描述**: 删除指定科室
+- **响应**: `true` 或 `false`
+
+---
 
 ### 医生模块 `/doctors`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | /doctors | 获取医生列表 |
-| GET | /doctors/{doctorId} | 获取医生详情 |
-| POST | /doctors | 添加医生 |
-| PUT | /doctors | 更新医生信息 |
-| DELETE | /doctors/{doctorId} | 删除医生 |
+#### 1. 获取医生列表
+- **方法**: GET
+- **路径**: `/doctors`
+- **描述**: 获取医生列表（支持按科室和状态筛选）
+- **参数**:
+  - `deptId` (可选): 科室ID
+  - `status` (可选): 医生状态
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "doctorId": 1,
+      "doctorName": "李医生",
+      "title": "主任医师",
+      "deptId": 1,
+      "deptName": "内科",
+      "specialty": "心血管疾病",
+      "status": "active"
+    }
+  ]
+}
+```
+
+#### 2. 获取医生详情
+- **方法**: GET
+- **路径**: `/doctors/{doctorId}`
+- **描述**: 根据ID获取医生详情
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "doctorId": 1,
+    "doctorName": "李医生",
+    "title": "主任医师",
+    "specialty": "心血管疾病",
+    "experience": 20
+  }
+}
+```
+
+#### 3. 添加医生
+- **方法**: POST
+- **路径**: `/doctors`
+- **描述**: 添加新医生
+- **请求体**:
+```json
+{
+  "userId": 1,
+  "deptId": 1,
+  "doctorName": "string",
+  "title": "string",
+  "specialty": "string",
+  "experience": 10,
+  "status": "active"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 4. 更新医生信息
+- **方法**: PUT
+- **路径**: `/doctors`
+- **描述**: 更新医生信息
+- **请求体**:
+```json
+{
+  "doctorId": 1,
+  "doctorName": "string",
+  "title": "string",
+  "specialty": "string"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 5. 删除医生
+- **方法**: DELETE
+- **路径**: `/doctors/{doctorId}`
+- **描述**: 删除指定医生
+- **响应**: `true` 或 `false`
+
+---
 
 ### 排班模块 `/schedules`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | /schedules | 获取排班列表 |
-| GET | /schedules/{scheduleId} | 获取排班详情 |
-| POST | /schedules | 添加排班 |
-| PUT | /schedules | 更新排班信息 |
-| DELETE | /schedules/{scheduleId} | 删除排班 |
+#### 1. 获取排班列表
+- **方法**: GET
+- **路径**: `/schedules`
+- **描述**: 获取医生排班列表（包含医生信息）
+- **参数**:
+  - `deptId` (可选): 科室ID
+  - `doctorId` (可选): 医生ID
+  - `date` (可选): 日期，格式 YYYY-MM-DD
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "scheduleId": 1,
+      "doctorId": 1,
+      "doctorName": "李医生",
+      "deptName": "内科",
+      "scheduleDate": "2026-05-30",
+      "timeSlot": "09:00-12:00",
+      "maxAppointments": 20,
+      "currentAppointments": 5,
+      "remainingSlots": 15
+    }
+  ]
+}
+```
+
+#### 2. 获取排班详情
+- **方法**: GET
+- **路径**: `/schedules/{scheduleId}`
+- **描述**: 根据ID获取排班详情
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "scheduleId": 1,
+    "doctorId": 1,
+    "scheduleDate": "2026-05-30",
+    "timeSlot": "09:00-12:00",
+    "status": "available"
+  }
+}
+```
+
+#### 3. 添加排班
+- **方法**: POST
+- **路径**: `/schedules`
+- **描述**: 添加新的排班
+- **请求体**:
+```json
+{
+  "doctorId": 1,
+  "scheduleDate": "2026-05-30",
+  "timeSlot": "09:00-12:00",
+  "maxAppointments": 20,
+  "status": "available"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 4. 更新排班信息
+- **方法**: PUT
+- **路径**: `/schedules`
+- **描述**: 更新排班信息
+- **请求体**:
+```json
+{
+  "scheduleId": 1,
+  "scheduleDate": "2026-05-30",
+  "timeSlot": "14:00-17:00",
+  "maxAppointments": 25
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 5. 删除排班
+- **方法**: DELETE
+- **路径**: `/schedules/{scheduleId}`
+- **描述**: 删除指定排班
+- **响应**: `true` 或 `false`
+
+---
 
 ### 公告模块 `/notices`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | /notices | 获取公告列表 |
-| GET | /notices/{noticeId} | 获取公告详情 |
-| POST | /notices | 添加公告 |
-| PUT | /notices | 更新公告 |
-| DELETE | /notices/{noticeId} | 删除公告 |
+#### 1. 获取公告列表
+- **方法**: GET
+- **路径**: `/notices`
+- **描述**: 获取所有公告列表
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "noticeId": 1,
+      "title": "系统维护通知",
+      "content": "系统将于周末进行维护...",
+      "publishTime": "2026-05-29T10:00:00Z",
+      "publisher": "管理员"
+    }
+  ]
+}
+```
+
+#### 2. 获取公告详情
+- **方法**: GET
+- **路径**: `/notices/{noticeId}`
+- **描述**: 根据ID获取公告详情
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "noticeId": 1,
+    "title": "系统维护通知",
+    "content": "系统将于周末进行维护...",
+    "publishTime": "2026-05-29T10:00:00Z"
+  }
+}
+```
+
+#### 3. 添加公告
+- **方法**: POST
+- **路径**: `/notices`
+- **描述**: 发布新公告
+- **请求体**:
+```json
+{
+  "title": "string",
+  "content": "string",
+  "publisher": "string"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 4. 更新公告
+- **方法**: PUT
+- **路径**: `/notices`
+- **描述**: 更新公告信息
+- **请求体**:
+```json
+{
+  "noticeId": 1,
+  "title": "string",
+  "content": "string"
+}
+```
+- **响应**: `true` 或 `false`
+
+#### 5. 删除公告
+- **方法**: DELETE
+- **路径**: `/notices/{noticeId}`
+- **描述**: 删除指定公告
+- **响应**: `true` 或 `false`
+
+---
 
 ### 预约模块 `/appointments`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| POST | /appointments | 创建预约 |
-| GET | /appointments/patient | 获取患者预约列表 |
+#### 1. 创建预约
+- **方法**: POST
+- **路径**: `/appointments`
+- **描述**: 创建新的预约挂号
+- **请求体**:
+```json
+{
+  "patientId": 1,
+  "scheduleId": 1,
+  "appointmentDate": "2026-05-30",
+  "timeSlot": "09:00-12:00",
+  "symptoms": "头痛、发热",
+  "status": "pending"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "appointmentId": 1,
+    "patientId": 1,
+    "scheduleId": 1,
+    "appointmentDate": "2026-05-30",
+    "status": "pending",
+    "createdAt": "2026-05-30T10:00:00Z"
+  }
+}
+```
+
+#### 2. 获取患者预约列表
+- **方法**: GET
+- **路径**: `/appointments/patient`
+- **描述**: 获取指定患者的预约列表
+- **参数**:
+  - `patientId` (必填): 患者ID
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "appointmentId": 1,
+      "patientId": 1,
+      "doctorName": "李医生",
+      "deptName": "内科",
+      "appointmentDate": "2026-05-30",
+      "timeSlot": "09:00-12:00",
+      "status": "pending",
+      "queueNumber": 5
+    }
+  ]
+}
+```
+
+---
 
 ### 就诊记录模块 `/consultations`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| GET | /consultations | 获取就诊记录列表 |
+#### 1. 获取就诊记录
+- **方法**: GET
+- **路径**: `/consultations`
+- **描述**: 获取就诊记录列表
+- **参数**:
+  - `patientId` (可选): 患者ID
+  - `doctorId` (可选): 医生ID
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "consultationId": 1,
+      "patientId": 1,
+      "doctorId": 1,
+      "appointmentId": 1,
+      "diagnosis": "上呼吸道感染",
+      "prescription": "阿莫西林胶囊 0.5g tid",
+      "advice": "多喝水，注意休息",
+      "consultationDate": "2026-05-30T10:30:00Z"
+    }
+  ]
+}
+```
+
+---
 
 ### 住院管理模块 `/hospitalizations`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| POST | /hospitalizations | 住院登记 |
+#### 1. 住院登记
+- **方法**: POST
+- **路径**: `/hospitalizations`
+- **描述**: 创建住院登记
+- **请求体**:
+```json
+{
+  "patientId": 1,
+  "consultationId": 1,
+  "bedNumber": "301-01",
+  "admissionDate": "2026-05-30",
+  "diagnosis": "待确诊",
+  "attendingDoctor": "李医生",
+  "status": "admitted"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "hospitalizationId": 1,
+    "patientId": 1,
+    "bedNumber": "301-01",
+    "admissionDate": "2026-05-30",
+    "status": "admitted"
+  }
+}
+```
+
+---
 
 ### 患者账户模块 `/patientAccount`
 
-| 方法 | 路径 | 功能 |
-|------|------|------|
-| POST | /recharge | 账户充值 |
-| POST | /payment | 费用缴纳 |
+#### 1. 账户充值
+- **方法**: POST
+- **路径**: `/recharge`
+- **描述**: 患者账户充值
+- **请求体**:
+```json
+{
+  "patientId": 1,
+  "amount": 1000.00,
+  "paymentMethod": "alipay"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "recordId": 1,
+    "amount": 1000.00,
+    "balance": 1500.00,
+    "rechargeDate": "2026-05-30T10:00:00Z"
+  }
+}
+```
+
+#### 2. 费用缴纳
+- **方法**: POST
+- **路径**: `/payment`
+- **描述**: 缴纳医疗费用
+- **请求体**:
+```json
+{
+  "patientId": 1,
+  "consultationId": 1,
+  "amount": 200.00,
+  "paymentMethod": "wechat"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "paymentId": 1,
+    "amount": 200.00,
+    "balance": 1300.00,
+    "paymentDate": "2026-05-30T10:00:00Z"
+  }
+}
+```
+
+---
+
+### AI问诊模块 `/api/ai-consultation`
+
+#### 1. 创建问诊会话
+- **方法**: POST
+- **路径**: `/api/ai-consultation/session`
+- **描述**: 创建新的AI问诊会话
+- **请求体**:
+```json
+{
+  "chiefComplaint": "头痛、发热三天"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "创建成功",
+  "data": {
+    "sessionId": "sess_abc123",
+    "chiefComplaint": "头痛、发热三天",
+    "status": "active",
+    "createdAt": "2026-05-30T10:00:00Z"
+  }
+}
+```
+
+#### 2. 发送消息
+- **方法**: POST
+- **路径**: `/api/ai-consultation/message`
+- **描述**: 在问诊会话中发送消息
+- **请求体**:
+```json
+{
+  "sessionId": "sess_abc123",
+  "message": "我已经发烧三天了，体温38.5度"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "发送成功",
+  "data": {
+    "messageId": 1,
+    "content": "您好，根据您描述的症状，建议您先进行体温监测...",
+    "isAi": true,
+    "timestamp": "2026-05-30T10:01:00Z"
+  }
+}
+```
+
+#### 3. 获取会话详情
+- **方法**: GET
+- **路径**: `/api/ai-consultation/session/{sessionId}`
+- **描述**: 获取指定会话的详细信息
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "sessionId": "sess_abc123",
+    "chiefComplaint": "头痛、发热三天",
+    "status": "active",
+    "createdAt": "2026-05-30T10:00:00Z"
+  }
+}
+```
+
+#### 4. 获取会话消息列表
+- **方法**: GET
+- **路径**: `/api/ai-consultation/session/{sessionId}/messages`
+- **描述**: 获取会话中的消息列表
+- **参数**:
+  - `page` (可选, 默认1): 页码
+  - `pageSize` (可选, 默认20): 每页数量
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": [
+    {
+      "messageId": 1,
+      "content": "我已经发烧三天了",
+      "isAi": false,
+      "timestamp": "2026-05-30T10:00:30Z"
+    },
+    {
+      "messageId": 2,
+      "content": "您好，根据您的描述...",
+      "isAi": true,
+      "timestamp": "2026-05-30T10:00:35Z"
+    }
+  ]
+}
+```
+
+#### 5. 结束会话
+- **方法**: POST
+- **路径**: `/api/ai-consultation/session/{sessionId}/close`
+- **描述**: 结束AI问诊会话
+- **请求体**:
+```json
+{
+  "closeReason": "已完成问诊"
+}
+```
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "会话已结束",
+  "data": {
+    "sessionId": "sess_abc123",
+    "status": "closed"
+  }
+}
+```
+
+#### 6. 获取我的会话列表
+- **方法**: GET
+- **路径**: `/api/ai-consultation/session/my`
+- **描述**: 获取当前用户的问诊会话列表
+- **参数**:
+  - `page` (可选, 默认1): 页码
+  - `pageSize` (可选, 默认20): 每页数量
+  - `status` (可选): 筛选状态 (active/closed)
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": [
+    {
+      "sessionId": "sess_abc123",
+      "chiefComplaint": "头痛、发热三天",
+      "status": "active",
+      "createdAt": "2026-05-30T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### 7. 获取风险评估
+- **方法**: GET
+- **路径**: `/api/ai-consultation/session/{sessionId}/risk`
+- **描述**: 获取会话的风险评估结果
+- **响应示例**:
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "riskLevel": "low",
+    "suggestion": "建议观察，若症状加重请及时就医",
+    "keywords": ["发热", "头痛"]
+  }
+}
+```
+
+---
+
+## API 测试指南
+
+### 测试工具
+推荐使用以下工具进行API测试：
+- **Postman**: 功能强大的API测试工具
+- **Apifox**: 国产API管理平台
+- **curl**: 命令行测试工具
+
+### 测试示例（使用curl）
+
+#### 1. 用户注册测试
+```bash
+curl -X POST http://localhost:8123/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "123456",
+    "realName": "测试用户",
+    "phone": "13800138000",
+    "idCard": "110101199001011234",
+    "role": "patient"
+  }'
+```
+
+#### 2. 用户登录测试
+```bash
+curl -X POST http://localhost:8123/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "123456"
+  }'
+```
+
+#### 3. 获取科室列表测试
+```bash
+curl -X GET http://localhost:8123/departments
+```
+
+#### 4. 创建预约测试（需要Token）
+```bash
+curl -X POST http://localhost:8123/appointments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your_token>" \
+  -d '{
+    "patientId": 1,
+    "scheduleId": 1,
+    "appointmentDate": "2026-05-30",
+    "timeSlot": "09:00-12:00",
+    "symptoms": "头痛"
+  }'
+```
+
+#### 5. AI问诊会话测试
+```bash
+# 创建会话
+curl -X POST http://localhost:8123/api/ai-consultation/session \
+  -H "Content-Type: application/json" \
+  -d '{"chiefComplaint": "头痛发热"}'
+
+# 发送消息
+curl -X POST http://localhost:8123/api/ai-consultation/message \
+  -H "Content-Type: application/json" \
+  -d '{"sessionId": "sess_xxx", "message": "我已经发烧三天了"}'
+
+# 获取消息列表
+curl -X GET "http://localhost:8123/api/ai-consultation/session/sess_xxx/messages?page=1&pageSize=20"
+```
+
+### 通用响应格式
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {}
+}
+```
+
+| code | 说明 |
+|------|------|
+| 0 | 成功 |
+| 400 | 请求参数错误 |
+| 401 | 未授权（Token无效或过期） |
+| 404 | 资源不存在 |
+| 500 | 服务器内部错误 |
 
 ---
 

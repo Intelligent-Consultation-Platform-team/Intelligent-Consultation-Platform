@@ -5,94 +5,74 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="37d48f2c-fa4e-46bb-9a30-28165a7d40d3" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/3cc4efe7-7971-4af4-9a26-81b25e67a0e3.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/3cc4efe7-7971-4af4-9a26-81b25e67a0e3.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/API.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algorithm_api.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algorithms.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/algorithms_api.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/docker/docker-compose.yml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/frontend-completion-report.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/frontend-todo-iteration.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/requirements.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/App.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/main.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/router/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/style.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/utils/api.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/utils/request.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/utils/session.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Appoint.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Home.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/Manage.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/User.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/appoint/Book.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/appoint/Hospital.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/appoint/PatientBook.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/appoint/Visit.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/manage/Notice.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/manage/Office.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/manage/Schedule.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/user/Admin.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/user/Doctor.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/user/PatientAccount.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/views/user/UserInfo.vue" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/vite.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/前端完成情况文档.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/前端迭代待办清单.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/HELP.md" beforeDir="false" afterPath="$PROJECT_DIR$/HELP.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/.env" beforeDir="false" afterPath="$PROJECT_DIR$/front/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/App.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/utils/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/utils/api.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/utils/request.js" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/utils/request.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/appoint/Book.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/appoint/Book.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/appoint/PatientBook.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/appoint/PatientBook.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/appoint/Visit.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/appoint/Visit.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/manage/Notice.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/manage/Notice.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/manage/Office.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/manage/Office.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/user/Admin.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/user/Admin.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/user/Doctor.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/user/Doctor.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/user/PatientAccount.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/user/PatientAccount.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/src/views/user/UserInfo.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/user/UserInfo.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front/vite.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/front/vite.config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/database.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/database.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/config/CorsConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/common/BaseResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/common/BaseResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/common/DeleteRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/common/DeleteRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/common/PageRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/common/PageRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/common/ResultUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/common/ResultUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/AppointmentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/AppointmentsController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/DoctorsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/DoctorsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/SchedulesController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/SchedulesController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/UsersController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/UsersController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/exception/BusinessException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/exception/BusinessException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/exception/ErrorCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/exception/ErrorCode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/exception/ThrowUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/exception/ThrowUtils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/generator/MyBatisCodeGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/generator/MyBatisCodeGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/interceptor/TokenInterceptor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/interceptor/TokenInterceptor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/DoctorDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/DoctorDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserLoginRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserLoginRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserRegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/model/dto/UserRegisterRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/AppointmentsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/AppointmentsService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/DoctorsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/DoctorsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/SchedulesService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/SchedulesService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/UsersService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/UsersService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/AppointmentsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/AppointmentsServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/DoctorsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/DoctorsServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/SchedulesServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/SchedulesServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/UsersServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/UsersServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/utils/JwtUtils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/utils/JwtUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/IntelligentConsultstionPlatformApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/IntelligentConsultstionPlatformApplication.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/BaseResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/BaseResponse.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/DeleteRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/DeleteRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/PageRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/PageRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/ResultUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/ResultUtils.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/CorsConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/DeepSeekConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/DeepSeekConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$DateFromTimeRange.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$DateFromTimeRange.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$TimeFromTimeRange.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$TimeFromTimeRange.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/AppointmentsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/AppointmentsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/AuthController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/AuthController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/ConsultationsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/ConsultationsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/DepartmentsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/DepartmentsController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/DoctorsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/DoctorsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/HospitalizationsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/HospitalizationsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/NoticesController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/NoticesController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$PaymentRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$PaymentRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$RechargeRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$RechargeRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/SchedulesController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/SchedulesController.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/UsersController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/UsersController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/BusinessException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/BusinessException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/ErrorCode.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/ErrorCode.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/GlobalExceptionHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/ThrowUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/ThrowUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/generator/MyBatisCodeGenerator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/generator/MyBatisCodeGenerator.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/AppointmentsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/AppointmentsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/ConsultationsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/ConsultationsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/DepartmentsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/DepartmentsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/DoctorsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/DoctorsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/HospitalizationsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/HospitalizationsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/NoticesMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/NoticesMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/PaymentRecordsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/PaymentRecordsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/RechargeRecordsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/RechargeRecordsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/SchedulesMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/SchedulesMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/UsersMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/UsersMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/interceptor/TokenInterceptor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/interceptor/TokenInterceptor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO$DoctorDTOBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO$DoctorDTOBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO$ScheduleDTOBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO$ScheduleDTOBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserLoginRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserLoginRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserRegisterRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserRegisterRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CloseSessionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CloseSessionRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CreateSessionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CreateSessionRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/MessageDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/MessageDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageRequest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageResponse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SessionDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SessionDTO.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments$AppointmentsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments$AppointmentsBuilder.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Consultations$ConsultationsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Consultations$ConsultationsBuilder.class" afterDir="false" />
@@ -113,30 +93,16 @@
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Schedules.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Schedules.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users$UsersBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users$UsersBuilder.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/AiConsultationService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/AiConsultationService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/AppointmentsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/AppointmentsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/ConsultationsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/ConsultationsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DepartmentsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DepartmentsService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DeepSeekService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DeepSeekService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DoctorsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DoctorsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/HospitalizationsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/HospitalizationsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/NoticesService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/NoticesService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/PatientAccountService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/PatientAccountService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/SchedulesService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/SchedulesService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/UsersService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/UsersService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/AppointmentsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/AppointmentsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/ConsultationsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/ConsultationsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DepartmentsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DepartmentsServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DoctorsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DoctorsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/HospitalizationsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/HospitalizationsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/NoticesServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/NoticesServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/PatientAccountServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/PatientAccountServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/SchedulesServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/SchedulesServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/UsersServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/UsersServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/backend/utils/JwtUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/utils/JwtUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/utils/PasswordUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/utils/PasswordUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -304,6 +270,12 @@
       <workItem from="1779850293150" duration="18151000" />
       <workItem from="1779937489228" duration="2383000" />
       <workItem from="1779940020567" duration="56000" />
+      <workItem from="1779948225871" duration="477000" />
+      <workItem from="1780039712267" duration="951000" />
+      <workItem from="1780042742940" duration="33000" />
+      <workItem from="1780042800459" duration="5714000" />
+      <workItem from="1780110498929" duration="25000" />
+      <workItem from="1780110547815" duration="14625000" />
     </task>
     <servers />
   </component>
@@ -315,7 +287,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/backend/service/impl/AppointmentsServiceImpl.java</url>
-          <line>25</line>
+          <line>173</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>

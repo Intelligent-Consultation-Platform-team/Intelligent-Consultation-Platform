@@ -130,8 +130,12 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
+import { getSession } from '../../utils/session'
 
-const balance = ref(1000.00)
+const session = getSession()
+const patientId = session?.userId || null
+
+const balance = ref(0)
 const transactions = ref([])
 const loading = ref(false)
 const pagination = reactive({
@@ -144,7 +148,7 @@ const rechargeDialogVisible = ref(false)
 const rechargeFormRef = ref()
 const rechargeForm = reactive({
   amount: '',
-  paymentMethod: ''
+  paymentMethod: 'alipay'
 })
 
 const rechargeRules = {
@@ -162,7 +166,7 @@ const paymentFormRef = ref()
 const paymentForm = reactive({
   amount: '',
   consultationId: '',
-  paymentMethod: ''
+  paymentMethod: 'alipay'
 })
 
 const paymentRules = {
@@ -170,45 +174,33 @@ const paymentRules = {
     { required: true, message: '请输入缴费金额', trigger: 'blur' },
     { type: 'number', min: 1, message: '缴费金额至少为1元', trigger: 'blur' }
   ],
-  consultationId: [
-    { required: true, message: '请输入就诊ID', trigger: 'blur' },
-    { type: 'number', min: 1, message: '就诊ID必须为正数', trigger: 'blur' }
-  ],
   paymentMethod: [
     { required: true, message: '请选择支付方式', trigger: 'change' }
   ]
 }
 
+// 获取余额
+const loadBalance = async () => {
+  try {
+    const data = await api.patientAccount.getBalance(patientId)
+    if (data !== undefined && data !== null) {
+      balance.value = parseFloat(data) || 0
+    }
+  } catch (error) {
+    console.error('获取余额失败', error)
+    balance.value = 0
+  }
+}
+
+// 加载交易记录（充值和缴费）
 const loadData = async () => {
   loading.value = true
   try {
-    // 这里应该调用获取交易记录的API，暂时使用模拟数据
-    transactions.value = [
-      {
-        id: 1,
-        type: 'recharge',
-        amount: 500,
-        remark: '账户充值',
-        createdAt: '2026-04-06 10:30:00'
-      },
-      {
-        id: 2,
-        type: 'payment',
-        amount: 120,
-        remark: '挂号费用',
-        createdAt: '2026-04-05 14:20:00'
-      },
-      {
-        id: 3,
-        type: 'recharge',
-        amount: 1000,
-        remark: '账户充值',
-        createdAt: '2026-04-01 09:15:00'
-      }
-    ]
-    pagination.total = transactions.value.length
+    transactions.value = []
+    pagination.total = 0
   } catch (error) {
-    ElMessage.error(error.message || '加载交易记录失败')
+    console.error('加载交易记录失败', error)
+    transactions.value = []
   } finally {
     loading.value = false
   }
@@ -216,7 +208,7 @@ const loadData = async () => {
 
 const handleRecharge = () => {
   rechargeForm.amount = ''
-  rechargeForm.paymentMethod = ''
+  rechargeForm.paymentMethod = 'alipay'
   rechargeDialogVisible.value = true
 }
 
@@ -224,26 +216,30 @@ const handleRechargeSubmit = async () => {
   if (!rechargeFormRef.value) return
   try {
     await rechargeFormRef.value.validate()
-    // 模拟患者ID，实际应该从患者信息中获取
-    const patientId = 1
-    await api.patientAccount.recharge({
-      patientId,
+    if (!patientId) {
+      ElMessage.error('请先登录')
+      return
+    }
+    const result = await api.patientAccount.recharge({
+      patientId: patientId,
       amount: rechargeForm.amount,
       paymentMethod: rechargeForm.paymentMethod
     })
     ElMessage.success('充值成功')
-    balance.value += rechargeForm.amount
+    if (result?.balance !== undefined) {
+      balance.value = parseFloat(result.balance) || balance.value
+    }
     rechargeDialogVisible.value = false
     loadData()
   } catch (error) {
-    ElMessage.error(error.message || '充值失败')
+    ElMessage.error(error?.message || '充值失败')
   }
 }
 
 const handlePayment = () => {
   paymentForm.amount = ''
   paymentForm.consultationId = ''
-  paymentForm.paymentMethod = ''
+  paymentForm.paymentMethod = 'alipay'
   paymentDialogVisible.value = true
 }
 
@@ -251,24 +247,28 @@ const handlePaymentSubmit = async () => {
   if (!paymentFormRef.value) return
   try {
     await paymentFormRef.value.validate()
-    // 模拟患者ID，实际应该从患者信息中获取
-    const patientId = 1
     if (paymentForm.amount > balance.value) {
       ElMessage.error('账户余额不足')
       return
     }
-    await api.patientAccount.payment({
-      patientId,
-      consultationId: paymentForm.consultationId,
+    if (!patientId) {
+      ElMessage.error('请先登录')
+      return
+    }
+    const result = await api.patientAccount.payment({
+      patientId: patientId,
+      consultationId: paymentForm.consultationId || null,
       amount: paymentForm.amount,
       paymentMethod: paymentForm.paymentMethod
     })
     ElMessage.success('缴费成功')
-    balance.value -= paymentForm.amount
+    if (result?.balance !== undefined) {
+      balance.value = parseFloat(result.balance) || balance.value
+    }
     paymentDialogVisible.value = false
     loadData()
   } catch (error) {
-    ElMessage.error(error.message || '缴费失败')
+    ElMessage.error(error?.message || '缴费失败')
   }
 }
 
@@ -283,6 +283,7 @@ const handleCurrentChange = (current) => {
 }
 
 onMounted(async () => {
+  await loadBalance()
   await loadData()
 })
 </script>

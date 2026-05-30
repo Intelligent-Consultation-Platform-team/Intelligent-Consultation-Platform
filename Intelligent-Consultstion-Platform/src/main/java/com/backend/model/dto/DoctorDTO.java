@@ -20,6 +20,8 @@ public class DoctorDTO {
 
     private Integer userId;
 
+    private String username;
+
     private String realName;
 
     private String title;

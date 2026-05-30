@@ -120,6 +120,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
+import { getSession } from '../../utils/session'
 
 const filter = reactive({ patientName: '', status: '' })
 const pagination = reactive({ current: 1, size: 10, total: 0 })
@@ -145,16 +146,24 @@ const formatDateTime = (value) => {
 const loadData = async () => {
   loading.value = true
   try {
-    const doctorId = 1
-    const data = await api.consultations.getList({ doctorId })
+    const session = getSession()
+    const patientId = session?.userId || null
+
+    if (!patientId) {
+      visits.value = []
+      pagination.total = 0
+      return
+    }
+
+    const data = await api.consultations.getList({ patientId: patientId })
     visits.value = (data || []).map(item => {
       const { date, time } = formatDateTime(item.consultationDate)
       return {
         id: item.consultationId,
         patientId: item.patientId,
         patientName: `患者${item.patientId}`,
-        department: '待补充',
-        doctorName: `医生${item.doctorId}`,
+        department: item.deptName || '待补充',
+        doctorName: item.doctorName || `医生${item.doctorId}`,
         visitDate: date,
         visitTime: time,
         symptoms: item.symptoms || '-',
@@ -169,8 +178,19 @@ const loadData = async () => {
   }
 }
 
-const getStatusLabel = (status) => ({ pending: '待就诊', processing: '就诊中', completed: '已完成' }[status] || '未知')
-const getStatusTagType = (status) => ({ pending: 'warning', processing: 'primary', completed: 'success' }[status] || 'default')
+const getStatusLabel = (status) => ({
+  pending: '待就诊',
+  processing: '就诊中',
+  completed: '已完成',
+  cancelled: '已取消'
+}[status] || '未知')
+
+const getStatusTagType = (status) => ({
+  pending: 'warning',
+  processing: 'primary',
+  completed: 'success',
+  cancelled: 'info'
+}[status] || 'default')
 const handleSearch = () => { pagination.current = 1; loadData() }
 const resetFilter = () => { filter.patientName = ''; filter.status = ''; pagination.current = 1; loadData() }
 const refreshData = () => loadData()

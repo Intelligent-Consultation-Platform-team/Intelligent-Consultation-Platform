@@ -11,4 +11,12 @@ public interface UsersService extends IService<Users> {
     Long userRegister(UserRegisterRequest userRegisterRequest);
 
     Map<String, Object> userLogin(UserLoginRequest userLoginRequest);
+
+    /**
+     * 重置用户密码为默认密码123456
+     *
+     * @param userId 用户ID
+     * @return 是否成功
+     */
+    boolean resetPassword(Integer userId);
 }

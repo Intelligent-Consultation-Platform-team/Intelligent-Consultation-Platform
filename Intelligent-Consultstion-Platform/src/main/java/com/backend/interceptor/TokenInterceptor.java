@@ -2,12 +2,16 @@ package com.backend.interceptor;
 
 import com.backend.common.UserContext;
 import com.backend.utils.JwtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class TokenInterceptor implements HandlerInterceptor {
@@ -18,10 +22,12 @@ public class TokenInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = extractToken(request);
-        
+
+        // 没有 token，直接返回 401
         if (token == null) {
             UserContext.clear();
-            return true;
+            sendUnauthorized(response, "请先登录");
+            return false;
         }
 
         try {
@@ -31,7 +37,8 @@ public class TokenInterceptor implements HandlerInterceptor {
 
             if (jwtUtils.isTokenExpired(token)) {
                 UserContext.clear();
-                return true;
+                sendUnauthorized(response, "登录已过期，请重新登录");
+                return false;
             }
 
             UserContext.UserInfo userInfo = new UserContext.UserInfo(userId, username, role);
@@ -39,13 +46,25 @@ public class TokenInterceptor implements HandlerInterceptor {
             return true;
         } catch (JwtException e) {
             UserContext.clear();
-            return true;
+            sendUnauthorized(response, "token无效，请重新登录");
+            return false;
         }
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         UserContext.clear();
+    }
+
+    private void sendUnauthorized(HttpServletResponse response, String message) throws Exception {
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json;charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        Map<String, Object> body = new HashMap<>();
+        body.put("code", 401);
+        body.put("message", message);
+        body.put("data", null);
+        response.getWriter().write(new ObjectMapper().writeValueAsString(body));
     }
 
     private String extractToken(HttpServletRequest request) {

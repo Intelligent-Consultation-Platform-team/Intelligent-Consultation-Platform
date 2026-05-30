@@ -36,7 +36,12 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         String confirmPassword = userRegisterRequest.getConfirmPassword();
         String role = userRegisterRequest.getRole();
 
-        if (StrUtil.hasBlank(username, realName, phone, email, password, confirmPassword, role)) {
+        // 如果 realName 为空，用 username 代替
+        if (StrUtil.isBlank(realName)) {
+            realName = username;
+        }
+
+        if (StrUtil.hasBlank(username, phone, email, password, confirmPassword, role)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
         }
 
@@ -48,7 +53,7 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名只能包含字母、数字和下划线");
         }
 
-        if (realName.length() < 2 || realName.length() > 20) {
+        if (realName != null && (realName.length() < 2 || realName.length() > 20)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "真实姓名长度必须在2-20位之间");
         }
 
@@ -156,5 +161,19 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         result.put("user", userInfo);
 
         return result;
+    }
+
+    @Override
+    public boolean resetPassword(Integer userId) {
+        if (userId == null) {
+            return false;
+        }
+        String encryptedPassword = PasswordUtils.encrypt("123456");
+        Users user = Users.builder()
+                .userId(userId)
+                .password(encryptedPassword)
+                .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        return updateById(user);
     }
 }

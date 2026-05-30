@@ -1,6 +1,8 @@
 package com.backend.controller;
 
 import com.backend.common.ResultUtils;
+import com.backend.model.dto.DoctorAddRequest;
+import com.backend.model.dto.DoctorUpdateRequest;
 import com.backend.model.entity.Doctors;
 import com.backend.service.DoctorsService;
 import jakarta.annotation.Resource;
@@ -9,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- *  医生管理控制器。
+ * 医生管理控制器。
  *
  * @author 佳尔宇柔
  */
@@ -36,26 +38,26 @@ public class DoctorsController {
     }
 
     /**
-     * 添加医生
+     * 添加医生（同时创建用户账户）
      *
-     * @param doctors 医生信息
+     * @param request 添加医生请求
      * @return 操作结果
      */
     @PostMapping
-    public Object addDoctor(@RequestBody Doctors doctors) {
-        boolean result = doctorsService.addDoctor(doctors);
+    public Object addDoctor(@RequestBody DoctorAddRequest request) {
+        boolean result = doctorsService.addDoctor(request);
         return ResultUtils.success(result);
     }
 
     /**
      * 更新医生信息
      *
-     * @param doctors 医生信息
+     * @param request 更新医生请求
      * @return 操作结果
      */
     @PutMapping
-    public Object updateDoctor(@RequestBody Doctors doctors) {
-        boolean result = doctorsService.updateDoctor(doctors);
+    public Object updateDoctor(@RequestBody DoctorUpdateRequest request) {
+        boolean result = doctorsService.updateDoctor(request);
         return ResultUtils.success(result);
     }
 

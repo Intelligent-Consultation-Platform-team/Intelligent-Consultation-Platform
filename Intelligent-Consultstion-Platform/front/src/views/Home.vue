@@ -87,7 +87,7 @@
       </template>
 
       <template v-if="!isDoctor">
-        <el-table :data="recentActivities" style="width: 100%" empty-text="暂无活动记录">
+        <el-table v-loading="activitiesLoading" :data="recentActivities" style="width: 100%" empty-text="暂无活动记录">
           <el-table-column prop="time" label="时间" width="180" />
           <el-table-column prop="type" label="类型" width="120">
             <template #default="scope">
@@ -116,6 +116,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { api } from '../utils/api'
 
 const SESSION_KEY = 'demo_session'
 const getSession = () => {
@@ -150,35 +151,100 @@ const roleWelcomeText = computed(() =>
       ? '欢迎您，请在这里查看预约、就诊和个人账户信息。'
       : '欢迎您，请使用左侧菜单访问对应功能。',
 )
-const userCount = ref(128)
-const doctorCount = ref(32)
-const appointmentCount = ref(45)
-const doctorStats = computed(() => [
-  { label: '今日接诊', value: 18 },
-  { label: '待处理预约', value: 6 },
-  { label: '排班时段', value: 4 },
-])
+
+// 统计数据（从API加载）
+const userCount = ref(0)
+const doctorCount = ref(0)
+const appointmentCount = ref(0)
 const patientStats = computed(() => [
-  { label: '我的预约', value: 8 },
-  { label: '待就诊', value: 2 },
-  { label: '我的记录', value: 15 },
+  { label: '我的预约', value: appointmentCount.value },
+  { label: '待就诊', value: 0 },
+  { label: '我的记录', value: 0 },
+])
+const doctorStats = computed(() => [
+  { label: '今日接诊', value: 0 },
+  { label: '待处理预约', value: 0 },
+  { label: '排班时段', value: 0 },
 ])
 const doctorDashboard = computed(() => [
-  { label: '今日接诊', value: 18 },
-  { label: '待处理预约', value: 6 },
-  { label: '已完成就诊', value: 24 },
+  { label: '今日接诊', value: 0 },
+  { label: '待处理预约', value: 0 },
+  { label: '已完成就诊', value: 0 },
 ])
-const recentActivities = ref([
-  { time: '2026-04-06 09:30', type: '登录', content: '用户登录系统', user: '测试用户' },
-  { time: '2026-04-06 08:45', type: '预约', content: '预约了内科张医生', user: '测试用户' },
-  { time: '2026-04-05 16:20', type: '注册', content: '新用户注册', user: '系统' },
-])
+
+// 最近活动
+const recentActivities = ref([])
+const activitiesLoading = ref(false)
+
+// 加载统计数据
+const loadStatistics = async () => {
+  try {
+    // 获取用户总数
+    const usersData = await api.users.getList()
+    userCount.value = Array.isArray(usersData) ? usersData.length : 0
+
+    // 获取医生列表
+    const doctorsData = await api.doctors.getList()
+    const doctors = Array.isArray(doctorsData) ? doctorsData : []
+    doctorCount.value = doctors.length
+
+    // 如果是患者，加载预约数量
+    const session = getSession()
+    if (session?.userId && isPatient.value) {
+      const appointmentsData = await api.appointments.getPatientList(session.userId)
+      appointmentCount.value = Array.isArray(appointmentsData) ? appointmentsData.length : 0
+    }
+  } catch (error) {
+    console.error('加载统计数据失败:', error)
+  }
+}
+
+// 加载最近活动
+const loadRecentActivities = async () => {
+  activitiesLoading.value = true
+  try {
+    const session = getSession()
+    if (!session?.userId) {
+      recentActivities.value = []
+      return
+    }
+
+    // 获取患者的预约记录作为最近活动
+    const appointmentsData = await api.appointments.getPatientList(session.userId)
+    if (Array.isArray(appointmentsData)) {
+      recentActivities.value = appointmentsData.slice(0, 5).map(item => ({
+        time: item.appointmentDate || item.createdAt || new Date().toLocaleString(),
+        type: '预约',
+        content: `预约了 ${item.doctorName || '医生'} (${item.deptName || '科室'})`,
+        user: currentUser.value.realName || currentUser.value.username || '用户'
+      }))
+    } else {
+      recentActivities.value = []
+    }
+  } catch (error) {
+    console.error('加载最近活动失败:', error)
+    recentActivities.value = []
+  } finally {
+    activitiesLoading.value = false
+  }
+}
+
 const getTypeTagType = (type) => ({ 登录: 'success', 预约: 'primary', 注册: 'info', 操作: 'warning' }[type] || 'default')
 const goAiConsultation = () => router.push('/ai-consultation')
 
 onMounted(() => {
   const session = getSession()
-  if (session) currentUser.value = { username: session.username || '', realName: session.realName || session.username || '', role: session.role || '' }
+  if (session) {
+    currentUser.value = {
+      username: session.username || '',
+      realName: session.realName || session.username || '',
+      role: session.role || ''
+    }
+  }
+
+  // 加载数据
+  loadStatistics()
+  loadRecentActivities()
 })
 </script>
 
