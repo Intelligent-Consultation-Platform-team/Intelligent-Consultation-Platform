@@ -30,10 +30,9 @@
       </el-empty>
       <template v-else>
         <el-table v-loading="loading" :data="pagedOffices" style="width: 100%">
-          <el-table-column prop="id" label="ID" width="90" />
           <el-table-column prop="name" label="科室名称" />
-          <el-table-column prop="description" label="科室描述" show-overflow-tooltip />
           <el-table-column prop="location" label="位置" width="180" />
+          <el-table-column prop="description" label="科室描述" show-overflow-tooltip />
           <el-table-column prop="createdAt" label="创建时间" width="180" />
           <el-table-column label="操作" width="200" fixed="right">
             <template #default="scope">
@@ -57,6 +56,7 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" @closed="resetForm">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="科室名称" prop="name"><el-input v-model.trim="form.name" placeholder="请输入科室名称" /></el-form-item>
+        <el-form-item label="科室位置" prop="location"><el-input v-model.trim="form.location" placeholder="请输入科室位置，如：1号楼2层" /></el-form-item>
         <el-form-item label="科室描述" prop="description"><el-input v-model.trim="form.description" type="textarea" :rows="3" placeholder="请输入科室描述" /></el-form-item>
       </el-form>
       <template #footer>
@@ -84,18 +84,18 @@ const hasLoadedOnce = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增科室')
 const formRef = ref()
-const form = reactive({ id: '', name: '', description: '' })
+const form = reactive({ id: '', name: '', location: '', description: '' })
 const rules = { name: [{ required: true, message: '请输入科室名称', trigger: 'blur' }], description: [{ required: true, message: '请输入科室描述', trigger: 'blur' }] }
 const filteredOffices = computed(() => offices.value.filter((item) => !filter.name || item.name?.includes(filter.name)))
 const pagedOffices = computed(() => filteredOffices.value.slice((pagination.current - 1) * pagination.size, pagination.current * pagination.size))
 const formatDate = (value) => (value ? String(value).replace('T', ' ').slice(0, 19) : '-')
-const buildDepartmentPayload = () => ({ deptName: form.name.trim(), description: form.description.trim() })
+const buildDepartmentPayload = () => ({ deptName: form.name.trim(), location: form.location.trim(), description: form.description.trim() })
 
 const loadData = async () => {
   loading.value = true
   try {
     const data = await api.departments.getList()
-    offices.value = (data || []).map((item) => ({ id: item.deptId ?? item.id, name: item.deptName ?? item.name, description: item.description || '-', location: item.location || '-', createdAt: formatDate(item.createdAt) }))
+    offices.value = (data || []).map((item) => ({ id: item.deptId ?? item.id, name: item.deptName ?? item.name, description: item.description || '-', location: item.deptLocation || item.location || '-', createdAt: formatDate(item.createdAt) }))
     hasLoadedOnce.value = true
     pagination.current = 1
   } catch (error) {
@@ -106,9 +106,9 @@ const loadData = async () => {
 }
 const handleSearch = () => { pagination.current = 1; loadData() }
 const resetFilter = () => { filter.name = ''; pagination.current = 1; loadData() }
-const resetForm = () => { form.id = ''; form.name = ''; form.description = ''; formRef.value?.clearValidate?.() }
+const resetForm = () => { form.id = ''; form.name = ''; form.location = ''; form.description = ''; formRef.value?.clearValidate?.() }
 const handleAdd = () => { dialogTitle.value = '新增科室'; resetForm(); dialogVisible.value = true }
-const handleEdit = (row) => { form.id = row.id; form.name = row.name; form.description = row.description === '-' ? '' : row.description; dialogTitle.value = '编辑科室'; dialogVisible.value = true }
+const handleEdit = (row) => { form.id = row.id; form.name = row.name; form.location = row.location === '-' ? '' : row.location; form.description = row.description === '-' ? '' : row.description; dialogTitle.value = '编辑科室'; dialogVisible.value = true }
 
 const handleDelete = async (id) => {
   try {

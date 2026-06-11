@@ -50,18 +50,26 @@ export const request = async (url, options = {}) => {
   const tokenType = session?.tokenType || 'Bearer'
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null
   const timer = controller ? window.setTimeout(() => controller.abort(), timeout) : null
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
+
+  const requestHeaders = {
+    ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
+    ...(withAuth && token ? { Authorization: `${tokenType} ${token}` } : {}),
+    ...headers,
+  }
+
+  console.debug(`[Request] ${method} ${normalizeUrl(url)}${buildQuery(params)}`, {
+    withAuth,
+    hasToken: !!token,
+    headers: requestHeaders,
+  })
 
   let response
-  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
   try {
     response = await fetch(`${normalizeUrl(url)}${buildQuery(params)}`, {
       method,
       signal: controller?.signal,
-      headers: {
-        ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
-        ...(withAuth && token ? { Authorization: `${tokenType} ${token}` } : {}),
-        ...headers,
-      },
+      headers: requestHeaders,
       body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
     })
   } catch (error) {
@@ -86,11 +94,22 @@ export const request = async (url, options = {}) => {
   const text = await response.text()
   const result = text ? JSON.parse(text) : null
 
-  const successCode = result?.code === 0 || result?.code === 200 || result?.success === true || response.ok
-  if (!response.ok || !successCode) {
-    throw new Error(result?.message || `请求失败（${response.status}）`)
+  console.debug(`[Response] ${response.status}`, result)
+
+  const isWrapped = !!result && typeof result === 'object' && !Array.isArray(result) && Object.prototype.hasOwnProperty.call(result, 'code')
+
+  if (isWrapped) {
+    const successCode = (result?.code === 0 || result?.success === true)
+    if (!successCode) {
+      throw new Error(result?.message || `请求失败（${response.status}）`)
+    }
+    return result?.data ?? result
   }
 
-  return result?.data ?? result
+  if (!response.ok) {
+    throw new Error(`请求失败（${response.status}）`)
+  }
+
+  return result
 }
 

@@ -25,6 +25,8 @@ export const api = {
     getList: (params) => request(`${API_BASE_URL}/departments`, {
       params
     }),
+    // 获取科室详情
+    getInfo: (id) => request(`${API_BASE_URL}/departments/${id}`),
     // 新增科室
     create: (data) => request(`${API_BASE_URL}/departments`, {
       method: 'POST',
@@ -41,19 +43,54 @@ export const api = {
     })
   },
   
+  // 用户管理
+  users: {
+    // 获取用户列表
+    getList: (params) => request(`${API_BASE_URL}/users/list`, {
+      params
+    }),
+    // 分页查询用户
+    getPage: (params) => request(`${API_BASE_URL}/users/page`, {
+      params
+    }),
+    // 保存用户
+    save: (data) => request(`${API_BASE_URL}/users/save`, {
+      method: 'POST',
+      data
+    }),
+    // 更新用户
+    update: (data) => request(`${API_BASE_URL}/users/update`, {
+      method: 'PUT',
+      data
+    }),
+    // 删除用户
+    remove: (id) => request(`${API_BASE_URL}/users/remove/${id}`, {
+      method: 'DELETE'
+    }),
+    // 获取用户详情
+    getInfo: (id) => request(`${API_BASE_URL}/users/getInfo/${id}`),
+    // 重置密码
+    resetPassword: (data) => request(`${API_BASE_URL}/users/resetPassword`, {
+      method: 'POST',
+      data
+    })
+  },
+  
   // 医生管理
   doctors: {
     // 获取医生列表
     getList: (params) => request(`${API_BASE_URL}/doctors`, {
       params
     }),
+    // 获取医生详情
+    getInfo: (id) => request(`${API_BASE_URL}/doctors/${id}`),
     // 新增医生
     create: (data) => request(`${API_BASE_URL}/doctors`, {
       method: 'POST',
       data
     }),
     // 更新医生
-    update: (id, data) => request(`${API_BASE_URL}/doctors/${id}`, {
+    update: (data) => request(`${API_BASE_URL}/doctors`, {
       method: 'PUT',
       data
     }),
@@ -69,6 +106,8 @@ export const api = {
     getList: (params) => request(`${API_BASE_URL}/schedules`, {
       params
     }),
+    // 获取排班详情
+    getInfo: (id) => request(`${API_BASE_URL}/schedules/${id}`),
     // 新增排班
     create: (data) => request(`${API_BASE_URL}/schedules`, {
       method: 'POST',
@@ -86,64 +125,95 @@ export const api = {
   },
   
   // 预约挂号
-  appointments: {
+  appointment: {
     // 创建预约
-    create: (data) => request(`${API_BASE_URL}/appointments`, {
+    create: (data) => request(`${API_BASE_URL}/appointment`, {
       method: 'POST',
       data
+    }),
+    // 分页查询所有预约（管理员/医生用）
+    getPage: (params) => request(`${API_BASE_URL}/appointment`, {
+      params
     }),
     // 获取患者预约列表
-    getPatientList: () => request(`${API_BASE_URL}/appointments/patient`)
-  },
-  
-  // 就诊记录
-  consultations: {
-    // 获取就诊记录
-    getList: (params) => request(`${API_BASE_URL}/consultations`, {
-      params
+    getPatientList: (patientId) => request(`${API_BASE_URL}/appointment/patient/${patientId}`),
+    // 获取医生出诊列表
+    getDoctorList: () => request(`${API_BASE_URL}/appointment/doctor`),
+    // 获取预约详情
+    getInfo: (id) => request(`${API_BASE_URL}/appointment/${id}`),
+    // 取消预约
+    cancel: (appointmentId) => request(`${API_BASE_URL}/appointment/${appointmentId}/cancel`, {
+      method: 'PUT'
+    }),
+    // 患者签到
+    confirm: (appointmentId) => request(`${API_BASE_URL}/appointment/${appointmentId}/confirm`, {
+      method: 'PUT'
+    }),
+    // 完成就诊
+    complete: (appointmentId) => request(`${API_BASE_URL}/appointment/${appointmentId}/complete`, {
+      method: 'PUT'
     })
   },
-  
-  // 住院管理
-  hospitalizations: {
-    // 住院登记
-    create: (data) => request(`${API_BASE_URL}/hospitalizations`, {
+
+  // 就诊记录
+  consultation: {
+    // 获取就诊记录
+    getList: (params) => request(`${API_BASE_URL}/consultation`, {
+      params
+    }),
+    // 获取就诊记录详情
+    getInfo: (id) => request(`${API_BASE_URL}/consultation/${id}`),
+    // 医生填写病历（问诊）
+    create: (data) => request(`${API_BASE_URL}/consultation`, {
       method: 'POST',
       data
     })
   },
-  
+
+  // 住院管理
+  hospitalization: {
+    // 住院登记
+    create: (data) => request(`${API_BASE_URL}/hospitalization`, {
+      method: 'POST',
+      data
+    })
+  },
+
   // 系统公告
-  notices: {
+  notice: {
     // 获取公告列表
-    getList: (params) => request(`${API_BASE_URL}/notices`, {
+    getList: (params) => request(`${API_BASE_URL}/notice`, {
       params
     }),
+    // 获取公告详情
+    getInfo: (id) => request(`${API_BASE_URL}/notice/${id}`),
     // 新增公告
-    create: (data) => request(`${API_BASE_URL}/notices`, {
+    create: (data) => request(`${API_BASE_URL}/notice`, {
       method: 'POST',
       data
     }),
     // 更新公告
-    update: (data) => request(`${API_BASE_URL}/notices`, {
+    update: (data) => request(`${API_BASE_URL}/notice`, {
       method: 'PUT',
       data
     }),
     // 删除公告
-    remove: (id) => request(`${API_BASE_URL}/notices/${id}`, {
+    remove: (id) => request(`${API_BASE_URL}/notice/${id}`, {
       method: 'DELETE'
     })
   },
-  
+
   // 患者账户
-  patientAccount: {
+  patient: {
+    // 获取余额
+    getBalance: (patientId) => request(`${API_BASE_URL}/patient/${patientId}/balance`),
     // 充值
-    recharge: (data) => request(`${API_BASE_URL}/recharge`, {
+    recharge: (patientId, data) => request(`${API_BASE_URL}/patient/${patientId}/recharge`, {
       method: 'POST',
       data
     }),
     // 缴费
-    payment: (data) => request(`${API_BASE_URL}/payment`, {
+    payment: (patientId, data) => request(`${API_BASE_URL}/patient/${patientId}/payment`, {
       method: 'POST',
       data
     })
