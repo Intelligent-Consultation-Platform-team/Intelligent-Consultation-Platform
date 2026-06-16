@@ -128,6 +128,15 @@ const router = createRouter({
           }
         },
         {
+          path: 'my-journey',
+          name: 'MyJourney',
+          component: () => import('../views/appoint/MyJourney.vue'),
+          meta: {
+            title: '我的流程',
+            roles: ['patient']
+          }
+        },
+        {
           path: 'patient-book',
           name: 'PatientBook',
           component: () => import('../views/appoint/PatientBook.vue'),
@@ -153,8 +162,35 @@ const router = createRouter({
             title: '住院登记',
             roles: ['admin', 'doctor']
           }
+        },
+        {
+          path: 'payment/:consultationId',
+          name: 'Payment',
+          component: () => import('../views/appoint/Payment.vue'),
+          meta: {
+            title: '缴纳费用',
+            roles: ['patient']
+          }
         }
       ]
+    },
+    {
+      path: '/user/profile',
+      name: 'Profile',
+      component: () => import('../views/user/Profile.vue'),
+      meta: {
+        title: '个人信息',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/user/recharge',
+      name: 'Recharge',
+      component: () => import('../views/user/Recharge.vue'),
+      meta: {
+        title: '账户充值',
+        roles: ['patient']
+      }
     },
     {
       path: '/user',

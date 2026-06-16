@@ -16,6 +16,13 @@ export const api = {
       method: 'POST',
       withAuth: false,
       data
+    }),
+    // 获取当前用户信息
+    getMe: () => request(`${API_BASE_URL}/auth/me`),
+    // 更新个人信息
+    updateProfile: (data) => request(`${API_BASE_URL}/auth/profile`, {
+      method: 'PUT',
+      data
     })
   },
   
@@ -145,6 +152,10 @@ export const api = {
     cancel: (appointmentId) => request(`${API_BASE_URL}/appointment/${appointmentId}/cancel`, {
       method: 'PUT'
     }),
+    // 医生接诊
+    process: (appointmentId) => request(`${API_BASE_URL}/appointment/${appointmentId}/process`, {
+      method: 'PUT'
+    }),
     // 患者签到
     confirm: (appointmentId) => request(`${API_BASE_URL}/appointment/${appointmentId}/confirm`, {
       method: 'PUT'
@@ -161,12 +172,24 @@ export const api = {
     getList: (params) => request(`${API_BASE_URL}/consultation`, {
       params
     }),
+    // 医生获取自己的就诊列表
+    getDoctorList: () => request(`${API_BASE_URL}/consultation/doctor`),
     // 获取就诊记录详情
     getInfo: (id) => request(`${API_BASE_URL}/consultation/${id}`),
     // 医生填写病历（问诊）
     create: (data) => request(`${API_BASE_URL}/consultation`, {
       method: 'POST',
       data
+    }),
+    // 保存诊断
+    update: (id, data) => request(`${API_BASE_URL}/consultation/${id}`, {
+      method: 'PUT',
+      data
+    }),
+    // 完成就诊
+    complete: (id, data) => request(`${API_BASE_URL}/consultation/${id}/complete`, {
+      method: 'PUT',
+      data: data || {}
     })
   },
 
@@ -182,23 +205,23 @@ export const api = {
   // 系统公告
   notice: {
     // 获取公告列表
-    getList: (params) => request(`${API_BASE_URL}/notice`, {
+    getList: (params) => request(`${API_BASE_URL}/notices`, {
       params
     }),
     // 获取公告详情
-    getInfo: (id) => request(`${API_BASE_URL}/notice/${id}`),
+    getInfo: (id) => request(`${API_BASE_URL}/notices/${id}`),
     // 新增公告
-    create: (data) => request(`${API_BASE_URL}/notice`, {
+    create: (data) => request(`${API_BASE_URL}/notices`, {
       method: 'POST',
       data
     }),
     // 更新公告
-    update: (data) => request(`${API_BASE_URL}/notice`, {
+    update: (data) => request(`${API_BASE_URL}/notices`, {
       method: 'PUT',
       data
     }),
     // 删除公告
-    remove: (id) => request(`${API_BASE_URL}/notice/${id}`, {
+    remove: (id) => request(`${API_BASE_URL}/notices/${id}`, {
       method: 'DELETE'
     })
   },
@@ -216,6 +239,10 @@ export const api = {
     payment: (patientId, data) => request(`${API_BASE_URL}/patient/${patientId}/payment`, {
       method: 'POST',
       data
-    })
+    }),
+    // 获取全流程数据
+    getJourney: () => request(`${API_BASE_URL}/patient/journey`),
+    // 获取交易记录
+    getRecords: () => request(`${API_BASE_URL}/patient/records`)
   }
 }

@@ -91,7 +91,18 @@
               <el-button text @click="botVisible = !botVisible">
                 {{ botVisible ? '隐藏 AI 助手' : '显示 AI 助手' }}
               </el-button>
-              <el-button type="danger" plain @click="logout">退出登录</el-button>
+              <el-dropdown trigger="hover" @command="handleUserCommand">
+                <span class="user-dropdown-link">
+                  {{ currentUser.realName || currentUser.username }}
+                  <el-icon><ArrowDown /></el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="profile">个人信息</el-dropdown-item>
+                    <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
             </div>
           </el-header>
 
@@ -109,6 +120,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { ArrowDown } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
 import ConsultationFloatingBot from './components/aiConsultation/ConsultationFloatingBot.vue'
 import { api } from './utils/api'
@@ -160,6 +172,8 @@ const menuConfig = [
     roles: ['admin', 'doctor', 'patient'],
     children: [
       { index: 'book', label: '预约挂号', path: '/appoint/book', roles: ['patient'] },
+      { index: 'my-journey', label: '我的流程', path: '/appoint/my-journey', roles: ['patient'] },
+      { index: 'recharge', label: '账户充值', path: '/user/recharge', roles: ['patient'] },
       { index: 'patient-book', label: '患者挂号', path: '/appoint/patient-book', roles: ['admin', 'doctor'] },
       { index: 'visit', label: '患者就诊', path: '/appoint/visit', roles: ['doctor'] },
       { index: 'hospital', label: '住院登记', path: '/appoint/hospital', roles: ['admin', 'doctor'] },
@@ -274,7 +288,7 @@ const handleSubmit = async () => {
     if (isRegister.value) {
       const registerData = {
         username: formModel.username.trim(),
-        nickname: formModel.realName.trim(),
+        realName: formModel.realName.trim(),
         phone: formModel.phone.trim(),
         email: formModel.email.trim(),
         password: formModel.password,
@@ -321,6 +335,14 @@ const handleSubmit = async () => {
     ElMessage.error(error?.message || '登录失败，请检查用户名和密码')
   } finally {
     loading.value = false
+  }
+}
+
+const handleUserCommand = (command) => {
+  if (command === 'profile') {
+    router.push('/user/profile')
+  } else if (command === 'logout') {
+    logout()
   }
 }
 
@@ -386,6 +408,8 @@ onMounted(() => {
 .menu { border-right: none; }
 .header { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #fff; padding: 0 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
 .header-actions { display: flex; align-items: center; gap: 12px; }
+.user-dropdown-link { display: flex; align-items: center; gap: 4px; cursor: pointer; color: #409eff; font-weight: 500; }
+.user-dropdown-link:hover { color: #337ecc; }
 .welcome { font-size: 16px; font-weight: 600; }
 .role { font-size: 13px; color: #6b7280; margin-top: 4px; }
 .main { padding: 20px; }

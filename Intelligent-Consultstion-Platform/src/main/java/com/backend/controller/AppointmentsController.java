@@ -85,6 +85,15 @@ public class AppointmentsController {
     }
 
     /**
+     * 医生接诊（状态 pending/confirmed -> processing）
+     */
+    @PutMapping("/{appointmentId}/process")
+    public BaseResponse<Void> processAppointment(@PathVariable Integer appointmentId) {
+        appointmentsService.processAppointment(appointmentId);
+        return ResultUtils.success(null, "已接诊");
+    }
+
+    /**
      * 取消预约
      */
     @PutMapping("/{appointmentId}/cancel")

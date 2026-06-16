@@ -1,7 +1,9 @@
 package com.backend.service.impl;
 
+import com.backend.mapper.DepartmentsMapper;
 import com.backend.mapper.SchedulesMapper;
 import com.backend.model.dto.ScheduleDTO;
+import com.backend.model.entity.Departments;
 import com.backend.model.entity.Doctors;
 import com.backend.model.entity.Schedules;
 import com.backend.model.entity.Users;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  *  排班服务实现类。
@@ -34,6 +37,9 @@ public class SchedulesServiceImpl extends ServiceImpl<SchedulesMapper, Schedules
 
     @Resource
     private UsersService usersService;
+
+    @Resource
+    private DepartmentsMapper departmentsMapper;
 
     @Override
     public List<Schedules> getDoctorSchedules(Integer doctorId, String date) {
@@ -62,9 +68,7 @@ public class SchedulesServiceImpl extends ServiceImpl<SchedulesMapper, Schedules
             int dayOfWeek = localDate.getDayOfWeek().getValue();
             queryWrapper.eq("day_of_week", dayOfWeek);
         }
-        
-        queryWrapper.eq("status", "active");
-        
+
         List<Schedules> schedulesList = list(queryWrapper);
         
         List<Integer> doctorIds = schedulesList.stream()
@@ -127,25 +131,24 @@ public class SchedulesServiceImpl extends ServiceImpl<SchedulesMapper, Schedules
         return result;
     }
 
+    private Map<Integer, String> deptNameCache = null;
+
     private String getDeptName(Integer deptId) {
-        Map<Integer, String> deptMap = new HashMap<>();
-        deptMap.put(1, "内科");
-        deptMap.put(2, "外科");
-        deptMap.put(3, "妇产科");
-        deptMap.put(4, "儿科");
-        deptMap.put(5, "急诊科");
-        deptMap.put(6, "皮肤科");
-        return deptMap.getOrDefault(deptId, "未知科室");
+        if (deptNameCache == null) {
+            List<Departments> allDepts = departmentsMapper.selectAll();
+            deptNameCache = allDepts.stream()
+                    .collect(Collectors.toMap(Departments::getDeptId, Departments::getDeptName));
+        }
+        return deptNameCache.getOrDefault(deptId, "未知科室");
     }
 
     @Override
     public boolean addSchedule(Schedules schedules) {
-        // 设置默认可用号源
         if (schedules.getAvailableSlots() == null) {
             schedules.setAvailableSlots(20);
         }
         if (schedules.getStatus() == null) {
-            schedules.setStatus("available");
+            schedules.setStatus("active");
         }
         return save(schedules);
     }

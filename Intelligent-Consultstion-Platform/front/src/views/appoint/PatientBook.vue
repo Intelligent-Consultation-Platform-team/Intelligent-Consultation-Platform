@@ -26,6 +26,7 @@
             style="width: 100%"
           >
             <el-option label="待就诊" value="pending" />
+            <el-option label="已签到" value="confirmed" />
             <el-option label="就诊中" value="processing" />
             <el-option label="已完成" value="completed" />
             <el-option label="已取消" value="cancelled" />
@@ -54,11 +55,23 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="scope">
-            <el-button type="danger" size="small" @click="handleCancel(scope.row.appointmentId)">
-              取消
-            </el-button>
+            <template v-if="scope.row.status === 'pending' || scope.row.status === 'confirmed'">
+              <el-button type="primary" size="small" @click="handleProcess(scope.row)">
+                接诊
+              </el-button>
+              <el-button type="danger" size="small" @click="handleCancel(scope.row.appointmentId)">
+                取消
+              </el-button>
+            </template>
+            <template v-else-if="scope.row.status === 'processing'">
+              <el-button type="success" size="small" @click="handleComplete(scope.row.appointmentId)">
+                完成就诊
+              </el-button>
+            </template>
+            <span v-else-if="scope.row.status === 'completed'">已结束</span>
+            <span v-else-if="scope.row.status === 'cancelled'">已取消</span>
           </template>
         </el-table-column>
       </el-table>
@@ -131,14 +144,20 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="预约时间" prop="appointmentTime">
+        <el-form-item label="预约时间" prop="scheduleId">
           <el-select
-            v-model="form.appointmentTime"
-            placeholder="选择时间"
+            v-model="form.scheduleId"
+            placeholder="请先选择医生和日期"
             style="width: 100%"
+            :disabled="!form.doctorId || !form.appointmentDate"
+            @change="onScheduleSelect"
           >
-            <el-option label="上午 (8:00-12:00)" value="上午" />
-            <el-option label="下午 (14:00-18:00)" value="下午" />
+            <el-option
+              v-for="s in availableSchedules"
+              :key="s.scheduleId"
+              :label="s.startTime + ' - ' + s.endTime + '（剩余' + s.availableSlots + '号）'"
+              :value="s.scheduleId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="症状描述" prop="symptoms">
@@ -161,10 +180,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
+import { getSession } from '../../utils/session'
 
 const filter = reactive({
   patientName: '',
@@ -180,6 +200,7 @@ const pagination = reactive({
 const departments = ref([])
 const doctors = ref([])
 const appointments = ref([])
+const availableSchedules = ref([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增挂号')
 const formRef = ref()
@@ -193,6 +214,7 @@ const form = reactive({
   doctorId: '',
   appointmentDate: '',
   appointmentTime: '',
+  scheduleId: '',
   symptoms: ''
 })
 
@@ -208,6 +230,9 @@ const rules = {
   ],
   appointmentDate: [
     { required: true, message: '请选择预约日期', trigger: 'change' }
+  ],
+  scheduleId: [
+    { required: true, message: '请选择预约时间段', trigger: 'change' }
   ],
   symptoms: [
     { required: true, message: '请描述症状', trigger: 'blur' }
@@ -237,6 +262,46 @@ const loadDoctors = async (deptId) => {
   }
 }
 
+const loadSchedulesForBooking = async () => {
+  if (!form.doctorId || !form.appointmentDate) {
+    availableSchedules.value = []
+    form.scheduleId = ''
+    form.appointmentTime = ''
+    return
+  }
+  try {
+    const data = await api.schedules.getList({
+      doctorId: form.doctorId,
+      date: form.appointmentDate
+    })
+    availableSchedules.value = (data || []).filter(s => s.status === 'active' && s.availableSlots > 0)
+    if (availableSchedules.value.length === 0) {
+      ElMessage.warning('该医生在所选日期无可用排班')
+    }
+  } catch (e) {
+    console.error('加载排班失败', e)
+  }
+}
+
+const onScheduleSelect = (scheduleId) => {
+  const selected = availableSchedules.value.find(s => s.scheduleId === scheduleId)
+  if (selected) {
+    form.appointmentTime = selected.startTime
+  }
+}
+
+// 医生或日期变化时重新查询排班
+watch(() => form.doctorId, () => {
+  form.scheduleId = ''
+  form.appointmentTime = ''
+  loadSchedulesForBooking()
+})
+watch(() => form.appointmentDate, () => {
+  form.scheduleId = ''
+  form.appointmentTime = ''
+  loadSchedulesForBooking()
+})
+
 const loadData = async () => {
   loading.value = true
   try {
@@ -260,6 +325,7 @@ const loadData = async () => {
 
 const getStatusLabel = (status) => ({
   pending: '待就诊',
+  confirmed: '已签到',
   processing: '就诊中',
   completed: '已完成',
   cancelled: '已取消'
@@ -267,6 +333,7 @@ const getStatusLabel = (status) => ({
 
 const getStatusTagType = (status) => ({
   pending: 'warning',
+  confirmed: '',
   processing: 'primary',
   completed: 'success',
   cancelled: 'info'
@@ -292,7 +359,9 @@ const handleAdd = () => {
   form.doctorId = ''
   form.appointmentDate = ''
   form.appointmentTime = ''
+  form.scheduleId = ''
   form.symptoms = ''
+  availableSchedules.value = []
   dialogTitle.value = '新增挂号'
   dialogVisible.value = true
 }
@@ -309,6 +378,33 @@ const handleEdit = (row) => {
   form.symptoms = row.symptoms
   dialogTitle.value = '编辑挂号'
   dialogVisible.value = true
+}
+
+const handleProcess = async (row) => {
+  try {
+    await api.appointment.process(row.appointmentId)
+    ElMessage.success('已接诊，请前往就诊管理')
+    await loadData()
+  } catch (e) {
+    ElMessage.error(e?.message || '接诊失败')
+  }
+}
+
+const handleComplete = async (id) => {
+  try {
+    await ElMessageBox.confirm('确认完成就诊？', '提示', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await api.appointment.complete(id)
+    ElMessage.success('就诊已完成')
+    await loadData()
+  } catch (e) {
+    if (e !== 'cancel') {
+      ElMessage.error(e?.message || '操作失败')
+    }
+  }
 }
 
 const handleCancel = async (id) => {
@@ -331,10 +427,10 @@ const handleSubmit = async () => {
       return
     }
     await api.appointment.create({
-      patientId: session.userId,
       doctorId: form.doctorId,
-      scheduleId: 1,
+      scheduleId: form.scheduleId,
       appointmentDate: form.appointmentDate,
+      appointmentTime: form.appointmentTime,
       symptoms: form.symptoms
     })
     ElMessage.success('保存成功')

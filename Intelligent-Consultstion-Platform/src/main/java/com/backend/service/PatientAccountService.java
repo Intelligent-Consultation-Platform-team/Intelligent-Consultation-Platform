@@ -4,6 +4,8 @@ import com.backend.model.entity.RechargeRecords;
 import com.backend.model.entity.PaymentRecords;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 /**
  *  患者账户服务接口。
@@ -40,5 +42,15 @@ public interface PatientAccountService {
      * @return 余额
      */
     BigDecimal getBalance(Integer patientId);
+
+    /**
+     * 获取患者全流程数据
+     */
+    Map<String, Object> getJourney(Integer userId);
+
+    /**
+     * 获取患者交易记录
+     */
+    List<Map<String, Object>> getRecords(Integer userId);
 
 }

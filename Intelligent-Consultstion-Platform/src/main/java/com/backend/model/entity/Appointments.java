@@ -46,6 +46,8 @@ public class Appointments implements Serializable {
 
     private String status;
 
+    private String symptoms;
+
     private Timestamp createdAt;
 
     private Timestamp updatedAt;

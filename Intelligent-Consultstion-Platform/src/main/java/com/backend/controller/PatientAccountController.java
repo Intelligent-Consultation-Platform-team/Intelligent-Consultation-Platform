@@ -2,14 +2,18 @@ package com.backend.controller;
 
 import com.backend.common.BaseResponse;
 import com.backend.common.ResultUtils;
-import com.backend.model.entity.RechargeRecords;
+import com.backend.common.UserContext;
+import com.backend.exception.BusinessException;
+import com.backend.exception.ErrorCode;
 import com.backend.model.entity.PaymentRecords;
+import com.backend.model.entity.RechargeRecords;
 import com.backend.service.PatientAccountService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -88,6 +92,32 @@ public class PatientAccountController {
         data.put("balance", balance);
         data.put("paymentDate", record.getPaymentDate());
         return ResultUtils.success(data, "缴费成功");
+    }
+
+    /**
+     * 获取患者全流程数据（预约 + 就诊 + 缴费）
+     */
+    @GetMapping("/journey")
+    public BaseResponse<Map<String, Object>> getJourney() {
+        Integer userId = UserContext.getUserId();
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "请先登录");
+        }
+        Map<String, Object> data = patientAccountService.getJourney(userId);
+        return ResultUtils.success(data);
+    }
+
+    /**
+     * 获取患者交易记录（充值 + 缴费）
+     */
+    @GetMapping("/records")
+    public BaseResponse<List<Map<String, Object>>> getRecords() {
+        Integer userId = UserContext.getUserId();
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "请先登录");
+        }
+        List<Map<String, Object>> data = patientAccountService.getRecords(userId);
+        return ResultUtils.success(data);
     }
 
     // 充值请求类

@@ -7,7 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/../../../../../App/Maven/apache-maven-3.9.6-bin/apache-maven-3.9.6/mvn_repo/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
+          <entry name="$PROJECT_DIR$/../../../../../APP/Maven/apache-maven-3.9.6-bin/apache-maven-3.9.6/mvn_repo/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
         </processorPath>
         <module name="backend" />
       </profile>

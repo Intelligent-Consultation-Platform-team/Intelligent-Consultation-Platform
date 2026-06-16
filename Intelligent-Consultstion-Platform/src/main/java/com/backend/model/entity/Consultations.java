@@ -46,6 +46,8 @@ public class Consultations implements Serializable {
 
     private String prescription;
 
+    private java.math.BigDecimal amount;
+
     private Timestamp consultationDate;
 
     private Timestamp createdAt;

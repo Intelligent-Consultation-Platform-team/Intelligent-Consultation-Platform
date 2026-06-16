@@ -4,14 +4,18 @@ import com.backend.common.UserContext;
 import com.backend.exception.BusinessException;
 import com.backend.exception.ErrorCode;
 import com.backend.mapper.AppointmentsMapper;
+import com.backend.mapper.ConsultationsMapper;
 import com.backend.mapper.DepartmentsMapper;
 import com.backend.mapper.DoctorsMapper;
+import com.backend.mapper.PatientsMapper;
 import com.backend.mapper.SchedulesMapper;
 import com.backend.mapper.UsersMapper;
 import com.backend.model.dto.AppointmentDTO;
 import com.backend.model.entity.Appointments;
+import com.backend.model.entity.Consultations;
 import com.backend.model.entity.Departments;
 import com.backend.model.entity.Doctors;
+import com.backend.model.entity.Patients;
 import com.backend.model.entity.Schedules;
 import com.backend.model.entity.Users;
 import com.backend.service.AppointmentsService;
@@ -22,6 +26,8 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +46,9 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
     private UsersMapper usersMapper;
 
     @Resource
+    private PatientsMapper patientsMapper;
+
+    @Resource
     private DoctorsMapper doctorsMapper;
 
     @Resource
@@ -47,6 +56,9 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
 
     @Resource
     private DepartmentsMapper departmentsMapper;
+
+    @Resource
+    private ConsultationsMapper consultationsMapper;
 
     @Override
     public Map<String, Object> getAppointmentsPage(Integer current, Integer size, String patientName, String status) {
@@ -57,10 +69,19 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
         String role = UserContext.getRole();
         Integer userId = UserContext.getUserId();
         if ("patient".equals(role) && userId != null) {
-            // 患者只能看自己的
-            queryWrapper.eq("patient_id", userId);
+            Patients patient = patientsMapper.selectOneByQuery(
+                    QueryWrapper.create().eq("user_id", userId));
+            if (patient != null) {
+                queryWrapper.eq("patient_id", patient.getPatientId());
+            }
+        } else if ("doctor".equals(role) && userId != null) {
+            Doctors doctor = doctorsMapper.selectOneByQuery(
+                    QueryWrapper.create().eq("user_id", userId));
+            if (doctor != null) {
+                queryWrapper.eq("doctor_id", doctor.getDoctorId());
+            }
         }
-        // 管理员和医生可以看全部，支持按患者姓名搜索
+        // 管理员看全部
 
         if (patientName != null && !patientName.trim().isEmpty()) {
             List<Users> matchedUsers = usersMapper.selectListByQuery(
@@ -74,9 +95,22 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
                 result.put("size", size);
                 return result;
             }
-            List<Integer> matchedIds = matchedUsers.stream()
+            List<Integer> matchedUserIds = matchedUsers.stream()
                     .map(Users::getUserId).collect(Collectors.toList());
-            queryWrapper.in("patient_id", matchedIds);
+            List<Patients> matchedPatients = patientsMapper.selectListByQuery(
+                    QueryWrapper.create().in("user_id", matchedUserIds)
+            );
+            List<Integer> matchedPatientIds = matchedPatients.stream()
+                    .map(Patients::getPatientId).collect(Collectors.toList());
+            if (matchedPatientIds.isEmpty()) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("records", new ArrayList<>());
+                result.put("total", 0L);
+                result.put("current", current);
+                result.put("size", size);
+                return result;
+            }
+            queryWrapper.in("patient_id", matchedPatientIds);
         }
         if (status != null && !status.trim().isEmpty()) {
             queryWrapper.eq("status", status.trim());
@@ -100,9 +134,15 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
         List<Integer> doctorIds = appointmentsList.stream()
                 .map(Appointments::getDoctorId).distinct().collect(Collectors.toList());
 
-        Map<Integer, Users> patientMap = usersMapper.selectListByQuery(
-                QueryWrapper.create().in("user_id", patientIds)
-        ).stream().collect(Collectors.toMap(Users::getUserId, u -> u));
+        Map<Integer, Patients> patientIdMap = patientsMapper.selectListByQuery(
+                QueryWrapper.create().in("patient_id", patientIds)
+        ).stream().collect(Collectors.toMap(Patients::getPatientId, p -> p));
+        List<Integer> patientUserIds = patientIdMap.values().stream()
+                .map(Patients::getUserId).distinct().collect(Collectors.toList());
+        Map<Integer, Users> patientUserMap = patientUserIds.isEmpty() ? new HashMap<>() :
+                usersMapper.selectListByQuery(
+                        QueryWrapper.create().in("user_id", patientUserIds)
+                ).stream().collect(Collectors.toMap(Users::getUserId, u -> u));
 
         Map<Integer, Doctors> doctorMap = doctorsMapper.selectListByQuery(
                 QueryWrapper.create().in("doctor_id", doctorIds)
@@ -127,10 +167,16 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
             item.put("appointmentDate", apt.getAppointmentDate());
             item.put("appointmentTime", apt.getAppointmentTime());
             item.put("status", apt.getStatus());
+            item.put("symptoms", apt.getSymptoms());
             item.put("createdAt", apt.getCreatedAt());
 
-            Users patient = patientMap.get(apt.getPatientId());
-            item.put("patientName", patient != null ? patient.getRealName() : null);
+            Patients patientRecord = patientIdMap.get(apt.getPatientId());
+            if (patientRecord != null) {
+                Users patientUser = patientUserMap.get(patientRecord.getUserId());
+                item.put("patientName", patientUser != null ? patientUser.getRealName() : null);
+            } else {
+                item.put("patientName", null);
+            }
 
             Doctors doctor = doctorMap.get(apt.getDoctorId());
             if (doctor != null) {
@@ -162,35 +208,95 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
         if (apt == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "预约不存在");
         }
+        if ("cancelled".equals(apt.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "预约已取消，无需重复操作");
+        }
         apt.setStatus("cancelled");
         updateById(apt);
+
+        // 恢复号源
+        Schedules schedule = schedulesMapper.selectOneById(apt.getScheduleId());
+        if (schedule != null) {
+            Schedules updateSchedule = new Schedules();
+            updateSchedule.setAvailableSlots(schedule.getAvailableSlots() + 1);
+            schedulesMapper.updateByQuery(updateSchedule,
+                    QueryWrapper.create().eq("schedule_id", schedule.getScheduleId()));
+        }
     }
 
     @Override
     public Appointments createAppointment(Appointments appointments) {
-        if (appointments.getDoctorId() == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "医生ID不能为空");
-        }
-
         if (appointments.getScheduleId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "排班ID不能为空");
         }
-
         if (appointments.getAppointmentDate() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "预约日期不能为空");
         }
 
-        if (appointments.getPatientId() == null) {
-            Integer userId = UserContext.getUserId();
-            if (userId != null) {
-                appointments.setPatientId(userId);
-            }
+        // 查询排班
+        Schedules schedule = schedulesMapper.selectOneById(appointments.getScheduleId());
+        if (schedule == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "排班不存在");
+        }
+        if (!"active".equals(schedule.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "该排班已停用");
         }
 
+        // 校验预约日期必须匹配排班的星期几
+        LocalDate appointmentLocalDate = appointments.getAppointmentDate().toLocalDate();
+        int dayOfWeek = appointmentLocalDate.getDayOfWeek().getValue();
+        if (!String.valueOf(dayOfWeek).equals(schedule.getDayOfWeek())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "预约日期与医生排班不匹配，该医生仅在此时间段出诊");
+        }
+
+        // 校验日期：不能是过去，且只能在未来15天内
+        LocalDate today = LocalDate.now();
+        if (appointmentLocalDate.isBefore(today)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不能预约过去的日期");
+        }
+        if (appointmentLocalDate.isAfter(today.plusDays(15))) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "只能预约未来15天内的号源");
+        }
+
+        // 校验号源
+        if (schedule.getAvailableSlots() == null || schedule.getAvailableSlots() <= 0) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "该排班号源已用完");
+        }
+
+        // 解析患者ID
+        Integer userId = UserContext.getUserId();
+        if (userId != null) {
+            Patients patient = patientsMapper.selectOneByQuery(
+                    QueryWrapper.create().eq("user_id", userId));
+            if (patient != null) {
+                appointments.setPatientId(patient.getPatientId());
+            }
+        }
         if (appointments.getPatientId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "请先登录");
         }
 
+        // 防重：同一患者同一排班同一日期已有非取消预约时拒绝
+        long existing = count(QueryWrapper.create()
+                .eq("patient_id", appointments.getPatientId())
+                .eq("schedule_id", appointments.getScheduleId())
+                .eq("appointment_date", appointments.getAppointmentDate())
+                .ne("status", "cancelled"));
+        if (existing > 0) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "该时段您已有预约，请勿重复预约");
+        }
+
+        // 扣减号源
+        Schedules updateSchedule = new Schedules();
+        updateSchedule.setAvailableSlots(schedule.getAvailableSlots() - 1);
+        schedulesMapper.updateByQuery(updateSchedule,
+                QueryWrapper.create().eq("schedule_id", schedule.getScheduleId()));
+
+        // 设置医生ID和预约时间（来自排班）
+        appointments.setDoctorId(schedule.getDoctorId());
+        if (appointments.getAppointmentTime() == null) {
+            appointments.setAppointmentTime(schedule.getStartTime());
+        }
         appointments.setStatus("pending");
         save(appointments);
         return appointments;
@@ -265,6 +371,41 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
     }
 
     /**
+     * 接诊，将预约状态改为 processing，并创建就诊记录
+     */
+    @Override
+    public void processAppointment(Integer appointmentId) {
+        if (appointmentId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "预约ID不能为空");
+        }
+        Appointments apt = getById(appointmentId);
+        if (apt == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "预约不存在");
+        }
+        if (!"pending".equals(apt.getStatus()) && !"confirmed".equals(apt.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "当前状态不支持接诊操作");
+        }
+        Appointments update = Appointments.builder()
+                .appointmentId(appointmentId)
+                .status("processing")
+                .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        updateById(update);
+
+        // 创建就诊记录
+        Consultations consultation = Consultations.builder()
+                .appointmentId(appointmentId)
+                .doctorId(apt.getDoctorId())
+                .patientId(apt.getPatientId())
+                .symptoms(apt.getSymptoms())
+                .consultationDate(new Timestamp(System.currentTimeMillis()))
+                .createdAt(new Timestamp(System.currentTimeMillis()))
+                .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        consultationsMapper.insert(consultation);
+    }
+
+    /**
      * 患者到院签到，将预约状态改为 confirmed
      */
     @Override
@@ -326,9 +467,15 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
         List<Integer> patientIds = appointmentsList.stream()
                 .map(Appointments::getPatientId).distinct().collect(Collectors.toList());
 
-        Map<Integer, Users> patientMap = usersMapper.selectListByQuery(
-                QueryWrapper.create().in("user_id", patientIds)
-        ).stream().collect(Collectors.toMap(Users::getUserId, u -> u));
+        Map<Integer, Patients> patientIdMap = patientsMapper.selectListByQuery(
+                QueryWrapper.create().in("patient_id", patientIds)
+        ).stream().collect(Collectors.toMap(Patients::getPatientId, p -> p));
+        List<Integer> patientUserIds = patientIdMap.values().stream()
+                .map(Patients::getUserId).distinct().collect(Collectors.toList());
+        Map<Integer, Users> patientUserMap = patientUserIds.isEmpty() ? new HashMap<>() :
+                usersMapper.selectListByQuery(
+                        QueryWrapper.create().in("user_id", patientUserIds)
+                ).stream().collect(Collectors.toMap(Users::getUserId, u -> u));
 
         return appointmentsList.stream().map(apt -> {
             Map<String, Object> item = new HashMap<>();
@@ -336,10 +483,16 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
             item.put("appointmentDate", apt.getAppointmentDate());
             item.put("appointmentTime", apt.getAppointmentTime());
             item.put("status", apt.getStatus());
+            item.put("symptoms", apt.getSymptoms());
 
-            Users patient = patientMap.get(apt.getPatientId());
+            Patients patientRecord = patientIdMap.get(apt.getPatientId());
             item.put("patientId", apt.getPatientId());
-            item.put("patientName", patient != null ? patient.getRealName() : "患者" + apt.getPatientId());
+            if (patientRecord != null) {
+                Users patientUser = patientUserMap.get(patientRecord.getUserId());
+                item.put("patientName", patientUser != null ? patientUser.getRealName() : "患者" + apt.getPatientId());
+            } else {
+                item.put("patientName", "患者" + apt.getPatientId());
+            }
 
             return item;
         }).collect(Collectors.toList());

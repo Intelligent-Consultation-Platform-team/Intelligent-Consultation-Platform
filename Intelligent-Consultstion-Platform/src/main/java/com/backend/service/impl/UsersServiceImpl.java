@@ -4,9 +4,13 @@ import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.StrUtil;
 import com.backend.exception.BusinessException;
 import com.backend.exception.ErrorCode;
+import com.backend.mapper.DoctorsMapper;
+import com.backend.mapper.PatientsMapper;
 import com.backend.mapper.UsersMapper;
 import com.backend.model.dto.UserLoginRequest;
 import com.backend.model.dto.UserRegisterRequest;
+import com.backend.model.entity.Doctors;
+import com.backend.model.entity.Patients;
 import com.backend.model.entity.Users;
 import com.backend.service.UsersService;
 import com.backend.utils.JwtUtils;
@@ -25,6 +29,12 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private DoctorsMapper doctorsMapper;
+
+    @Autowired
+    private PatientsMapper patientsMapper;
 
     @Override
     public Long userRegister(UserRegisterRequest userRegisterRequest) {
@@ -115,6 +125,28 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         boolean saved = save(user);
         if (!saved) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败");
+        }
+
+        if ("doctor".equals(role)) {
+            Doctors doctor = Doctors.builder()
+                    .userId(user.getUserId())
+                    .deptId(0)
+                    .status("available")
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .updatedAt(new Timestamp(System.currentTimeMillis()))
+                    .build();
+            doctorsMapper.insert(doctor);
+        }
+
+        if ("patient".equals(role)) {
+            Patients patient = Patients.builder()
+                    .userId(user.getUserId())
+                    .idCard("TEMP_" + user.getUserId())
+                    .balance(java.math.BigDecimal.ZERO)
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .updatedAt(new Timestamp(System.currentTimeMillis()))
+                    .build();
+            patientsMapper.insert(patient);
         }
 
         return user.getUserId().longValue();

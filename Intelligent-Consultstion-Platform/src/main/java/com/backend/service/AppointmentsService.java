@@ -49,6 +49,13 @@ public interface AppointmentsService extends IService<Appointments> {
     void cancelAppointment(Integer appointmentId);
 
     /**
+     * 接诊，将预约状态改为 processing
+     *
+     * @param appointmentId 预约ID
+     */
+    void processAppointment(Integer appointmentId);
+
+    /**
      * 患者到院签到，将预约状态改为 confirmed
      *
      * @param appointmentId 预约ID

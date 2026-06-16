@@ -45,17 +45,22 @@ public class ConsultationsController {
      * @return 就诊记录
      */
     @GetMapping("/{consultationId}")
-    public BaseResponse<Consultations> getConsultationById(@PathVariable Integer consultationId) {
-        Consultations consultation = consultationsService.getById(consultationId);
-        return ResultUtils.success(consultation);
+    public BaseResponse<Map<String, Object>> getConsultationById(@PathVariable Integer consultationId) {
+        Map<String, Object> data = consultationsService.getConsultationDetail(consultationId);
+        return ResultUtils.success(data);
+    }
+
+    /**
+     * 医生获取自己的就诊列表
+     */
+    @GetMapping("/doctor")
+    public BaseResponse<List<Map<String, Object>>> getDoctorConsultations() {
+        List<Map<String, Object>> list = consultationsService.getDoctorConsultations();
+        return ResultUtils.success(list);
     }
 
     /**
      * 医生填写病历（问诊）
-     * 会自动更新预约状态为 processing
-     *
-     * @param consultation 就诊信息（symptoms, diagnosis, treatment, prescription等）
-     * @return 问诊记录ID
      */
     @PostMapping
     public BaseResponse<Map<String, Object>> createConsultation(@RequestBody Consultations consultation) {
@@ -64,6 +69,40 @@ public class ConsultationsController {
         data.put("consultationId", result.getConsultationId());
         data.put("appointmentId", result.getAppointmentId());
         return ResultUtils.success(data, "问诊记录已保存");
+    }
+
+    /**
+     * 保存诊断信息
+     */
+    @PutMapping("/{consultationId}")
+    public BaseResponse<Void> updateConsultation(
+            @PathVariable Integer consultationId,
+            @RequestBody Map<String, Object> body) {
+        java.math.BigDecimal amount = null;
+        if (body.get("amount") != null) {
+            amount = new java.math.BigDecimal(body.get("amount").toString());
+        }
+        consultationsService.updateConsultation(consultationId,
+                (String) body.get("diagnosis"),
+                (String) body.get("treatment"),
+                (String) body.get("prescription"),
+                amount);
+        return ResultUtils.success(null, "诊断已保存");
+    }
+
+    /**
+     * 完成就诊
+     */
+    @PutMapping("/{consultationId}/complete")
+    public BaseResponse<Void> completeConsultation(
+            @PathVariable Integer consultationId,
+            @RequestBody(required = false) Map<String, Object> body) {
+        java.math.BigDecimal amount = null;
+        if (body != null && body.get("amount") != null) {
+            amount = new java.math.BigDecimal(body.get("amount").toString());
+        }
+        consultationsService.completeConsultation(consultationId, amount);
+        return ResultUtils.success(null, "就诊已完成");
     }
 
 }

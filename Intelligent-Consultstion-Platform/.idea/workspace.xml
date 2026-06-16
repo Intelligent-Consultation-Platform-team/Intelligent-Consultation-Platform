@@ -4,129 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="37d48f2c-fa4e-46bb-9a30-28165a7d40d3" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HELP.md" beforeDir="false" afterPath="$PROJECT_DIR$/HELP.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/utils/api.js" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/utils/api.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/Home.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/views/appoint/Book.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/appoint/Book.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/views/appoint/Hospital.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/appoint/Hospital.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/views/appoint/PatientBook.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/appoint/PatientBook.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/views/appoint/Visit.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/appoint/Visit.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/views/manage/Notice.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/manage/Notice.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front/src/views/user/PatientAccount.vue" beforeDir="false" afterPath="$PROJECT_DIR$/front/src/views/user/PatientAccount.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/config/WebMvcConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/config/WebMvcConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/AppointmentsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/AppointmentsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/ConsultationsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/ConsultationsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/controller/PatientAccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/controller/PatientAccountController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/AppointmentsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/AppointmentsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/ConsultationsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/ConsultationsService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/AppointmentsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/AppointmentsServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/ConsultationsServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/ConsultationsServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/PatientAccountServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/backend/service/impl/PatientAccountServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/IntelligentConsultstionPlatformApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/IntelligentConsultstionPlatformApplication.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/BaseResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/BaseResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/DeleteRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/DeleteRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/PageRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/PageRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/ResultUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/ResultUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/UserContext$UserInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/UserContext$UserInfo.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/common/UserContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/common/UserContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/CorsConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/DeepSeekConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/DeepSeekConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/WebMvcConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/WebMvcConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$DateFromTimeRange.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$DateFromTimeRange.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$TimeFromTimeRange.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer$TimeFromTimeRange.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/config/jackson/TimeRangeDeserializer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/AiConsultationController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/AiConsultationController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/AppointmentsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/AppointmentsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/AuthController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/AuthController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/ConsultationsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/ConsultationsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/DepartmentsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/DepartmentsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/DoctorsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/DoctorsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/HospitalizationsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/HospitalizationsController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/NoticesController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/NoticesController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$PaymentRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$PaymentRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$RechargeRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController$RechargeRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/PatientAccountController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/SchedulesController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/SchedulesController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/controller/UsersController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/controller/UsersController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/BusinessException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/BusinessException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/ErrorCode.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/ErrorCode.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/GlobalExceptionHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/exception/ThrowUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/exception/ThrowUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/generator/MyBatisCodeGenerator.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/generator/MyBatisCodeGenerator.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/interceptor/TokenInterceptor.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/interceptor/TokenInterceptor.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/AppointmentsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/AppointmentsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/ConsultationsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/ConsultationsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/DepartmentsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/DepartmentsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/DoctorsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/DoctorsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/HospitalizationsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/HospitalizationsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/NoticesMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/NoticesMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/PaymentRecordsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/PaymentRecordsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/RechargeRecordsMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/RechargeRecordsMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/SchedulesMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/SchedulesMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/mapper/UsersMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/mapper/UsersMapper.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/AppointmentDTO$AppointmentDTOBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/AppointmentDTO$AppointmentDTOBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/AppointmentDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/AppointmentDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorAddRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorAddRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO$DoctorDTOBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO$DoctorDTOBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorUpdateRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/DoctorUpdateRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ResetPasswordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ResetPasswordRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO$ScheduleDTOBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO$ScheduleDTOBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ScheduleDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserLoginRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserLoginRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserRegisterRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/UserRegisterRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CloseSessionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CloseSessionRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CreateSessionRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/CreateSessionRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/MessageDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/MessageDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageResponse.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SendMessageResponse.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SessionDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/dto/ai/SessionDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments$AppointmentsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments$AppointmentsBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Appointments.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Consultations$ConsultationsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Consultations$ConsultationsBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Consultations.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Consultations.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Departments$DepartmentsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Departments$DepartmentsBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Departments.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Departments.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Doctors$DoctorsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Doctors$DoctorsBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Doctors.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Doctors.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Hospitalizations$HospitalizationsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Hospitalizations$HospitalizationsBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Hospitalizations.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Hospitalizations.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Notices$NoticesBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Notices$NoticesBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Notices.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Notices.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/PaymentRecords$PaymentRecordsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/PaymentRecords$PaymentRecordsBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/PaymentRecords.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/PaymentRecords.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/RechargeRecords$RechargeRecordsBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/RechargeRecords$RechargeRecordsBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/RechargeRecords.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/RechargeRecords.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Schedules$SchedulesBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Schedules$SchedulesBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Schedules.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Schedules.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users$UsersBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users$UsersBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/model/entity/Users.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/AiConsultationService$SessionData.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/AiConsultationService$SessionData.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/AiConsultationService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/AiConsultationService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/AppointmentsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/AppointmentsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/ConsultationsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/ConsultationsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DeepSeekService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DeepSeekService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DepartmentsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DepartmentsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/DoctorsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/DoctorsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/HospitalizationsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/HospitalizationsService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/NoticesService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/NoticesService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/PatientAccountService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/PatientAccountService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/SchedulesService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/SchedulesService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/UsersService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/UsersService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/AppointmentsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/AppointmentsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/ConsultationsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/ConsultationsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DepartmentsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DepartmentsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DoctorsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/DoctorsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/HospitalizationsServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/HospitalizationsServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/NoticesServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/NoticesServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/PatientAccountServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/PatientAccountServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/SchedulesServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/SchedulesServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/service/impl/UsersServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/service/impl/UsersServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/utils/JwtUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/utils/JwtUtils.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/backend/utils/PasswordUtils.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/backend/utils/PasswordUtils.class" afterDir="false" />
-    </list>
+    <list default="true" id="37d48f2c-fa4e-46bb-9a30-28165a7d40d3" name="更改" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -169,50 +47,50 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Maven.backend [clean,install,-U].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [compile].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [deploy].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [install].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [package].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [site].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [test].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [validate].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.backend [verify].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.IntelligentConsultstionPlatformApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;lej&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/学校/大三下/软件工程实训/project/Intelligent-Consultstion-Platform&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
-    &quot;typescript.add.unambiguous.imports.on.the.fly&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
-    &quot;应用程序.IntelligentConsultstionPlatformApplication.executor&quot;: &quot;Run&quot;,
-    &quot;应用程序.MyBatisCodeGenerator.executor&quot;: &quot;Run&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Maven.backend [clean,install,-U].executor": "Run",
+    "Maven.backend [clean].executor": "Run",
+    "Maven.backend [compile].executor": "Run",
+    "Maven.backend [deploy].executor": "Run",
+    "Maven.backend [install].executor": "Run",
+    "Maven.backend [package].executor": "Run",
+    "Maven.backend [site].executor": "Run",
+    "Maven.backend [test].executor": "Run",
+    "Maven.backend [validate].executor": "Run",
+    "Maven.backend [verify].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.IntelligentConsultstionPlatformApplication.executor": "Run",
+    "git-widget-placeholder": "lej",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/学校/软件工程实训/Intelligent-Consultation-Platform/Intelligent-Consultation-Platform/Intelligent-Consultstion-Platform",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "模块",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "MavenSettings",
+    "typescript.add.unambiguous.imports.on.the.fly": "true",
+    "vue.rearranger.settings.migration": "true",
+    "应用程序.IntelligentConsultstionPlatformApplication.executor": "Run",
+    "应用程序.MyBatisCodeGenerator.executor": "Run"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;mysql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
     ]
   }
-}</component>
+}]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -237,15 +115,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <configuration name="IntelligentConsultstionPlatformApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="backend" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.backend.IntelligentConsultstionPlatformApplication" />
@@ -262,8 +131,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.28539.33" />
-        <option value="bundled-js-predefined-d6986cc7102b-a71380e98a7c-JavaScript-IU-252.28539.33" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26830.84" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.26830.84" />
       </set>
     </attachedChunks>
   </component>
@@ -299,6 +168,7 @@
       <workItem from="1780042800459" duration="5714000" />
       <workItem from="1780110498929" duration="25000" />
       <workItem from="1780110547815" duration="18695000" />
+      <workItem from="1781332392280" duration="13511000" />
     </task>
     <servers />
   </component>
@@ -310,7 +180,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/com/backend/service/impl/AppointmentsServiceImpl.java</url>
-          <line>173</line>
+          <line>234</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
