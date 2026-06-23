@@ -25,9 +25,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="280" fixed="right">
           <template #default="scope">
-            <template v-if="scope.row.status !== 'completed' && scope.row.status !== 'cancelled'">
+            <template v-if="scope.row.status !== 'completed' && scope.row.status !== 'cancelled' && scope.row.status !== 'unpaid'">
               <el-button type="primary" size="small" @click="handleDiagnose(scope.row)">
                 诊断
               </el-button>
@@ -40,7 +40,19 @@
                 完成
               </el-button>
             </template>
-            <span v-else>已结束</span>
+            <template v-if="scope.row.diagnosis && scope.row.status !== 'completed' && scope.row.status !== 'cancelled' && scope.row.status !== 'unpaid'">
+              <el-tag v-if="scope.row.admitted" type="danger" size="small">已住院</el-tag>
+              <el-button
+                v-else
+                type="warning"
+                size="small"
+                @click="handleHospitalize(scope.row)"
+              >
+                建议住院
+              </el-button>
+            </template>
+            <span v-if="scope.row.status === 'unpaid'">待患者支付</span>
+            <span v-if="scope.row.status === 'completed' || scope.row.status === 'cancelled'">已结束</span>
           </template>
         </el-table-column>
       </el-table>
@@ -80,9 +92,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
+
+const router = useRouter()
 
 const visits = ref([])
 const loading = ref(false)
@@ -107,12 +122,14 @@ const loadData = async () => {
   loading.value = true
   try {
     const data = await api.consultation.getDoctorList()
-    visits.value = (data || []).map(item => {
+    const mapped = (data || []).map(item => {
       const { date, time } = formatDateTime(item.consultationDate)
       return {
         consultationId: item.consultationId,
         appointmentId: item.appointmentId,
         patientId: item.patientId,
+        doctorId: item.doctorId,
+        deptId: item.deptId,
         patientName: item.patientName || '患者' + item.patientId,
         symptoms: item.symptoms || '-',
         diagnosis: item.diagnosis || '',
@@ -121,9 +138,29 @@ const loadData = async () => {
         amount: item.amount || 0,
         visitDate: date,
         visitTime: time,
-        status: item.status || 'processing'
+        status: item.status || 'processing',
+        admitted: false
       }
     })
+
+    // 批量检查每个患者是否正在住院
+    const patientIds = [...new Set(mapped.map(v => v.patientId).filter(Boolean))]
+    if (patientIds.length > 0) {
+      const results = await Promise.allSettled(
+        patientIds.map(pid => api.hospitalization.checkAdmitted(pid))
+      )
+      const admittedSet = new Set()
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled' && r.value?.admitted) {
+          admittedSet.add(patientIds[i])
+        }
+      })
+      mapped.forEach(v => {
+        if (admittedSet.has(v.patientId)) v.admitted = true
+      })
+    }
+
+    visits.value = mapped
   } catch (error) {
     ElMessage.error(error.message || '加载就诊记录失败')
   } finally {
@@ -135,6 +172,7 @@ const getStatusLabel = (status) => ({
   pending: '待就诊',
   confirmed: '已签到',
   processing: '就诊中',
+  unpaid: '待支付',
   completed: '已完成',
   cancelled: '已取消'
 }[status] || '未知')
@@ -143,6 +181,7 @@ const getStatusTagType = (status) => ({
   pending: 'warning',
   confirmed: '',
   processing: 'primary',
+  unpaid: 'danger',
   completed: 'success',
   cancelled: 'info'
 }[status] || 'default')
@@ -193,6 +232,20 @@ const handleComplete = async (row) => {
       ElMessage.error(e.message)
     }
   }
+}
+
+const handleHospitalize = (row) => {
+  router.push({
+    path: '/appoint/hospital',
+    query: {
+      consultationId: row.consultationId,
+      patientId: row.patientId,
+      patientName: row.patientName,
+      doctorId: row.doctorId,
+      deptId: row.deptId,
+      diagnosis: row.diagnosis
+    }
+  })
 }
 
 onMounted(async () => { await loadData() })

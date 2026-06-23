@@ -95,6 +95,20 @@ public class AiConsultationController {
         return ResultUtils.success(sessions, "ok");
     }
 
+    @GetMapping("/session/all")
+    public BaseResponse<?> getAllSessions(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(required = false) String status) {
+        String role = com.backend.common.UserContext.getRole();
+        if (!"admin".equals(role)) {
+            return ResultUtils.error(403, "无权限访问");
+        }
+        log.info("Admin getting all sessions: page={}, pageSize={}, status={}", page, pageSize, status);
+        List<SessionDTO> sessions = aiConsultationService.getAllSessions(page, pageSize, status);
+        return ResultUtils.success(sessions, "ok");
+    }
+
     @GetMapping("/session/{sessionId}/risk")
     public BaseResponse<?> getSessionRisk(@PathVariable String sessionId) {
         log.info("Getting risk assessment for session: {}", sessionId);

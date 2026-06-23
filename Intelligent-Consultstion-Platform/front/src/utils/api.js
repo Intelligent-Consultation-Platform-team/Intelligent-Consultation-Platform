@@ -199,7 +199,17 @@ export const api = {
     create: (data) => request(`${API_BASE_URL}/hospitalization`, {
       method: 'POST',
       data
-    })
+    }),
+    // 分页查询住院列表
+    getPage: (params) => request(`${API_BASE_URL}/hospitalization`, { params }),
+    // 获取住院详情
+    getInfo: (id) => request(`${API_BASE_URL}/hospitalization/${id}`),
+    // 出院
+    discharge: (id) => request(`${API_BASE_URL}/hospitalization/${id}/discharge`, {
+      method: 'PUT'
+    }),
+    // 检查患者是否正在住院
+    checkAdmitted: (patientId) => request(`${API_BASE_URL}/hospitalization/patient/${patientId}/active`)
   },
 
   // 系统公告
@@ -243,6 +253,8 @@ export const api = {
     // 获取全流程数据
     getJourney: () => request(`${API_BASE_URL}/patient/journey`),
     // 获取交易记录
-    getRecords: () => request(`${API_BASE_URL}/patient/records`)
+    getRecords: () => request(`${API_BASE_URL}/patient/records`),
+    // 按姓名搜索患者
+    search: (name) => request(`${API_BASE_URL}/patient/search`, { params: { name } })
   }
 }

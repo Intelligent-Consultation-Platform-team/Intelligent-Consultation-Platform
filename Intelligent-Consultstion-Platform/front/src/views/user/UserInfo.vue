@@ -101,8 +101,18 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
+        <el-form-item v-if="!form.userId" label="角色" prop="role">
+          <el-select v-model="form.role" style="width: 100%">
+            <el-option label="患者" value="patient" />
+            <el-option label="医生" value="doctor" />
+            <el-option label="管理员" value="admin" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="form.status" active-value="1" inactive-value="0" />
+          <el-select v-model="form.status" style="width: 100%">
+            <el-option label="正常" value="active" />
+            <el-option label="停用" value="inactive" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -278,7 +288,7 @@ const handleSubmit = async () => {
         email: form.email,
         password: '123456',
         confirmPassword: '123456',
-        role: 'patient'
+        role: form.role || 'patient'
       })
       ElMessage.success('新增成功，初始密码为123456')
     }

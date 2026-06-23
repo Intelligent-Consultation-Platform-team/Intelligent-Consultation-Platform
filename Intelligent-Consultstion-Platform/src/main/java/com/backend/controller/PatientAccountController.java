@@ -108,6 +108,16 @@ public class PatientAccountController {
     }
 
     /**
+     * 按姓名搜索患者（管理员/医生代挂号时使用）
+     */
+    @GetMapping("/search")
+    public BaseResponse<List<Map<String, Object>>> searchPatients(
+            @RequestParam String name) {
+        List<Map<String, Object>> data = patientAccountService.searchPatients(name);
+        return ResultUtils.success(data);
+    }
+
+    /**
      * 获取患者交易记录（充值 + 缴费）
      */
     @GetMapping("/records")

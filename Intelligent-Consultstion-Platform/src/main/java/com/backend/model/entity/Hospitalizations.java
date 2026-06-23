@@ -1,5 +1,6 @@
 package com.backend.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
@@ -38,8 +39,16 @@ public class Hospitalizations implements Serializable {
 
     private Integer deptId;
 
+    private String wardNumber;
+
+    private String bedNumber;
+
+    private Integer consultationId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Timestamp admissionDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private Timestamp dischargeDate;
 
     private String reason;

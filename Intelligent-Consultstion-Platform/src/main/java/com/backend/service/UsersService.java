@@ -19,4 +19,12 @@ public interface UsersService extends IService<Users> {
      * @return 是否成功
      */
     boolean resetPassword(Integer userId);
+
+    /**
+     * 逻辑删除用户（设置状态为 inactive）
+     *
+     * @param userId 用户ID
+     * @return 是否成功
+     */
+    boolean deleteUser(Integer userId);
 }

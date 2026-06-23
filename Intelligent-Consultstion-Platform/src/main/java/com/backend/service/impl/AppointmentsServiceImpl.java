@@ -263,9 +263,10 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "该排班号源已用完");
         }
 
-        // 解析患者ID
+        // 解析患者ID：患者角色自动获取，管理员/医生从请求体传入
+        String role = UserContext.getRole();
         Integer userId = UserContext.getUserId();
-        if (userId != null) {
+        if ("patient".equals(role) && userId != null) {
             Patients patient = patientsMapper.selectOneByQuery(
                     QueryWrapper.create().eq("user_id", userId));
             if (patient != null) {
@@ -273,7 +274,7 @@ public class AppointmentsServiceImpl extends ServiceImpl<AppointmentsMapper, App
             }
         }
         if (appointments.getPatientId() == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, "请先登录");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请指定就诊患者");
         }
 
         // 防重：同一患者同一排班同一日期已有非取消预约时拒绝

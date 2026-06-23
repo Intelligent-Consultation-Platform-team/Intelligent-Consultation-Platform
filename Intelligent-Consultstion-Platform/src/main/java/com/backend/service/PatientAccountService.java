@@ -53,4 +53,12 @@ public interface PatientAccountService {
      */
     List<Map<String, Object>> getRecords(Integer userId);
 
+    /**
+     * 按姓名搜索患者
+     *
+     * @param name 患者姓名（模糊匹配）
+     * @return 患者列表（含 patientId、姓名、身份证、电话等）
+     */
+    List<Map<String, Object>> searchPatients(String name);
+
 }

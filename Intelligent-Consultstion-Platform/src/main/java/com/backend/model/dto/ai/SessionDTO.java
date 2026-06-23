@@ -10,4 +10,22 @@ public class SessionDTO {
     private String status;
 
     private String createdAt;
+
+    private Integer userId;
+
+    private String username;
+
+    private String chiefComplaint;
+
+    private String riskLevel;
+
+    private String symptomTags;
+
+    private Integer age;
+
+    private String gender;
+
+    private String summary;
+
+    private String suggestion;
 }

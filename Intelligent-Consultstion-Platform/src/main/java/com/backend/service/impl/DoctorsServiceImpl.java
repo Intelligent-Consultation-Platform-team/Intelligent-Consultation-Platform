@@ -1,10 +1,12 @@
 package com.backend.service.impl;
 
+import com.backend.mapper.DepartmentsMapper;
 import com.backend.mapper.DoctorsMapper;
 import com.backend.mapper.UsersMapper;
 import com.backend.model.dto.DoctorAddRequest;
 import com.backend.model.dto.DoctorDTO;
 import com.backend.model.dto.DoctorUpdateRequest;
+import com.backend.model.entity.Departments;
 import com.backend.model.entity.Doctors;
 import com.backend.model.entity.Users;
 import com.backend.service.DoctorsService;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.sql.Timestamp;
 
 /**
@@ -33,6 +36,11 @@ public class DoctorsServiceImpl extends ServiceImpl<DoctorsMapper, Doctors> impl
 
     @Resource
     private UsersService usersService;
+
+    @Resource
+    private DepartmentsMapper departmentsMapper;
+
+    private Map<Integer, String> deptNameCache = null;
 
     @Override
     public List<Doctors> getDoctorsList(Integer deptId, String status) {
@@ -52,10 +60,8 @@ public class DoctorsServiceImpl extends ServiceImpl<DoctorsMapper, Doctors> impl
         if (deptId != null) {
             queryWrapper.eq("dept_id", deptId);
         }
-        if (status != null) {
-            queryWrapper.eq("status", status);
-        }
-        
+        queryWrapper.eq("status", status != null ? status : "available");
+
         List<Doctors> doctorsList = list(queryWrapper);
         
         List<Integer> userIds = doctorsList.stream()
@@ -99,14 +105,12 @@ public class DoctorsServiceImpl extends ServiceImpl<DoctorsMapper, Doctors> impl
     }
 
     private String getDeptName(Integer deptId) {
-        Map<Integer, String> deptMap = new HashMap<>();
-        deptMap.put(1, "内科");
-        deptMap.put(2, "外科");
-        deptMap.put(3, "妇产科");
-        deptMap.put(4, "儿科");
-        deptMap.put(5, "急诊科");
-        deptMap.put(6, "皮肤科");
-        return deptMap.getOrDefault(deptId, "未知科室");
+        if (deptNameCache == null) {
+            List<Departments> allDepts = departmentsMapper.selectAll();
+            deptNameCache = allDepts.stream()
+                    .collect(Collectors.toMap(Departments::getDeptId, Departments::getDeptName));
+        }
+        return deptNameCache.getOrDefault(deptId, deptId != null ? "科室" + deptId : "未分配");
     }
 
     @Override
@@ -124,7 +128,7 @@ public class DoctorsServiceImpl extends ServiceImpl<DoctorsMapper, Doctors> impl
                 .realName(request.getRealName())
                 .phone(request.getPhone())
                 .role("doctor")
-                .status("1")
+                .status("active")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .updatedAt(new Timestamp(System.currentTimeMillis()))
                 .build();
@@ -140,7 +144,7 @@ public class DoctorsServiceImpl extends ServiceImpl<DoctorsMapper, Doctors> impl
                 .title(request.getTitle())
                 .specialty(request.getSpecialty())
                 .bio(request.getBio())
-                .status("1")
+                .status("available")
                 .createdAt(new Timestamp(System.currentTimeMillis()))
                 .updatedAt(new Timestamp(System.currentTimeMillis()))
                 .build();
@@ -176,8 +180,22 @@ public class DoctorsServiceImpl extends ServiceImpl<DoctorsMapper, Doctors> impl
     }
 
     @Override
+    @Transactional
     public boolean deleteDoctor(Long doctorId) {
-        return removeById(doctorId);
+        Doctors doctor = getById(doctorId);
+        if (doctor == null) {
+            return false;
+        }
+        Doctors updateDoctor = Doctors.builder()
+                .doctorId(Math.toIntExact(doctorId))
+                .status("unavailable")
+                .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        boolean result = updateById(updateDoctor);
+        if (result && doctor.getUserId() != null) {
+            usersService.deleteUser(doctor.getUserId());
+        }
+        return result;
     }
 
     @Override

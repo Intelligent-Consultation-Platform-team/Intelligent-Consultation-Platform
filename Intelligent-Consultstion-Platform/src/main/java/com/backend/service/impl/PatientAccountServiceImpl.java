@@ -292,6 +292,41 @@ public class PatientAccountServiceImpl implements PatientAccountService {
         return records;
     }
 
+    @Override
+    public List<Map<String, Object>> searchPatients(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Users> matchedUsers = usersMapper.selectListByQuery(
+                QueryWrapper.create()
+                        .like("real_name", "%" + name.trim() + "%")
+                        .eq("role", "patient")
+        );
+        if (matchedUsers.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Integer> userIds = matchedUsers.stream()
+                .map(Users::getUserId).collect(Collectors.toList());
+        Map<Integer, Patients> patientMap = patientsMapper.selectListByQuery(
+                QueryWrapper.create().in("user_id", userIds)
+        ).stream().collect(Collectors.toMap(Patients::getUserId, p -> p));
+
+        return matchedUsers.stream().map(user -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("userId", user.getUserId());
+            item.put("patientName", user.getRealName());
+            item.put("phone", user.getPhone());
+            Patients p = patientMap.get(user.getUserId());
+            if (p != null) {
+                item.put("patientId", p.getPatientId());
+                item.put("idCard", p.getIdCard());
+                item.put("gender", p.getGender());
+                item.put("age", p.getAge());
+            }
+            return item;
+        }).collect(Collectors.toList());
+    }
+
     private Patients getPatientByUserId(Integer userId) {
         if (userId == null) return null;
         QueryWrapper queryWrapper = QueryWrapper.create().eq("user_id", userId);

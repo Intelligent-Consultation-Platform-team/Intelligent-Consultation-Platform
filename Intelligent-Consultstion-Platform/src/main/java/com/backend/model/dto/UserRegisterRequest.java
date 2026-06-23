@@ -34,6 +34,6 @@ public class UserRegisterRequest {
     private String confirmPassword;
 
     @NotBlank(message = "角色不能为空")
-    @Pattern(regexp = "^(patient|doctor)$", message = "角色必须是patient或doctor")
+    @Pattern(regexp = "^(patient|doctor|admin)$", message = "角色必须是patient、doctor或admin")
     private String role;
 }

@@ -6,39 +6,27 @@ import com.mybatisflex.annotation.Table;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-import java.io.Serial;
-
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- *  科室实体类。
- *
- * @author 佳尔宇柔
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("departments")
-public class Departments implements Serializable {
+@Table("ai_consultation_messages")
+public class AiConsultationMessage implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
+    private String messageId;
 
-    @Id(keyType = KeyType.Auto)
-    private Integer deptId;
+    private String sessionId;
 
-    private String deptName;
+    private String role;
 
-    private String description;
-
-    private String location;
+    private String content;
 
     private Timestamp createdAt;
-
-    private Timestamp updatedAt;
-
 }

@@ -325,3 +325,35 @@ INSERT INTO payment_records (patient_id, hospitalization_id, amount, payment_dat
 -- ALTER TABLE appointments
 --     ADD CONSTRAINT appointments_ibfk_1
 --         FOREIGN KEY (patient_id) REFERENCES patients(patient_id);
+
+-- 预约状态增加"待支付"
+ALTER TABLE appointments MODIFY COLUMN status ENUM('pending', 'confirmed', 'processing', 'unpaid', 'completed', 'cancelled') DEFAULT 'pending';
+
+-- ============================================
+-- AI 问诊会话表
+-- ============================================
+CREATE TABLE ai_consultation_sessions (
+    session_id VARCHAR(50) PRIMARY KEY,
+    user_id INT NOT NULL,
+    chief_complaint TEXT,
+    symptom_tags VARCHAR(500),
+    age INT,
+    gender VARCHAR(10),
+    risk_level VARCHAR(20),
+    status ENUM('active', 'closed') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- AI 问诊消息表
+-- ============================================
+CREATE TABLE ai_consultation_messages (
+    message_id VARCHAR(50) PRIMARY KEY,
+    session_id VARCHAR(50) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    content TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES ai_consultation_sessions(session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

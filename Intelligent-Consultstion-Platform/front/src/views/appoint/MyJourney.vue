@@ -60,12 +60,12 @@
             <template v-else-if="scope.row.paymentStatus === 'paid'">
               <el-tag type="success" size="small">已完成</el-tag>
             </template>
-            <template v-else-if="scope.row.status === 'processing' && scope.row.paymentStatus === 'unpaid'">
+            <template v-else-if="scope.row.status === 'unpaid' || (scope.row.status === 'processing' && scope.row.paymentStatus === 'unpaid')">
               <el-button type="warning" size="small" @click="handlePay(scope.row)">
                 立即缴费
               </el-button>
             </template>
-            <template v-else-if="scope.row.status === 'processing'">
+            <template v-else-if="scope.row.status === 'processing' && scope.row.paymentStatus !== 'unpaid'">
               <el-button type="primary" size="small" plain disabled>
                 就诊中
               </el-button>
@@ -214,9 +214,9 @@ const steps = computed(() => {
   const counts = { pending: 0, processing: 0, unpaid: 0, completed: 0 }
   items.value.forEach(item => {
     if (item.status === 'pending' || item.status === 'confirmed') counts.pending++
-    else if (item.status === 'processing' && item.paymentStatus !== 'unpaid' && item.paymentStatus !== 'paid') counts.processing++
-    else if (item.status === 'processing' && item.paymentStatus === 'unpaid') counts.unpaid++
-    else if (item.paymentStatus === 'paid') counts.completed++
+    else if (item.status === 'unpaid' || (item.status === 'processing' && item.paymentStatus === 'unpaid')) counts.unpaid++
+    else if (item.paymentStatus === 'paid' || item.status === 'completed') counts.completed++
+    else if (item.status === 'processing') counts.processing++
   })
   return [
     { key: 'all', label: '全部', count: items.value.length },
@@ -231,14 +231,14 @@ const filteredItems = computed(() => {
   if (activeStep.value === 'all') return items.value
   if (activeStep.value === 'pending') return items.value.filter(i => i.status === 'pending' || i.status === 'confirmed')
   if (activeStep.value === 'processing') return items.value.filter(i => i.status === 'processing' && i.paymentStatus !== 'unpaid' && i.paymentStatus !== 'paid')
-  if (activeStep.value === 'unpaid') return items.value.filter(i => i.status === 'processing' && i.paymentStatus === 'unpaid')
-  if (activeStep.value === 'completed') return items.value.filter(i => i.paymentStatus === 'paid')
+  if (activeStep.value === 'unpaid') return items.value.filter(i => i.status === 'unpaid' || (i.status === 'processing' && i.paymentStatus === 'unpaid'))
+  if (activeStep.value === 'completed') return items.value.filter(i => i.paymentStatus === 'paid' || i.status === 'completed')
   return items.value
 })
 
 const getDisplayStatus = (row) => {
   if (row.paymentStatus === 'paid') return 'completed'
-  if (row.status === 'processing' && row.paymentStatus === 'unpaid') return 'unpaid'
+  if (row.status === 'unpaid' || (row.status === 'processing' && row.paymentStatus === 'unpaid')) return 'unpaid'
   return row.status
 }
 

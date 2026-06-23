@@ -160,7 +160,11 @@ public class SchedulesServiceImpl extends ServiceImpl<SchedulesMapper, Schedules
 
     @Override
     public boolean deleteSchedule(Long scheduleId) {
-        return removeById(scheduleId);
+        Schedules schedule = Schedules.builder()
+                .scheduleId(Math.toIntExact(scheduleId))
+                .status("inactive")
+                .build();
+        return updateById(schedule);
     }
 
     @Override

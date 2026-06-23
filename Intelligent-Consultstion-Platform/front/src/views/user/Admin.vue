@@ -68,7 +68,8 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
 
-const currentRole = localStorage.getItem('role') || ''
+const getSession = () => { try { return JSON.parse(localStorage.getItem('demo_session') || '{}') } catch { return {} } }
+const currentRole = getSession().role || ''
 const canManage = computed(() => currentRole === 'admin')
 const filter = reactive({ username: '', realName: '' })
 const pagination = reactive({ current: 1, size: 10, total: 0 })
@@ -118,7 +119,7 @@ const resetForm = () => { form.userId = ''; form.username = ''; form.realName = 
 const handleAdd = () => { if (!canManage.value) return ElMessage.warning('无操作权限'); resetForm(); dialogTitle.value = '新增管理员'; dialogVisible.value = true }
 const handleEdit = (row) => { if (!canManage.value) return ElMessage.warning('无操作权限'); rowSubmitting.value = row.id; resetForm(); form.userId = row.id; form.username = row.username; form.realName = row.realName; form.phone = row.phone; form.email = row.email; dialogTitle.value = '编辑管理员'; dialogVisible.value = true; rowSubmitting.value = '' }
 const handleDelete = async (id) => { if (!canManage.value) return ElMessage.warning('无操作权限'); try { rowDeleting.value = id; await api.users.remove(id); ElMessage.success('删除成功'); await loadData() } catch (e) { ElMessage.error(e?.message || '删除失败') } finally { rowDeleting.value = '' } }
-const handleSubmit = async () => { if (!formRef.value || submitLoading.value) return; try { await formRef.value.validate(); submitLoading.value = true; if (form.userId) { await api.users.update({ id: form.userId, username: form.username, realName: form.realName, phone: form.phone, email: form.email, role: 'admin' }); ElMessage.success('编辑成功') } else { await api.auth.register({ username: form.username, password: form.password, realName: form.realName, phone: form.phone, email: form.email, role: 'admin' }); ElMessage.success('新增成功') } dialogVisible.value = false; await loadData() } catch (e) { if (e?.message) ElMessage.error(e.message) } finally { submitLoading.value = false } }
+const handleSubmit = async () => { if (!formRef.value || submitLoading.value) return; try { await formRef.value.validate(); submitLoading.value = true; if (form.userId) { await api.users.update({ userId: form.userId, username: form.username, realName: form.realName, phone: form.phone, email: form.email, role: 'admin' }); ElMessage.success('编辑成功') } else { await api.auth.register({ username: form.username, password: form.password, realName: form.realName, phone: form.phone, email: form.email, role: 'admin' }); ElMessage.success('新增成功') } dialogVisible.value = false; await loadData() } catch (e) { if (e?.message) ElMessage.error(e.message) } finally { submitLoading.value = false } }
 const handleSizeChange = (size) => { pagination.size = size; pagination.current = 1 }
 const handleCurrentChange = (current) => { pagination.current = current }
 onMounted(loadData)

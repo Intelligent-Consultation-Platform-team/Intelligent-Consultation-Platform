@@ -194,6 +194,7 @@ public class ConsultationsServiceImpl extends ServiceImpl<ConsultationsMapper, C
             item.put("consultationId", c.getConsultationId());
             item.put("appointmentId", c.getAppointmentId());
             item.put("doctorId", c.getDoctorId());
+            item.put("deptId", doctor.getDeptId());
             item.put("patientId", c.getPatientId());
             item.put("symptoms", c.getSymptoms());
             item.put("diagnosis", c.getDiagnosis());
@@ -257,7 +258,15 @@ public class ConsultationsServiceImpl extends ServiceImpl<ConsultationsMapper, C
 
         boolean exists = paymentRecordsMapper.selectCountByQuery(
                 QueryWrapper.create().eq("consultation_id", consultationId)) > 0;
-        if (exists) return;
+        if (exists) {
+            // 仍需要更新预约状态
+            Appointments apt = appointmentsMapper.selectOneById(consultation.getAppointmentId());
+            if (apt != null && !"unpaid".equals(apt.getStatus())) {
+                apt.setStatus("unpaid");
+                appointmentsMapper.update(apt);
+            }
+            return;
+        }
 
         java.math.BigDecimal finalAmount = (amount != null && amount.compareTo(java.math.BigDecimal.ZERO) > 0)
                 ? amount
@@ -276,6 +285,13 @@ public class ConsultationsServiceImpl extends ServiceImpl<ConsultationsMapper, C
                 .updatedAt(new Timestamp(System.currentTimeMillis()))
                 .build();
         paymentRecordsMapper.insert(payment);
+
+        // 更新预约状态为待支付
+        Appointments apt = appointmentsMapper.selectOneById(consultation.getAppointmentId());
+        if (apt != null) {
+            apt.setStatus("unpaid");
+            appointmentsMapper.update(apt);
+        }
     }
 
     /**

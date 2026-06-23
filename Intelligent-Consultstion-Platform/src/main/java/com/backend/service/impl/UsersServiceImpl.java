@@ -6,11 +6,13 @@ import com.backend.exception.BusinessException;
 import com.backend.exception.ErrorCode;
 import com.backend.mapper.DoctorsMapper;
 import com.backend.mapper.PatientsMapper;
+import com.backend.mapper.AdminsMapper;
 import com.backend.mapper.UsersMapper;
 import com.backend.model.dto.UserLoginRequest;
 import com.backend.model.dto.UserRegisterRequest;
 import com.backend.model.entity.Doctors;
 import com.backend.model.entity.Patients;
+import com.backend.model.entity.Admins;
 import com.backend.model.entity.Users;
 import com.backend.service.UsersService;
 import com.backend.utils.JwtUtils;
@@ -35,6 +37,9 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
 
     @Autowired
     private PatientsMapper patientsMapper;
+
+    @Autowired
+    private AdminsMapper adminsMapper;
 
     @Override
     public Long userRegister(UserRegisterRequest userRegisterRequest) {
@@ -83,8 +88,8 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入密码不一致");
         }
 
-        if (!role.matches("^(patient|doctor)$")) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "角色必须是patient或doctor");
+        if (!role.matches("^(patient|doctor|admin)$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "角色必须是patient、doctor或admin");
         }
 
         QueryWrapper queryWrapper = QueryWrapper.create()
@@ -125,6 +130,15 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         boolean saved = save(user);
         if (!saved) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败");
+        }
+
+        if ("admin".equals(role)) {
+            Admins admin = Admins.builder()
+                    .userId(user.getUserId())
+                    .createdAt(new Timestamp(System.currentTimeMillis()))
+                    .updatedAt(new Timestamp(System.currentTimeMillis()))
+                    .build();
+            adminsMapper.insert(admin);
         }
 
         if ("doctor".equals(role)) {
@@ -204,6 +218,19 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, Users> implements
         Users user = Users.builder()
                 .userId(userId)
                 .password(encryptedPassword)
+                .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        return updateById(user);
+    }
+
+    @Override
+    public boolean deleteUser(Integer userId) {
+        if (userId == null) {
+            return false;
+        }
+        Users user = Users.builder()
+                .userId(userId)
+                .status("inactive")
                 .updatedAt(new Timestamp(System.currentTimeMillis()))
                 .build();
         return updateById(user);

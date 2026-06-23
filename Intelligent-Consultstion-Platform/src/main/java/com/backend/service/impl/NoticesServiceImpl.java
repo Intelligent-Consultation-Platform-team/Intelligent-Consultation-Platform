@@ -41,7 +41,12 @@ public class NoticesServiceImpl extends ServiceImpl<NoticesMapper, Notices> impl
 
     @Override
     public boolean deleteNotice(Long noticeId) {
-        return removeById(noticeId);
+        Notices notice = Notices.builder()
+                .noticeId(Math.toIntExact(noticeId))
+                .status("inactive")
+                .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        return updateById(notice);
     }
 
     @Override
