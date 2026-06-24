@@ -43,15 +43,14 @@ const summary = reactive({ chiefComplaint: '', text: '', suggestion: '' })
 const loadDetail = async () => {
   try {
     const detail = await aiConsultationApi.getSessionDetail(sessionId)
-    const data = detail?.data || detail
-    riskLevel.value = data?.riskLevel || 'medium'
-    status.value = data?.status || 'closed'
-    summary.chiefComplaint = data?.chiefComplaint || ''
-    summary.text = data?.summary || ''
-    summary.suggestion = data?.suggestion || ''
+    riskLevel.value = detail?.riskLevel || 'medium'
+    status.value = detail?.status || 'closed'
+    summary.chiefComplaint = detail?.chiefComplaint || ''
+    summary.text = detail?.summary || ''
+    summary.suggestion = detail?.suggestion || ''
 
-    const list = await aiConsultationApi.getSessionMessages(sessionId, { page: 1, pageSize: 50 })
-    messages.value = list?.list || list?.data?.list || []
+    const list = await aiConsultationApi.getSessionMessages(sessionId, { page: 1, pageSize: 200 })
+    messages.value = Array.isArray(list) ? list : (list?.records || list?.list || [])
   } catch (error) {
     ElMessage.error(error.message || '加载详情失败')
   }

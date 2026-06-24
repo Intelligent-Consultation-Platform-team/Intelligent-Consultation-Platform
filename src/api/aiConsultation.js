@@ -27,6 +27,10 @@ export const aiConsultationApi = {
     params,
   }),
 
+  getAllSessions: (params) => request('/api/ai-consultation/session/all', {
+    params,
+  }),
+
   getSessionRisk: (sessionId) => request(`/api/ai-consultation/session/${sessionId}/risk`),
 
   uploadFile: (data) => request('/api/ai-consultation/upload', {

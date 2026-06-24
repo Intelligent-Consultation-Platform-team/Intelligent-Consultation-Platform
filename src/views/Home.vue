@@ -75,6 +75,29 @@
       </el-col>
     </el-row>
 
+    <el-card v-if="notices.length > 0" shadow="never" class="notices-card">
+      <template #header>
+        <div class="card-header">
+          <span>系统公告</span>
+        </div>
+      </template>
+      <el-timeline v-loading="noticesLoading">
+        <el-timeline-item
+          v-for="item in notices"
+          :key="item.noticeId"
+          :timestamp="formatDate(item.publishDate)"
+          placement="top"
+        >
+          <el-card shadow="never" class="notice-item-card">
+            <h4 class="notice-title">{{ item.title }}</h4>
+            <p class="notice-content">{{ item.content }}</p>
+            <span class="notice-author">发布者：{{ item.author || '系统' }}</span>
+          </el-card>
+        </el-timeline-item>
+      </el-timeline>
+      <el-empty v-if="!noticesLoading && notices.length === 0" description="暂无公告" />
+    </el-card>
+
     <el-card shadow="never" class="recent-activities">
       <template #header>
         <div class="card-header">
@@ -156,43 +179,106 @@ const roleWelcomeText = computed(() =>
 const userCount = ref(0)
 const doctorCount = ref(0)
 const appointmentCount = ref(0)
+const patientPendingCount = ref(0)
+const patientRecordCount = ref(0)
+const doctorTodayCount = ref(0)
+const doctorPendingCount = ref(0)
+const doctorScheduleCount = ref(0)
+const doctorCompletedCount = ref(0)
+
 const patientStats = computed(() => [
   { label: '我的预约', value: appointmentCount.value },
-  { label: '待就诊', value: 0 },
-  { label: '我的记录', value: 0 },
+  { label: '待就诊', value: patientPendingCount.value },
+  { label: '我的记录', value: patientRecordCount.value },
 ])
 const doctorStats = computed(() => [
-  { label: '今日接诊', value: 0 },
-  { label: '待处理预约', value: 0 },
-  { label: '排班时段', value: 0 },
+  { label: '今日接诊', value: doctorTodayCount.value },
+  { label: '待处理预约', value: doctorPendingCount.value },
+  { label: '排班时段', value: doctorScheduleCount.value },
 ])
 const doctorDashboard = computed(() => [
-  { label: '今日接诊', value: 0 },
-  { label: '待处理预约', value: 0 },
-  { label: '已完成就诊', value: 0 },
+  { label: '今日接诊', value: doctorTodayCount.value },
+  { label: '待处理预约', value: doctorPendingCount.value },
+  { label: '已完成就诊', value: doctorCompletedCount.value },
 ])
+
+// 公告
+const notices = ref([])
+const noticesLoading = ref(false)
 
 // 最近活动
 const recentActivities = ref([])
 const activitiesLoading = ref(false)
 
+// 加载公告
+const loadNotices = async () => {
+  noticesLoading.value = true
+  try {
+    const data = await api.notice.getList()
+    notices.value = Array.isArray(data) ? data : []
+  } catch (error) {
+    console.error('加载公告失败:', error)
+    notices.value = []
+  } finally {
+    noticesLoading.value = false
+  }
+}
+
 // 加载统计数据
 const loadStatistics = async () => {
   try {
-    // 获取用户总数
+    const session = getSession()
+
+    // 管理员统计
     const usersData = await api.users.getList()
     userCount.value = Array.isArray(usersData) ? usersData.length : 0
 
-    // 获取医生列表
     const doctorsData = await api.doctors.getList()
     const doctors = Array.isArray(doctorsData) ? doctorsData : []
     doctorCount.value = doctors.length
 
-    // 如果是患者，加载预约数量
-    const session = getSession()
-    if (session?.userId && isPatient.value) {
-      const appointmentsData = await api.appointment.getPatientList(session.userId)
-      appointmentCount.value = Array.isArray(appointmentsData) ? appointmentsData.length : 0
+    // 医生统计
+    if (isDoctor.value) {
+      try {
+        const consultations = await api.consultation.getDoctorList()
+        const consultList = Array.isArray(consultations) ? consultations : []
+        const today = new Date().toLocaleDateString('zh-CN')
+        doctorTodayCount.value = consultList.filter(c => {
+          const d = c.consultationDate ? new Date(c.consultationDate).toLocaleDateString('zh-CN') : null
+          return d === today
+        }).length
+        doctorCompletedCount.value = consultList.filter(c => c.status === 'completed').length
+      } catch { doctorTodayCount.value = 0; doctorCompletedCount.value = 0 }
+
+      try {
+        const appointments = await api.appointment.getDoctorList()
+        const apptList = Array.isArray(appointments) ? appointments : []
+        doctorPendingCount.value = apptList.filter(a =>
+          a.status === 'pending' || a.status === 'confirmed'
+        ).length
+      } catch { doctorPendingCount.value = 0 }
+
+      try {
+        const schedules = await api.schedules.getList()
+        doctorScheduleCount.value = Array.isArray(schedules) ? schedules.length : 0
+      } catch { doctorScheduleCount.value = 0 }
+    }
+
+    // 患者统计
+    if (isPatient.value && session?.userId) {
+      try {
+        const appointmentsData = await api.appointment.getPatientList(session.userId)
+        const apptList = Array.isArray(appointmentsData) ? appointmentsData : []
+        appointmentCount.value = apptList.length
+        patientPendingCount.value = apptList.filter(a =>
+          a.status === 'pending' || a.status === 'confirmed'
+        ).length
+      } catch { appointmentCount.value = 0; patientPendingCount.value = 0 }
+
+      try {
+        const journeyData = await api.patient.getJourney()
+        patientRecordCount.value = (journeyData?.items || []).length
+      } catch { patientRecordCount.value = 0 }
     }
   } catch (error) {
     console.error('加载统计数据失败:', error)
@@ -230,6 +316,11 @@ const loadRecentActivities = async () => {
 }
 
 const getTypeTagType = (type) => ({ 登录: 'success', 预约: 'primary', 注册: 'info', 操作: 'warning' }[type] || 'default')
+const formatDate = (timestamp) => {
+  if (!timestamp) return ''
+  const d = new Date(timestamp)
+  return d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
 const goAiConsultation = () => router.push('/ai-consultation')
 
 onMounted(() => {
@@ -245,6 +336,7 @@ onMounted(() => {
   // 加载数据
   loadStatistics()
   loadRecentActivities()
+  loadNotices()
 })
 </script>
 
@@ -354,6 +446,35 @@ onMounted(() => {
   margin-top: 4px;
   font-size: 13px;
   color: #6b7280;
+}
+
+.notices-card {
+  margin-top: 20px;
+  border-radius: 16px;
+}
+
+.notice-item-card {
+  border-radius: 12px;
+  border: 1px solid #e4e7ed;
+}
+
+.notice-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2d3d;
+}
+
+.notice-content {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.notice-author {
+  font-size: 12px;
+  color: #a8abb2;
 }
 
 .recent-activities {

@@ -69,7 +69,7 @@
       </div>
       <el-form ref="formRef" :model="bookForm" :rules="rules" label-width="80px" style="margin-top: 20px">
         <el-form-item label="预约日期" prop="date">
-          <el-date-picker v-model="bookForm.date" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" style="width: 100%" />
+          <el-date-picker v-model="bookForm.date" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" style="width: 100%" :disabled-date="disabledDate" />
         </el-form-item>
         <el-form-item label="症状描述" prop="symptoms">
           <el-input v-model="bookForm.symptoms" type="textarea" :rows="3" maxlength="200" show-word-limit placeholder="请简要描述您的症状（2-200字）" />
@@ -115,10 +115,27 @@ const rules = {
   ]
 }
 
-const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
 const formatDayOfWeek = (day) => {
   return dayNames[parseInt(day) - 1] || '未知'
+}
+
+const disabledDate = (date) => {
+  if (!selectedSchedule.value) return true
+  const scheduleDay = parseInt(selectedSchedule.value.dayOfWeek)
+  // 只允许选择与排班星期几匹配的日期（JS: 0=周日, 需转换）
+  const jsDay = scheduleDay === 7 ? 0 : scheduleDay
+  if (date.getDay() !== jsDay) return true
+  // 不能选过去
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (date < today) return true
+  // 只能选未来15天内
+  const maxDate = new Date(today)
+  maxDate.setDate(maxDate.getDate() + 15)
+  if (date > maxDate) return true
+  return false
 }
 
 const loadDepartments = async () => {
@@ -155,9 +172,27 @@ const clearFilter = () => {
   loadSchedules()
 }
 
+const getNextMatchingDate = (scheduleDay) => {
+  // scheduleDay: 1=周一...7=周日, JS day: 0=周日
+  const jsTarget = scheduleDay === 7 ? 0 : scheduleDay
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  for (let i = 0; i <= 15; i++) {
+    const d = new Date(today)
+    d.setDate(d.getDate() + i)
+    if (d.getDay() === jsTarget) {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    }
+  }
+  return ''
+}
+
 const openBookDialog = (row) => {
   selectedSchedule.value = row
-  bookForm.date = filterForm.date || ''
+  bookForm.date = getNextMatchingDate(parseInt(row.dayOfWeek))
   bookForm.symptoms = ''
   dialogVisible.value = true
 }
@@ -182,11 +217,8 @@ const submitBooking = async () => {
   submitting.value = true
   try {
     await api.appointment.create({
-      patientId: session.userId,
-      doctorId: selectedSchedule.value.doctorId,
       scheduleId: selectedSchedule.value.scheduleId,
       appointmentDate: bookForm.date,
-      appointmentTime: selectedSchedule.value.startTime,
       symptoms: bookForm.symptoms.trim()
     })
     ElMessage.success('预约成功！请按时就诊')

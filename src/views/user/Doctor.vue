@@ -205,11 +205,8 @@ const loadData = async () => {
     if (filter.department) {
       params.deptId = filter.department
     }
-    if (filter.name) {
-      params.name = filter.name
-    }
     const data = await api.doctors.getList(params)
-    doctors.value = (data || []).map(item => ({
+    let list = (data || []).map(item => ({
       id: item.doctorId ?? item.id,
       userId: item.userId,
       name: item.realName ?? item.name,
@@ -220,6 +217,11 @@ const loadData = async () => {
       specialty: item.specialty || '-',
       phone: item.phone || '-'
     }))
+    if (filter.name) {
+      const keyword = filter.name.toLowerCase()
+      list = list.filter(item => (item.name || '').toLowerCase().includes(keyword))
+    }
+    doctors.value = list
     pagination.total = doctors.value.length
   } catch (error) {
     ElMessage.error(error.message || '加载医生失败')
