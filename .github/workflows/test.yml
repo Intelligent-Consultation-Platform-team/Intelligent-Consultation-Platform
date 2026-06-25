@@ -1,0 +1,47 @@
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Run backend tests
+        working-directory: Intelligent-Consultstion-Platform
+        run: mvn test
+      - name: Upload JaCoCo report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: Intelligent-Consultstion-Platform/target/site/jacoco
+
+  frontend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: Intelligent-Consultstion-Platform/front/package-lock.json
+      - name: Install dependencies
+        working-directory: Intelligent-Consultstion-Platform/front
+        run: npm ci
+      - name: Run Vitest
+        working-directory: Intelligent-Consultstion-Platform/front
+        run: npm test
+      - name: Install Playwright browsers
+        working-directory: Intelligent-Consultstion-Platform/front
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright E2E
+        working-directory: Intelligent-Consultstion-Platform/front
+        run: npm run test:e2e
