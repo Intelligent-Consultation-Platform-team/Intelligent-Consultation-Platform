@@ -1,0 +1,57 @@
+package com.backend.service.impl;
+
+import com.backend.mapper.NoticesMapper;
+import com.backend.model.entity.Notices;
+import com.backend.service.NoticesService;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.sql.Timestamp;
+
+/**
+ *  系统公告服务实现类。
+ *
+ * @author 佳尔宇柔
+ */
+@Service
+public class NoticesServiceImpl extends ServiceImpl<NoticesMapper, Notices> implements NoticesService {
+
+    @Override
+    public List<Notices> getNoticesList() {
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .eq("status", "active");
+        return list(queryWrapper);
+    }
+
+    @Override
+    public boolean addNotice(Notices notices) {
+        notices.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        notices.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        return save(notices);
+    }
+
+    @Override
+    public boolean updateNotice(Notices notices) {
+        notices.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        return updateById(notices);
+    }
+
+    @Override
+    public boolean deleteNotice(Long noticeId) {
+        Notices notice = Notices.builder()
+                .noticeId(Math.toIntExact(noticeId))
+                .status("inactive")
+                .updatedAt(new Timestamp(System.currentTimeMillis()))
+                .build();
+        return updateById(notice);
+    }
+
+    @Override
+    public Notices getNoticeById(Long noticeId) {
+        return getById(noticeId);
+    }
+
+}

@@ -1,0 +1,31 @@
+package com.backend.config;
+
+import com.backend.interceptor.TokenInterceptor;
+import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    @Resource
+    private TokenInterceptor tokenInterceptor;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(tokenInterceptor)
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/auth/register",
+                        "/auth/login",
+                        "/generate-password",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/doc.html",
+                        "/webjars/**",
+                        "/favicon.ico"
+                );
+    }
+}

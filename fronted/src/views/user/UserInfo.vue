@@ -43,22 +43,22 @@
         <el-table-column prop="realName" label="姓名" />
         <el-table-column prop="role" label="角色标识" width="120">
           <template #default="scope">
-            <el-tag type="info">{{ scope.row.role.toUpperCase() }}</el-tag>
+            <el-tag :type="scope.row.role === 'admin' ? 'danger' : scope.row.role === 'doctor' ? 'warning' : 'success'">
+              {{ scope.row.role === 'admin' ? '管理员' : scope.row.role === 'doctor' ? '医生' : '患者' }}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="phone" label="电话" />
         <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="level" label="用户等级" width="120">
-          <template #default="scope">
-            <el-tag type="success">{{ scope.row.level }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">
               编辑
             </el-button>
-            <el-button type="danger" size="small" @click="handleDelete(scope.row.id)" style="background-color: #ff7875; border-color: #ff7875;">
+            <el-button type="warning" size="small" @click="handleResetPassword(scope.row.userId)">
+              重置密码
+            </el-button>
+            <el-button type="danger" size="small" @click="handleDelete(scope.row.userId)" style="background-color: #ff7875; border-color: #ff7875;">
               删除
             </el-button>
           </template>
@@ -101,16 +101,18 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="form.email" placeholder="请输入邮箱" />
         </el-form-item>
-        <el-form-item label="密码" prop="password" v-if="!form.id">
-          <el-input
-            v-model="form.password"
-            type="password"
-            placeholder="请输入密码"
-            show-password
-          />
+        <el-form-item v-if="!form.userId" label="角色" prop="role">
+          <el-select v-model="form.role" style="width: 100%">
+            <el-option label="患者" value="patient" />
+            <el-option label="医生" value="doctor" />
+            <el-option label="管理员" value="admin" />
+          </el-select>
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="form.status" active-value="1" inactive-value="0" />
+          <el-select v-model="form.status" style="width: 100%">
+            <el-option label="正常" value="active" />
+            <el-option label="停用" value="inactive" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -127,6 +129,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
 
 const filter = reactive({
   keyword: ''
@@ -139,20 +142,19 @@ const pagination = reactive({
 })
 
 const users = ref([])
+const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增用户')
 const formRef = ref()
 const multipleSelection = ref([])
 const form = reactive({
-  id: '',
+  userId: '',
   username: '',
   realName: '',
   phone: '',
   email: '',
-  password: '',
-  role: 'user',
-  level: 100,
-  status: 1
+  role: 'patient',
+  status: 'active'
 })
 
 const rules = {
@@ -169,104 +171,135 @@ const rules = {
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
   ]
 }
 
-const loadData = () => {
-  // 模拟数据
-  users.value = [
-    {
-      id: 1,
-      username: 'zhangsan',
-      realName: '张三',
-      phone: '13877889922',
-      email: 'zhangsan@oxrm.com',
-      role: 'user',
-      level: 110,
-      avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-      status: 1
-    },
-    {
-      id: 2,
-      username: 'lisi',
-      realName: '李四',
-      phone: '18899990000',
-      email: 'lisi@oxrm.com',
-      role: 'user',
-      level: 120,
-      avatar: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-      status: 1
+const loadData = async () => {
+  loading.value = true
+  try {
+    const params = { page: pagination.current, size: pagination.size }
+    if (filter.keyword) {
+      params.keyword = filter.keyword
     }
-  ]
-  pagination.total = users.value.length
+    const data = await api.users.getPage(params)
+    if (data && data.records) {
+      users.value = data.records
+      pagination.total = data.total || data.records.length
+    } else if (Array.isArray(data)) {
+      users.value = data
+      pagination.total = data.length
+    }
+  } catch (error) {
+    ElMessage.error(error?.message || '加载用户失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSelectionChange = (val) => {
   multipleSelection.value = val
 }
 
-const handleBatchDelete = () => {
+// 批量删除（逐个删除）
+const handleBatchDelete = async () => {
   if (multipleSelection.value.length === 0) {
     ElMessage.warning('请选择要删除的用户')
     return
   }
-  ElMessage.success('批量删除成功')
-  loadData()
+  try {
+    const ids = multipleSelection.value.map(item => item.id || item.userId)
+    for (const id of ids) {
+      await api.users.remove(id)
+    }
+    ElMessage.success('批量删除成功')
+    await loadData()
+  } catch (error) {
+    ElMessage.error(error?.message || '删除失败')
+  }
 }
 
-const handleSearch = () => {
-  ElMessage.success('查询成功')
-  loadData()
+const handleSearch = async () => {
+  pagination.current = 1
+  await loadData()
 }
 
-const resetFilter = () => {
-  filter.username = ''
-  filter.realName = ''
-  loadData()
+const resetFilter = async () => {
+  filter.keyword = ''
+  pagination.current = 1
+  await loadData()
 }
 
 const handleAdd = () => {
-  form.id = ''
+  form.userId = ''
   form.username = ''
   form.realName = ''
   form.phone = ''
   form.email = ''
-  form.password = ''
-  form.status = 1
+  form.role = 'patient'
+  form.status = 'active'
   dialogTitle.value = '新增用户'
   dialogVisible.value = true
 }
 
 const handleEdit = (row) => {
-  form.id = row.id
+  form.userId = row.userId
   form.username = row.username
   form.realName = row.realName
   form.phone = row.phone
   form.email = row.email
-  form.password = ''
+  form.role = row.role
   form.status = row.status
   dialogTitle.value = '编辑用户'
   dialogVisible.value = true
 }
 
-const handleDelete = (id) => {
-  ElMessage.success('删除成功')
-  loadData()
+const handleDelete = async (id) => {
+  try {
+    await api.users.remove(id)
+    ElMessage.success('删除成功')
+    await loadData()
+  } catch (error) {
+    ElMessage.error(error?.message || '删除失败')
+  }
+}
+
+const handleResetPassword = async (userId) => {
+  try {
+    await api.users.resetPassword({ userId })
+    ElMessage.success('密码已重置为123456')
+    await loadData()
+  } catch (error) {
+    ElMessage.error(error?.message || '重置密码失败')
+  }
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.success('保存成功')
+    if (form.userId) {
+      await api.users.update({ ...form, userId: form.userId })
+      ElMessage.success('编辑成功')
+    } else {
+      await api.auth.register({
+        username: form.username,
+        realName: form.realName,
+        phone: form.phone,
+        email: form.email,
+        password: '123456',
+        confirmPassword: '123456',
+        role: form.role || 'patient'
+      })
+      ElMessage.success('新增成功，初始密码为123456')
+    }
     dialogVisible.value = false
-    loadData()
-  } catch {
-    ElMessage.warning('请完善表单信息')
+    await loadData()
+  } catch (error) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.warning('请完善表单信息')
+    }
   }
 }
 

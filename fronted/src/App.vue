@@ -87,7 +87,23 @@
               <div class="welcome">欢迎，{{ currentUser.realName || currentUser.username }}</div>
               <div class="role">当前角色：{{ roleText[currentUser.role] || '未知' }}</div>
             </div>
-            <el-button type="danger" plain @click="logout">退出登录</el-button>
+            <div class="header-actions">
+              <el-button text @click="botVisible = !botVisible">
+                {{ botVisible ? '隐藏 AI 助手' : '显示 AI 助手' }}
+              </el-button>
+              <el-dropdown trigger="hover" @command="handleUserCommand">
+                <span class="user-dropdown-link">
+                  {{ currentUser.realName || currentUser.username }}
+                  <el-icon><ArrowDown /></el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="profile">个人信息</el-dropdown-item>
+                    <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </el-header>
 
           <el-main class="main">
@@ -95,6 +111,8 @@
           </el-main>
         </el-container>
       </el-container>
+
+      <ConsultationFloatingBot v-model:visible="botVisible" />
     </div>
   </div>
 </template>
@@ -102,7 +120,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
+import { ArrowDown } from '@element-plus/icons-vue'
 import { useRoute, useRouter } from 'vue-router'
+import ConsultationFloatingBot from './components/aiConsultation/ConsultationFloatingBot.vue'
 import { api } from './utils/api'
 import { clearSession, getSession, isSessionExpired, setSession } from './utils/session'
 
@@ -112,6 +132,7 @@ const formRef = ref()
 const loading = ref(false)
 const activeTab = ref(route.path === '/auth/register' ? 'register' : 'login')
 const isAuthenticated = ref(false)
+const botVisible = ref(true)
 
 const currentUser = reactive({ username: '', realName: '', role: '' })
 const formModel = reactive({ username: '', realName: '', phone: '', email: '', password: '', confirmPassword: '', role: '' })
@@ -132,6 +153,7 @@ const normalizeRole = (role) => {
 
 const menuConfig = [
   { index: 'home', label: '系统首页', path: '/home', roles: ['admin', 'doctor', 'patient'] },
+  { index: 'ai-consultation', label: 'AI 问诊', path: '/ai-consultation', roles: ['admin', 'doctor', 'patient'] },
   {
     index: 'manage',
     label: '信息管理',
@@ -150,6 +172,8 @@ const menuConfig = [
     roles: ['admin', 'doctor', 'patient'],
     children: [
       { index: 'book', label: '预约挂号', path: '/appoint/book', roles: ['patient'] },
+      { index: 'my-journey', label: '我的流程', path: '/appoint/my-journey', roles: ['patient'] },
+      { index: 'recharge', label: '账户充值', path: '/user/recharge', roles: ['patient'] },
       { index: 'patient-book', label: '患者挂号', path: '/appoint/patient-book', roles: ['admin', 'doctor'] },
       { index: 'visit', label: '患者就诊', path: '/appoint/visit', roles: ['doctor'] },
       { index: 'hospital', label: '住院登记', path: '/appoint/hospital', roles: ['admin', 'doctor'] },
@@ -196,11 +220,11 @@ const rules = computed(() => ({
   ],
   realName: isRegister.value ? [
     { required: true, message: '请输入真实姓名', trigger: 'blur' },
-    { min: 2, max: 20, message: '真实姓名长度为 2-20 位', trigger: 'blur' }
+    { min: 2, max: 20, message: '真实姓名长度为 2-20 位', trigger: 'blur' },
   ] : [],
   phone: isRegister.value ? [
     { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' },
   ] : [],
   email: isRegister.value
     ? [
@@ -257,14 +281,14 @@ const fillDemo = () => {
 
 const handleSubmit = async () => {
   if (!formRef.value || loading.value) return
+  loading.value = true
   try {
     await formRef.value.validate()
-    loading.value = true
 
     if (isRegister.value) {
       const registerData = {
         username: formModel.username.trim(),
-        nickname: formModel.realName.trim(),
+        realName: formModel.realName.trim(),
         phone: formModel.phone.trim(),
         email: formModel.email.trim(),
         password: formModel.password,
@@ -284,7 +308,12 @@ const handleSubmit = async () => {
       password: formModel.password,
     })
 
-    const user = data?.user || data?.data || {}
+    if (!data || (!data.user && !data.token)) {
+      ElMessage.error(data?.message || '登录失败，请检查用户名和密码')
+      return
+    }
+
+    const user = data?.user || {}
     currentUser.username = user.username || formModel.username.trim()
     currentUser.realName = user.realName || user.nickname || user.username || formModel.username.trim()
     currentUser.role = normalizeRole(user.role)
@@ -293,6 +322,7 @@ const handleSubmit = async () => {
       username: currentUser.username,
       realName: currentUser.realName,
       role: currentUser.role,
+      userId: user.userId,
       token: data?.token || data?.accessToken || '',
       tokenType: data?.tokenType || 'Bearer',
       expiresIn: data?.expiresIn,
@@ -300,11 +330,19 @@ const handleSubmit = async () => {
 
     isAuthenticated.value = true
     ElMessage.success('登录成功')
-    router.replace(normalizePathByRole(currentUser.role))
+    router.replace('/home')
   } catch (error) {
-    ElMessage.error(error?.message || '请求失败')
+    ElMessage.error(error?.message || '登录失败，请检查用户名和密码')
   } finally {
     loading.value = false
+  }
+}
+
+const handleUserCommand = (command) => {
+  if (command === 'profile') {
+    router.push('/user/profile')
+  } else if (command === 'logout') {
+    logout()
   }
 }
 
@@ -332,7 +370,7 @@ watch(
     }
     if (isAuthenticated.value && !path.startsWith('/auth')) return
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 watch(activeTab, () => clearForm())
@@ -368,7 +406,10 @@ onMounted(() => {
 .sidebar { background: #1f2d3d; color: #fff; }
 .brand { height: 56px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; background: #16202b; }
 .menu { border-right: none; }
-.header { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 0 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #fff; padding: 0 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.user-dropdown-link { display: flex; align-items: center; gap: 4px; cursor: pointer; color: #409eff; font-weight: 500; }
+.user-dropdown-link:hover { color: #337ecc; }
 .welcome { font-size: 16px; font-weight: 600; }
 .role { font-size: 13px; color: #6b7280; margin-top: 4px; }
 .main { padding: 20px; }

@@ -36,6 +36,42 @@ const router = createRouter({
       }
     },
     {
+      path: '/ai-consultation',
+      name: 'AiConsultationIndex',
+      component: () => import('../views/aiConsultation/index.vue'),
+      meta: {
+        title: 'AI 问诊',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/ai-consultation/chat/:sessionId',
+      name: 'AiConsultationChat',
+      component: () => import('../views/aiConsultation/chat.vue'),
+      meta: {
+        title: 'AI 问诊对话',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/ai-consultation/history',
+      name: 'AiConsultationHistory',
+      component: () => import('../views/aiConsultation/history.vue'),
+      meta: {
+        title: 'AI 问诊历史',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/ai-consultation/detail/:sessionId',
+      name: 'AiConsultationDetail',
+      component: () => import('../views/aiConsultation/detail.vue'),
+      meta: {
+        title: 'AI 问诊详情',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
       path: '/manage',
       name: 'Manage',
       component: () => import('../views/Manage.vue'),
@@ -92,6 +128,15 @@ const router = createRouter({
           }
         },
         {
+          path: 'my-journey',
+          name: 'MyJourney',
+          component: () => import('../views/appoint/MyJourney.vue'),
+          meta: {
+            title: '我的流程',
+            roles: ['patient']
+          }
+        },
+        {
           path: 'patient-book',
           name: 'PatientBook',
           component: () => import('../views/appoint/PatientBook.vue'),
@@ -117,8 +162,35 @@ const router = createRouter({
             title: '住院登记',
             roles: ['admin', 'doctor']
           }
+        },
+        {
+          path: 'payment/:consultationId',
+          name: 'Payment',
+          component: () => import('../views/appoint/Payment.vue'),
+          meta: {
+            title: '缴纳费用',
+            roles: ['patient']
+          }
         }
       ]
+    },
+    {
+      path: '/user/profile',
+      name: 'Profile',
+      component: () => import('../views/user/Profile.vue'),
+      meta: {
+        title: '个人信息',
+        roles: ['admin', 'doctor', 'patient']
+      }
+    },
+    {
+      path: '/user/recharge',
+      name: 'Recharge',
+      component: () => import('../views/user/Recharge.vue'),
+      meta: {
+        title: '账户充值',
+        roles: ['patient']
+      }
     },
     {
       path: '/user',
@@ -194,7 +266,7 @@ router.beforeEach((to) => {
 
   const role = session?.role
   const requiredRoles = to.matched.flatMap((record) =>
-    Array.isArray(record.meta?.roles) ? record.meta.roles : []
+    Array.isArray(record.meta?.roles) ? record.meta.roles : [],
   )
 
   if (!session && !isPublicRoute) {
@@ -215,6 +287,7 @@ router.beforeEach((to) => {
     }
   }
 
+  document.title = `${to.meta?.title ? `${to.meta.title} - ` : ''}智能咨询平台`
   return true
 })
 

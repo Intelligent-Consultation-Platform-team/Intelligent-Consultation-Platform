@@ -41,21 +41,13 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table v-loading="loading" :data="doctors" style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80" />
+      <el-table v-loading="loading" :data="pagedDoctors" style="width: 100%">
         <el-table-column prop="name" label="姓名" />
+        <el-table-column prop="username" label="用户名" />
         <el-table-column prop="department" label="所属科室" />
         <el-table-column prop="title" label="职称" />
         <el-table-column prop="specialty" label="专长" show-overflow-tooltip />
         <el-table-column prop="phone" label="联系电话" />
-        <el-table-column prop="email" label="邮箱" />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="scope">
-            <el-tag :type="scope.row.status === 1 ? 'success' : 'danger'">
-              {{ scope.row.status === 1 ? '启用' : '禁用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
             <el-button type="primary" size="small" @click="handleEdit(scope.row)">
@@ -91,6 +83,9 @@
         :rules="rules"
         label-width="100px"
       >
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="form.username" :placeholder="form.id ? '' : '用于登录系统，默认密码123456'" :disabled="!!form.id" />
+        </el-form-item>
         <el-form-item label="姓名" prop="name">
           <el-input v-model="form.name" placeholder="请输入医生姓名" />
         </el-form-item>
@@ -122,12 +117,6 @@
         <el-form-item label="联系电话" prop="phone">
           <el-input v-model="form.phone" placeholder="请输入联系电话" />
         </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email" placeholder="请输入邮箱" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="form.status" active-value="1" inactive-value="0" />
-        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -140,8 +129,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
 
@@ -162,18 +151,23 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增医生')
 const formRef = ref()
+
+const pagedDoctors = computed(() => doctors.value.slice((pagination.current - 1) * pagination.size, pagination.current * pagination.size))
 const form = reactive({
   id: '',
+  userId: '',
+  username: '',
   name: '',
   departmentId: '',
   title: '',
   specialty: '',
-  phone: '',
-  email: '',
-  status: 1
+  phone: ''
 })
 
 const rules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' }
+  ],
   name: [
     { required: true, message: '请输入医生姓名', trigger: 'blur' }
   ],
@@ -189,10 +183,6 @@ const rules = {
   phone: [
     { required: true, message: '请输入联系电话', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: ['blur', 'change'] }
-  ],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] }
   ]
 }
 
@@ -215,21 +205,23 @@ const loadData = async () => {
     if (filter.department) {
       params.deptId = filter.department
     }
-    if (filter.name) {
-      params.name = filter.name
-    }
     const data = await api.doctors.getList(params)
-    doctors.value = (data || []).map(item => ({
-      id: item.doctorId,
-      name: item.realName,
+    let list = (data || []).map(item => ({
+      id: item.doctorId ?? item.id,
+      userId: item.userId,
+      name: item.realName ?? item.name,
+      username: item.username || '-',
       department: item.deptName || '-',
-      departmentId: item.deptId,
+      departmentId: item.deptId ?? item.departmentId ?? '',
       title: item.title || '-',
       specialty: item.specialty || '-',
-      phone: '-',
-      email: '-',
-      status: item.status === 'available' ? 1 : 0
+      phone: item.phone || '-'
     }))
+    if (filter.name) {
+      const keyword = filter.name.toLowerCase()
+      list = list.filter(item => (item.name || '').toLowerCase().includes(keyword))
+    }
+    doctors.value = list
     pagination.total = doctors.value.length
   } catch (error) {
     ElMessage.error(error.message || '加载医生失败')
@@ -252,42 +244,73 @@ const resetFilter = () => {
 
 const handleAdd = () => {
   form.id = ''
+  form.userId = ''
+  form.username = ''
   form.name = ''
   form.departmentId = ''
   form.title = ''
   form.specialty = ''
   form.phone = ''
-  form.email = ''
-  form.status = 1
   dialogTitle.value = '新增医生'
   dialogVisible.value = true
 }
 
 const handleEdit = (row) => {
-  form.id = row.id
-  form.name = row.name
-  form.departmentId = row.departmentId || ''
-  form.title = row.title
-  form.specialty = row.specialty
-  form.phone = row.phone
-  form.email = row.email
-  form.status = row.status
-  dialogTitle.value = '编辑医生'
-  dialogVisible.value = true
+  nextTick(() => {
+    form.id = row.id
+    form.userId = row.userId || ''
+    form.username = row.username || ''
+    form.name = row.name
+    form.departmentId = row.departmentId || ''
+    form.title = row.title === '-' ? '' : row.title
+    form.specialty = row.specialty === '-' ? '' : row.specialty
+    form.phone = row.phone === '-' ? '' : row.phone
+    dialogTitle.value = '编辑医生'
+    dialogVisible.value = true
+  })
 }
 
-const handleDelete = (id) => {
-  ElMessage.warning('当前后端暂未提供删除接口')
+const handleDelete = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定删除该医生吗？', '提示', { type: 'warning' })
+    await api.doctors.remove(id)
+    ElMessage.success('删除成功')
+    await loadData()
+  } catch (error) {
+    if (error !== 'cancel' && error !== 'close') {
+      ElMessage.error(error?.message || '删除失败')
+    }
+  }
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.warning('当前后端暂未提供新增/编辑接口')
+    const payload = {
+      doctorId: form.id,
+      userId: form.userId,
+      deptId: form.departmentId,
+      title: form.title,
+      specialty: form.specialty,
+      realName: form.name,
+      phone: form.phone
+    }
+    if (form.id) {
+      await api.doctors.update(payload)
+      ElMessage.success('编辑成功')
+    } else {
+      await api.doctors.create({ ...payload, username: form.username })
+      ElMessage.success('新增成功')
+    }
     dialogVisible.value = false
-  } catch {
-    ElMessage.warning('请完善表单信息')
+    await loadData()
+  } catch (error) {
+    if (error?.message) {
+      ElMessage.error(error.message)
+    } else {
+      ElMessage.warning('请完善表单信息')
+    }
   }
 }
 

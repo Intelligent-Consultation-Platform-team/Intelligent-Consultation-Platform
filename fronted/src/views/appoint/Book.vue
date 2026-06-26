@@ -3,236 +3,245 @@
     <div class="page-header">
       <div>
         <h3>预约挂号</h3>
-        <p>支持按科室与日期筛选，可直接提交预约</p>
+        <p>选择科室和日期，查看医生排班并提交预约</p>
       </div>
       <div class="header-actions">
-        <el-button @click="resetFilter">重置</el-button>
-        <el-button type="primary" :loading="loading" @click="refreshData">
-          <el-icon><Refresh /></el-icon>
-          刷新
-        </el-button>
+        <el-button @click="loadSchedules">刷新</el-button>
       </div>
     </div>
 
     <el-card shadow="never" class="filter-card">
-      <el-form :inline="true" :model="filter" @submit.prevent>
+      <el-form :inline="true" :model="filterForm" @submit.prevent>
         <el-form-item label="科室">
-          <el-select v-model="filter.departmentId" placeholder="选择科室" clearable style="width: 200px">
-            <el-option v-for="dept in departments" :key="dept.id" :label="dept.name" :value="dept.id" />
+          <el-select v-model="filterForm.deptId" placeholder="全部科室" clearable style="width: 180px">
+            <el-option v-for="dept in departments" :key="dept.deptId" :label="dept.deptName" :value="dept.deptId" />
           </el-select>
         </el-form-item>
         <el-form-item label="日期">
-          <el-date-picker v-model="filter.date" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" />
+          <el-date-picker v-model="filterForm.date" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" style="width: 180px" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" @click="handleSearch">查询</el-button>
-          <el-button @click="resetFilter">重置</el-button>
+          <el-button type="primary" :loading="loading" @click="loadSchedules">查询</el-button>
+          <el-button @click="clearFilter">重置</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-skeleton v-if="loading && !hasLoadedOnce" :rows="6" animated />
-      <el-empty v-else-if="!loading && !visibleSchedules.length" :description="emptyText">
-        <el-button type="primary" @click="refreshData">重新加载</el-button>
-      </el-empty>
-      <template v-else>
-        <el-table :data="paginatedSchedules" v-loading="loading" style="width: 100%">
-          <el-table-column prop="departmentName" label="科室" min-width="140" />
-          <el-table-column prop="doctorName" label="医生姓名" min-width="120" />
-          <el-table-column prop="scheduleDate" label="日期" width="120" />
-          <el-table-column prop="timeRange" label="时间段" width="160" />
-          <el-table-column prop="maxNumber" label="最大号数" width="100" />
-          <el-table-column prop="remaining" label="剩余号数" width="100">
-            <template #default="scope">
-              <el-tag :type="scope.row.remaining > 0 ? 'success' : 'danger'">{{ scope.row.remaining }}</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="120" fixed="right">
-            <template #default="scope">
-              <el-button
-                type="primary"
-                size="small"
-                :disabled="scope.row.remaining <= 0"
-                @click="handleBook(scope.row)"
-              >
-                预约
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="pagination">
-          <el-pagination
-            v-model:current-page="pagination.current"
-            v-model:page-size="pagination.size"
-            :page-sizes="[10, 20, 50, 100]"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="visibleSchedules.length"
-          />
-        </div>
-      </template>
+      <el-table v-loading="loading" :data="scheduleList" style="width: 100%" empty-text="暂无可预约的排班">
+        <el-table-column prop="deptName" label="科室" min-width="100" />
+        <el-table-column prop="doctorName" label="医生" min-width="100" />
+        <el-table-column prop="title" label="职称" width="100" />
+        <el-table-column prop="dayOfWeek" label="星期" width="80">
+          <template #default="{ row }">
+            {{ formatDayOfWeek(row.dayOfWeek) }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="startTime" label="开始时间" width="100" />
+        <el-table-column prop="endTime" label="结束时间" width="100" />
+        <el-table-column prop="availableSlots" label="剩余号源" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.availableSlots > 5 ? 'success' : row.availableSlots > 0 ? 'warning' : 'danger'">
+              {{ row.availableSlots }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" size="small" :disabled="row.availableSlots <= 0" @click="openBookDialog(row)">
+              预约
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </el-card>
 
-    <el-dialog v-model="bookDialogVisible" title="确认预约" width="420px" @closed="resetBookForm">
-      <div v-if="selectedSchedule" class="schedule-summary">
-        <p><strong>科室：</strong>{{ selectedSchedule.departmentName }}</p>
-        <p><strong>医生：</strong>{{ selectedSchedule.doctorName }}</p>
-        <p><strong>日期：</strong>{{ selectedSchedule.scheduleDate }}</p>
-        <p><strong>时间：</strong>{{ selectedSchedule.timeRange }}</p>
-        <p><strong>剩余号数：</strong>{{ selectedSchedule.remaining }}</p>
+    <el-dialog v-model="dialogVisible" title="确认预约" width="450px">
+      <div v-if="selectedSchedule" class="schedule-info">
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="科室">{{ selectedSchedule.deptName }}</el-descriptions-item>
+          <el-descriptions-item label="医生">{{ selectedSchedule.doctorName }} ({{ selectedSchedule.title }})</el-descriptions-item>
+          <el-descriptions-item label="时间">{{ selectedSchedule.dayOfWeekText }} {{ selectedSchedule.startTime }} - {{ selectedSchedule.endTime }}</el-descriptions-item>
+          <el-descriptions-item label="剩余号源">
+            <el-tag :type="selectedSchedule.availableSlots > 5 ? 'success' : 'warning'">{{ selectedSchedule.availableSlots }}</el-tag>
+          </el-descriptions-item>
+        </el-descriptions>
       </div>
-      <el-form ref="bookFormRef" :model="bookForm" :rules="bookRules" label-width="90px" class="book-form">
+      <el-form ref="formRef" :model="bookForm" :rules="rules" label-width="80px" style="margin-top: 20px">
+        <el-form-item label="预约日期" prop="date">
+          <el-date-picker v-model="bookForm.date" value-format="YYYY-MM-DD" type="date" placeholder="选择日期" style="width: 100%" :disabled-date="disabledDate" />
+        </el-form-item>
         <el-form-item label="症状描述" prop="symptoms">
-          <el-input v-model.trim="bookForm.symptoms" type="textarea" :rows="3" maxlength="200" show-word-limit placeholder="请简要描述您的症状" />
+          <el-input v-model="bookForm.symptoms" type="textarea" :rows="3" maxlength="200" show-word-limit placeholder="请简要描述您的症状（2-200字）" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="bookDialogVisible = false">取消</el-button>
-          <el-button type="primary" :loading="booking" :disabled="booking" @click="confirmBook">确认预约</el-button>
-        </span>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="submitting" @click="submitBooking">确认预约</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
 import { api } from '../../utils/api'
+import { getSession } from '../../utils/session'
 
-const filter = reactive({ departmentId: '', date: '' })
-const pagination = reactive({ current: 1, size: 10 })
-const departments = ref([])
-const schedules = ref([])
 const loading = ref(false)
-const booking = ref(false)
-const bookDialogVisible = ref(false)
+const submitting = ref(false)
+const departments = ref([])
+const scheduleList = ref([])
+const dialogVisible = ref(false)
 const selectedSchedule = ref(null)
-const bookFormRef = ref()
-const bookForm = reactive({ symptoms: '' })
-const hasLoadedOnce = ref(false)
+const formRef = ref()
 
-const bookRules = {
+const filterForm = reactive({
+  deptId: '',
+  date: ''
+})
+
+const bookForm = reactive({
+  date: '',
+  symptoms: ''
+})
+
+const rules = {
+  date: [{ required: true, message: '请选择预约日期', trigger: 'change' }],
   symptoms: [
-    { required: true, message: '请描述您的症状', trigger: 'blur' },
-    { min: 2, max: 200, message: '症状描述长度为 2-200 字', trigger: 'blur' },
-  ],
+    { required: true, message: '请描述症状', trigger: 'blur' },
+    { min: 2, max: 200, message: '症状描述长度为2-200字', trigger: 'blur' }
+  ]
 }
 
-const departmentMap = computed(() => new Map(departments.value.map((item) => [item.id, item.name])))
-const visibleSchedules = computed(() => schedules.value)
-const paginatedSchedules = computed(() => {
-  const start = (pagination.current - 1) * pagination.size
-  return visibleSchedules.value.slice(start, start + pagination.size)
-})
-const emptyText = computed(() => (hasLoadedOnce.value ? '暂无匹配的排班数据' : '暂无排班数据'))
+const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
-const normalizeSchedule = (item) => {
-  const startTime = item.startTime || item.beginTime || item.amStartTime || '--:--'
-  const endTime = item.endTime || item.finishTime || item.pmEndTime || '--:--'
-  const maxNumber = Number(item.maxNumber ?? item.totalNumber ?? item.capacity ?? item.availableSlots ?? 0)
-  const remaining = Number(item.remaining ?? item.remainingNumber ?? item.availableSlots ?? maxNumber)
-  return {
-    id: item.scheduleId ?? item.id,
-    doctorId: item.doctorId,
-    doctorName: item.doctorName || item.realName || '-',
-    departmentId: item.deptId ?? item.departmentId ?? '',
-    departmentName: item.deptName || departmentMap.value.get(item.deptId ?? item.departmentId) || '-',
-    scheduleDate: item.date || item.scheduleDate || filter.date || '-',
-    timeRange: `${startTime} - ${endTime}`,
-    maxNumber,
-    remaining,
-  }
+const formatDayOfWeek = (day) => {
+  return dayNames[parseInt(day) - 1] || '未知'
+}
+
+const disabledDate = (date) => {
+  if (!selectedSchedule.value) return true
+  const scheduleDay = parseInt(selectedSchedule.value.dayOfWeek)
+  // 只允许选择与排班星期几匹配的日期（JS: 0=周日, 需转换）
+  const jsDay = scheduleDay === 7 ? 0 : scheduleDay
+  if (date.getDay() !== jsDay) return true
+  // 不能选过去
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  if (date < today) return true
+  // 只能选未来15天内
+  const maxDate = new Date(today)
+  maxDate.setDate(maxDate.getDate() + 15)
+  if (date > maxDate) return true
+  return false
 }
 
 const loadDepartments = async () => {
-  const data = await api.departments.getList()
-  departments.value = (data || []).map((item) => ({
-    id: item.deptId ?? item.id,
-    name: item.deptName ?? item.name ?? '-',
-  }))
+  try {
+    const data = await api.departments.getList()
+    departments.value = data || []
+  } catch (e) {
+    console.error('加载科室失败', e)
+  }
 }
 
-const loadData = async () => {
+const loadSchedules = async () => {
   loading.value = true
   try {
-    await loadDepartments()
     const params = {}
-    if (filter.departmentId) params.deptId = filter.departmentId
-    if (filter.date) params.date = filter.date
+    if (filterForm.deptId) params.deptId = filterForm.deptId
+    if (filterForm.date) params.date = filterForm.date
+
     const data = await api.schedules.getList(params)
-    schedules.value = (data || []).map(normalizeSchedule)
-    pagination.current = 1
-    hasLoadedOnce.value = true
-  } catch (error) {
-    ElMessage.error(error?.message || '加载排班失败')
+    scheduleList.value = (data || []).map(item => ({
+      ...item,
+      dayOfWeekText: formatDayOfWeek(item.dayOfWeek)
+    }))
+  } catch (e) {
+    ElMessage.error(e?.message || '加载排班失败')
   } finally {
     loading.value = false
   }
 }
 
-const handleSearch = async () => {
-  await loadData()
+const clearFilter = () => {
+  filterForm.deptId = ''
+  filterForm.date = ''
+  loadSchedules()
 }
 
-const resetFilter = async () => {
-  filter.departmentId = ''
-  filter.date = ''
-  await loadData()
+const getNextMatchingDate = (scheduleDay) => {
+  // scheduleDay: 1=周一...7=周日, JS day: 0=周日
+  const jsTarget = scheduleDay === 7 ? 0 : scheduleDay
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  for (let i = 0; i <= 15; i++) {
+    const d = new Date(today)
+    d.setDate(d.getDate() + i)
+    if (d.getDay() === jsTarget) {
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    }
+  }
+  return ''
 }
 
-const refreshData = async () => {
-  await loadData()
-}
-
-const resetBookForm = () => {
-  selectedSchedule.value = null
-  bookForm.symptoms = ''
-  bookFormRef.value?.clearValidate?.()
-}
-
-const handleBook = (row) => {
+const openBookDialog = (row) => {
   selectedSchedule.value = row
+  bookForm.date = getNextMatchingDate(parseInt(row.dayOfWeek))
   bookForm.symptoms = ''
-  bookDialogVisible.value = true
+  dialogVisible.value = true
 }
 
-const confirmBook = async () => {
-  if (!bookFormRef.value || booking.value || !selectedSchedule.value) return
+const submitBooking = async () => {
+  if (!formRef.value) return
+
   try {
-    await bookFormRef.value.validate()
-    booking.value = true
-    await api.appointments.create({
-      doctorId: selectedSchedule.value.doctorId,
-      scheduleId: selectedSchedule.value.id,
-      appointmentDate: selectedSchedule.value.scheduleDate,
-      appointmentTime: selectedSchedule.value.timeRange,
-      symptoms: bookForm.symptoms.trim(),
+    await formRef.value.validate()
+  } catch {
+    return
+  }
+
+  if (!selectedSchedule.value) return
+
+  const session = getSession()
+  if (!session?.userId) {
+    ElMessage.error('请先登录')
+    return
+  }
+
+  submitting.value = true
+  try {
+    await api.appointment.create({
+      scheduleId: selectedSchedule.value.scheduleId,
+      appointmentDate: bookForm.date,
+      symptoms: bookForm.symptoms.trim()
     })
-    ElMessage.success('预约成功，请按时就诊')
-    bookDialogVisible.value = false
-    await loadData()
-  } catch (error) {
-    if (error?.message) ElMessage.error(error.message)
+    ElMessage.success('预约成功！请按时就诊')
+    dialogVisible.value = false
+    loadSchedules()
+  } catch (e) {
+    ElMessage.error(e?.message || '预约失败')
   } finally {
-    booking.value = false
+    submitting.value = false
   }
 }
 
-onMounted(loadData)
+onMounted(async () => {
+  await loadDepartments()
+  await loadSchedules()
+})
 </script>
 
 <style scoped>
 .book-page { padding: 20px 0; }
-.page-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 20px; }
+.page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
 .page-header h3 { margin: 0; color: #1f2d3d; }
 .page-header p { margin: 6px 0 0; color: #6b7280; }
-.header-actions { display: flex; gap: 12px; }
 .filter-card, .table-card { margin-bottom: 20px; }
-.pagination { margin-top: 20px; display: flex; justify-content: flex-end; }
-.book-form { margin-top: 12px; }
-.dialog-footer { display: flex; justify-content: flex-end; gap: 12px; }
-.schedule-summary { line-height: 1.9; color: #374151; }
+.schedule-info { margin-bottom: 0; }
 </style>

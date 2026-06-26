@@ -26,7 +26,9 @@
             style="width: 100%"
           >
             <el-option label="待就诊" value="pending" />
-            <el-option label="已就诊" value="completed" />
+            <el-option label="已签到" value="confirmed" />
+            <el-option label="就诊中" value="processing" />
+            <el-option label="已完成" value="completed" />
             <el-option label="已取消" value="cancelled" />
           </el-select>
         </el-col>
@@ -38,13 +40,14 @@
     </el-card>
 
     <el-card shadow="never" class="table-card">
-      <el-table :data="appointments" style="width: 100%">
-        <el-table-column prop="id" label="挂号ID" width="100" />
+      <el-table v-loading="loading" :data="appointments" style="width: 100%">
+        <el-table-column prop="appointmentId" label="挂号ID" width="100" />
         <el-table-column prop="patientName" label="患者姓名" />
-        <el-table-column prop="department" label="科室" />
+        <el-table-column prop="deptName" label="科室" />
         <el-table-column prop="doctorName" label="医生" />
+        <el-table-column prop="doctorTitle" label="职称" width="100" />
         <el-table-column prop="appointmentDate" label="预约日期" width="120" />
-        <el-table-column prop="appointmentTime" label="预约时间" width="150" />
+        <el-table-column prop="appointmentTime" label="预约时间" width="100" />
         <el-table-column prop="symptoms" label="症状描述" show-overflow-tooltip />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="scope">
@@ -53,14 +56,21 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="scope">
-            <el-button type="primary" size="small" @click="handleEdit(scope.row)">
-              编辑
-            </el-button>
-            <el-button type="danger" size="small" @click="handleCancel(scope.row.id)">
-              取消
-            </el-button>
+            <template v-if="scope.row.status === 'pending' || scope.row.status === 'confirmed'">
+              <el-button type="primary" size="small" @click="handleProcess(scope.row)">
+                接诊
+              </el-button>
+            </template>
+            <template v-else-if="scope.row.status === 'processing'">
+              <el-button type="success" size="small" @click="goToVisit">
+                就诊中
+              </el-button>
+            </template>
+            <span v-else-if="scope.row.status === 'unpaid'">待支付</span>
+            <span v-else-if="scope.row.status === 'completed'">已完成</span>
+            <span v-else-if="scope.row.status === 'cancelled'">已取消</span>
           </template>
         </el-table-column>
       </el-table>
@@ -88,20 +98,39 @@
         :rules="rules"
         label-width="100px"
       >
-        <el-form-item label="患者姓名" prop="patientName">
-          <el-input v-model="form.patientName" placeholder="请输入患者姓名" />
+        <el-form-item label="患者" prop="patientId">
+          <div style="display: flex; gap: 8px; width: 100%">
+            <el-input
+              v-model="form.patientName"
+              placeholder="输入患者姓名搜索"
+              style="flex: 1"
+              @keyup.enter="searchPatients"
+            />
+            <el-button type="primary" @click="searchPatients" :loading="searching">
+              查找
+            </el-button>
+          </div>
         </el-form-item>
-        <el-form-item label="身份证号" prop="idCard">
-          <el-input v-model="form.idCard" placeholder="请输入身份证号" />
+        <el-form-item v-if="patientOptions.length > 0" label="">
+          <el-radio-group v-model="form.patientId" style="display: flex; flex-direction: column; gap: 8px">
+            <el-radio
+              v-for="p in patientOptions"
+              :key="p.patientId"
+              :value="p.patientId"
+            >
+              {{ p.patientName }} — {{ p.idCard || '无身份证' }} — {{ p.phone || '无电话' }}
+            </el-radio>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="form.phone" placeholder="请输入联系电话" />
+        <el-form-item v-if="patientOptions.length === 0 && searched" label="">
+          <span style="color: #909399">未找到匹配患者，请先在用户管理中创建患者账户</span>
         </el-form-item>
         <el-form-item label="科室" prop="departmentId">
           <el-select
             v-model="form.departmentId"
             placeholder="选择科室"
             style="width: 100%"
+            @change="onDeptChange"
           >
             <el-option
               v-for="dept in departments"
@@ -116,6 +145,7 @@
             v-model="form.doctorId"
             placeholder="选择医生"
             style="width: 100%"
+            :disabled="!form.departmentId"
           >
             <el-option
               v-for="doctor in doctors"
@@ -131,16 +161,24 @@
             type="date"
             placeholder="选择日期"
             style="width: 100%"
+            value-format="YYYY-MM-DD"
+            :disabled-date="disabledDate"
           />
         </el-form-item>
-        <el-form-item label="预约时间" prop="appointmentTime">
+        <el-form-item label="预约时间" prop="scheduleId">
           <el-select
-            v-model="form.appointmentTime"
-            placeholder="选择时间"
+            v-model="form.scheduleId"
+            placeholder="请先选择医生和日期"
             style="width: 100%"
+            :disabled="!form.doctorId || !form.appointmentDate"
+            @change="onScheduleSelect"
           >
-            <el-option label="上午 (8:00-12:00)" value="上午" />
-            <el-option label="下午 (14:00-18:00)" value="下午" />
+            <el-option
+              v-for="s in availableSchedules"
+              :key="s.scheduleId"
+              :label="s.startTime + ' - ' + s.endTime + '（剩余' + s.availableSlots + '号）'"
+              :value="s.scheduleId"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="症状描述" prop="symptoms">
@@ -155,7 +193,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSubmit">确定</el-button>
+          <el-button type="primary" @click="handleSubmit" :loading="submitting">确定</el-button>
         </span>
       </template>
     </el-dialog>
@@ -163,9 +201,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { api } from '../../utils/api'
+
+const router = useRouter()
 
 const filter = reactive({
   patientName: '',
@@ -178,47 +220,32 @@ const pagination = reactive({
   total: 0
 })
 
-const departments = ref([
-  { id: 1, name: '内科' },
-  { id: 2, name: '外科' },
-  { id: 3, name: '儿科' },
-  { id: 4, name: '妇产科' },
-  { id: 5, name: '骨科' }
-])
-
-const doctors = ref([
-  { id: 1, name: '张医生', department: '内科' },
-  { id: 2, name: '李医生', department: '外科' },
-  { id: 3, name: '王医生', department: '儿科' },
-  { id: 4, name: '赵医生', department: '妇产科' },
-  { id: 5, name: '钱医生', department: '骨科' }
-])
-
+const departments = ref([])
+const doctors = ref([])
 const appointments = ref([])
+const availableSchedules = ref([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增挂号')
 const formRef = ref()
+const loading = ref(false)
+const submitting = ref(false)
+const searching = ref(false)
+const searched = ref(false)
+const patientOptions = ref([])
 const form = reactive({
-  id: '',
+  patientId: '',
   patientName: '',
-  idCard: '',
-  phone: '',
   departmentId: '',
   doctorId: '',
   appointmentDate: '',
   appointmentTime: '',
+  scheduleId: '',
   symptoms: ''
 })
 
 const rules = {
-  patientName: [
-    { required: true, message: '请输入患者姓名', trigger: 'blur' }
-  ],
-  idCard: [
-    { required: true, message: '请输入身份证号', trigger: 'blur' }
-  ],
-  phone: [
-    { required: true, message: '请输入联系电话', trigger: 'blur' }
+  patientId: [
+    { required: true, message: '请搜索并选择患者', trigger: 'change' }
   ],
   departmentId: [
     { required: true, message: '请选择科室', trigger: 'change' }
@@ -229,127 +256,229 @@ const rules = {
   appointmentDate: [
     { required: true, message: '请选择预约日期', trigger: 'change' }
   ],
-  appointmentTime: [
-    { required: true, message: '请选择预约时间', trigger: 'change' }
+  scheduleId: [
+    { required: true, message: '请选择预约时间段', trigger: 'change' }
   ],
   symptoms: [
     { required: true, message: '请描述症状', trigger: 'blur' }
   ]
 }
 
-const loadData = () => {
-  // 模拟数据
-  appointments.value = [
-    {
-      id: 1,
-      patientName: '张三',
-      department: '内科',
-      doctorName: '张医生',
-      appointmentDate: '2026-04-06',
-      appointmentTime: '上午',
-      symptoms: '发热、咳嗽',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      patientName: '李四',
-      department: '外科',
-      doctorName: '李医生',
-      appointmentDate: '2026-04-06',
-      appointmentTime: '下午',
-      symptoms: '腹痛',
-      status: 'completed'
-    },
-    {
-      id: 3,
-      patientName: '王五',
-      department: '儿科',
-      doctorName: '王医生',
-      appointmentDate: '2026-04-07',
-      appointmentTime: '上午',
-      symptoms: '感冒、发烧',
-      status: 'pending'
+// 日期限制：不能选过去和15天后
+const disabledDate = (time) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const maxDate = new Date(today)
+  maxDate.setDate(maxDate.getDate() + 15)
+  return time.getTime() < today.getTime() || time.getTime() > maxDate.getTime()
+}
+
+const loadDepartments = async () => {
+  try {
+    const data = await api.departments.getList()
+    departments.value = (data || []).map(item => ({
+      id: item.deptId ?? item.id,
+      name: item.deptName ?? item.name,
+      ...item
+    }))
+  } catch (e) {
+    console.error('加载科室失败', e)
+  }
+}
+
+const loadDoctors = async (deptId) => {
+  try {
+    const params = deptId ? { deptId } : {}
+    const data = await api.doctors.getList(params)
+    doctors.value = (data || []).map(item => ({
+      id: item.doctorId ?? item.id,
+      name: item.realName ?? item.name ?? item.doctorName,
+      ...item
+    }))
+  } catch (e) {
+    console.error('加载医生失败', e)
+  }
+}
+
+const onDeptChange = () => {
+  form.doctorId = ''
+  form.scheduleId = ''
+  form.appointmentTime = ''
+  availableSchedules.value = []
+  loadDoctors(form.departmentId)
+}
+
+// 搜索患者
+const searchPatients = async () => {
+  if (!form.patientName.trim()) {
+    ElMessage.warning('请输入患者姓名')
+    return
+  }
+  searching.value = true
+  searched.value = false
+  patientOptions.value = []
+  form.patientId = ''
+  try {
+    const data = await api.patient.search(form.patientName.trim())
+    patientOptions.value = data || []
+    searched.value = true
+    if ((data || []).length === 0) {
+      ElMessage.warning('未找到匹配患者')
     }
-  ]
-  pagination.total = appointments.value.length
+  } catch (e) {
+    ElMessage.error(e?.message || '搜索患者失败')
+  } finally {
+    searching.value = false
+  }
 }
 
-const getStatusLabel = (status) => {
-  const statusMap = {
-    pending: '待就诊',
-    completed: '已就诊',
-    cancelled: '已取消'
+const loadSchedulesForBooking = async () => {
+  if (!form.doctorId || !form.appointmentDate) {
+    availableSchedules.value = []
+    form.scheduleId = ''
+    form.appointmentTime = ''
+    return
   }
-  return statusMap[status] || '未知'
+  try {
+    const data = await api.schedules.getList({
+      doctorId: form.doctorId,
+      date: form.appointmentDate
+    })
+    availableSchedules.value = (data || []).filter(s => s.status === 'active' && s.availableSlots > 0)
+    if (availableSchedules.value.length === 0) {
+      ElMessage.warning('该医生在所选日期无可用排班')
+    }
+  } catch (e) {
+    console.error('加载排班失败', e)
+  }
 }
 
-const getStatusTagType = (status) => {
-  const typeMap = {
-    pending: 'warning',
-    completed: 'success',
-    cancelled: 'danger'
+const onScheduleSelect = (scheduleId) => {
+  const selected = availableSchedules.value.find(s => s.scheduleId === scheduleId)
+  if (selected) {
+    form.appointmentTime = selected.startTime
   }
-  return typeMap[status] || 'default'
 }
+
+// 医生或日期变化时重新查询排班
+watch(() => form.doctorId, () => {
+  form.scheduleId = ''
+  form.appointmentTime = ''
+  loadSchedulesForBooking()
+})
+watch(() => form.appointmentDate, () => {
+  form.scheduleId = ''
+  form.appointmentTime = ''
+  loadSchedulesForBooking()
+})
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const params = {
+      current: pagination.current,
+      size: pagination.size
+    }
+    if (filter.patientName.trim()) params.patientName = filter.patientName.trim()
+    if (filter.status) params.status = filter.status
+
+    const result = await api.appointment.getPage(params)
+    appointments.value = result?.records || result?.data?.records || []
+    pagination.total = result?.total || result?.data?.total || 0
+  } catch (e) {
+    ElMessage.error('加载预约数据失败')
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const getStatusLabel = (status) => ({
+  pending: '待就诊',
+  confirmed: '已签到',
+  processing: '就诊中',
+  unpaid: '待支付',
+  completed: '已完成',
+  cancelled: '已取消'
+}[status] || '未知')
+
+const getStatusTagType = (status) => ({
+  pending: 'warning',
+  confirmed: '',
+  processing: 'primary',
+  unpaid: 'danger',
+  completed: 'success',
+  cancelled: 'info'
+}[status] || 'default')
 
 const handleSearch = () => {
-  ElMessage.success('查询成功')
+  pagination.current = 1
   loadData()
 }
 
 const resetFilter = () => {
   filter.patientName = ''
   filter.status = ''
+  pagination.current = 1
   loadData()
 }
 
+const handleProcess = async (row) => {
+  try {
+    await api.appointment.process(row.appointmentId)
+    ElMessage.success('已接诊，跳转至就诊页面')
+    router.push('/appoint/visit')
+  } catch (e) {
+    ElMessage.error(e?.message || '接诊失败')
+  }
+}
+
+const goToVisit = () => {
+  router.push('/appoint/visit')
+}
+
 const handleAdd = () => {
-  form.id = ''
+  form.patientId = ''
   form.patientName = ''
-  form.idCard = ''
-  form.phone = ''
   form.departmentId = ''
   form.doctorId = ''
   form.appointmentDate = ''
   form.appointmentTime = ''
+  form.scheduleId = ''
   form.symptoms = ''
+  patientOptions.value = []
+  searched.value = false
+  availableSchedules.value = []
   dialogTitle.value = '新增挂号'
   dialogVisible.value = true
-}
-
-const handleEdit = (row) => {
-  form.id = row.id
-  form.patientName = row.patientName
-  form.idCard = row.idCard || ''
-  form.phone = row.phone || ''
-  form.departmentId = row.departmentId || ''
-  form.doctorId = row.doctorId || ''
-  form.appointmentDate = row.appointmentDate
-  form.appointmentTime = row.appointmentTime
-  form.symptoms = row.symptoms
-  dialogTitle.value = '编辑挂号'
-  dialogVisible.value = true
-}
-
-const handleCancel = (id) => {
-  ElMessage.success('挂号已取消')
-  loadData()
 }
 
 const handleSubmit = async () => {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-    ElMessage.success('保存成功')
+    submitting.value = true
+    await api.appointment.create({
+      patientId: form.patientId,
+      doctorId: form.doctorId,
+      scheduleId: form.scheduleId,
+      appointmentDate: form.appointmentDate,
+      appointmentTime: form.appointmentTime,
+      symptoms: form.symptoms
+    })
+    ElMessage.success('挂号成功')
     dialogVisible.value = false
     loadData()
-  } catch {
-    ElMessage.warning('请完善表单信息')
+  } catch (e) {
+    ElMessage.error(e?.message || '挂号失败')
+  } finally {
+    submitting.value = false
   }
 }
 
 const handleSizeChange = (size) => {
   pagination.size = size
+  pagination.current = 1
   loadData()
 }
 
@@ -358,8 +487,10 @@ const handleCurrentChange = (current) => {
   loadData()
 }
 
-onMounted(() => {
-  loadData()
+onMounted(async () => {
+  await loadDepartments()
+  await loadDoctors()
+  await loadData()
 })
 </script>
 
