@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: backend-test
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+  sql:
+    init:
+      mode: never
+
+server:
+  port: 0
+
+jwt:
+  secret: TestSecretKeyForJWTUnitTests2024!
+
+deepseek:
+  api-key: test-key
+  base-url: http://localhost:9999
+  model: deepseek-chat
+  timeout: 5000
+
+mybatis-flex:
+  configuration:
+    map-underscore-to-camel-case: true

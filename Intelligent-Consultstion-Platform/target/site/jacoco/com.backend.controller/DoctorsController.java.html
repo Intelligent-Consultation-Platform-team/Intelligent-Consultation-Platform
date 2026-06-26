@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DoctorsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.controller</a> &gt; <span class="el_source">DoctorsController.java</span></div><h1>DoctorsController.java</h1><pre class="source lang-java linenums">package com.backend.controller;
+
+import com.backend.common.ResultUtils;
+import com.backend.model.dto.DoctorAddRequest;
+import com.backend.model.dto.DoctorUpdateRequest;
+import com.backend.model.entity.Doctors;
+import com.backend.service.DoctorsService;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * 医生管理控制器。
+ *
+ * @author 佳尔宇柔
+ */
+@RestController
+@RequestMapping(&quot;/doctors&quot;)
+<span class="fc" id="L20">public class DoctorsController {</span>
+
+    @Resource
+    private DoctorsService doctorsService;
+
+    /**
+     * 获取医生列表（包含用户信息）
+     *
+     * @param deptId 科室ID
+     * @param status 状态
+     * @return 医生列表（包含用户信息）
+     */
+    @GetMapping
+    public Object getDoctorsList(
+            @RequestParam(required = false) Integer deptId,
+            @RequestParam(required = false) String status) {
+<span class="nc" id="L36">        List&lt;?&gt; doctorsList = doctorsService.getDoctorsWithUserInfo(deptId, status);</span>
+<span class="nc" id="L37">        return ResultUtils.success(doctorsList);</span>
+    }
+
+    /**
+     * 添加医生（同时创建用户账户）
+     *
+     * @param request 添加医生请求
+     * @return 操作结果
+     */
+    @PostMapping
+    public Object addDoctor(@RequestBody DoctorAddRequest request) {
+<span class="nc" id="L48">        boolean result = doctorsService.addDoctor(request);</span>
+<span class="nc" id="L49">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 更新医生信息
+     *
+     * @param request 更新医生请求
+     * @return 操作结果
+     */
+    @PutMapping
+    public Object updateDoctor(@RequestBody DoctorUpdateRequest request) {
+<span class="nc" id="L60">        boolean result = doctorsService.updateDoctor(request);</span>
+<span class="nc" id="L61">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 删除医生
+     *
+     * @param doctorId 医生ID
+     * @return 操作结果
+     */
+    @DeleteMapping(&quot;/{doctorId}&quot;)
+    public Object deleteDoctor(@PathVariable Long doctorId) {
+<span class="nc" id="L72">        boolean result = doctorsService.deleteDoctor(doctorId);</span>
+<span class="nc" id="L73">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 根据ID获取医生信息
+     *
+     * @param doctorId 医生ID
+     * @return 医生信息
+     */
+    @GetMapping(&quot;/{doctorId}&quot;)
+    public Object getDoctorById(@PathVariable Long doctorId) {
+<span class="nc" id="L84">        Doctors doctor = doctorsService.getDoctorById(doctorId);</span>
+<span class="nc" id="L85">        return ResultUtils.success(doctor);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

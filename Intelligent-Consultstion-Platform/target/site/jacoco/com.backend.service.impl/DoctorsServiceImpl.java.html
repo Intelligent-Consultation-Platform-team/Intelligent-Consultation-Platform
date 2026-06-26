@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DoctorsServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.service.impl</a> &gt; <span class="el_source">DoctorsServiceImpl.java</span></div><h1>DoctorsServiceImpl.java</h1><pre class="source lang-java linenums">package com.backend.service.impl;
+
+import com.backend.mapper.DepartmentsMapper;
+import com.backend.mapper.DoctorsMapper;
+import com.backend.mapper.UsersMapper;
+import com.backend.model.dto.DoctorAddRequest;
+import com.backend.model.dto.DoctorDTO;
+import com.backend.model.dto.DoctorUpdateRequest;
+import com.backend.model.entity.Departments;
+import com.backend.model.entity.Doctors;
+import com.backend.model.entity.Users;
+import com.backend.service.DoctorsService;
+import com.backend.service.UsersService;
+import com.backend.utils.PasswordUtils;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.sql.Timestamp;
+
+/**
+ *  医生服务实现类。
+ *
+ * @author 佳尔宇柔
+ */
+@Service
+<span class="fc" id="L35">public class DoctorsServiceImpl extends ServiceImpl&lt;DoctorsMapper, Doctors&gt; implements DoctorsService {</span>
+
+    @Resource
+    private UsersService usersService;
+
+    @Resource
+    private DepartmentsMapper departmentsMapper;
+
+<span class="fc" id="L43">    private Map&lt;Integer, String&gt; deptNameCache = null;</span>
+
+    @Override
+    public List&lt;Doctors&gt; getDoctorsList(Integer deptId, String status) {
+<span class="nc" id="L47">        QueryWrapper queryWrapper = QueryWrapper.create();</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (deptId != null) {</span>
+<span class="nc" id="L49">            queryWrapper.eq(&quot;dept_id&quot;, deptId);</span>
+        }
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (status != null) {</span>
+<span class="nc" id="L52">            queryWrapper.eq(&quot;status&quot;, status);</span>
+        }
+<span class="nc" id="L54">        return list(queryWrapper);</span>
+    }
+
+    @Override
+    public List&lt;DoctorDTO&gt; getDoctorsWithUserInfo(Integer deptId, String status) {
+<span class="nc" id="L59">        QueryWrapper queryWrapper = QueryWrapper.create();</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (deptId != null) {</span>
+<span class="nc" id="L61">            queryWrapper.eq(&quot;dept_id&quot;, deptId);</span>
+        }
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        queryWrapper.eq(&quot;status&quot;, status != null ? status : &quot;available&quot;);</span>
+
+<span class="nc" id="L65">        List&lt;Doctors&gt; doctorsList = list(queryWrapper);</span>
+        
+<span class="nc" id="L67">        List&lt;Integer&gt; userIds = doctorsList.stream()</span>
+<span class="nc" id="L68">                .map(Doctors::getUserId)</span>
+<span class="nc" id="L69">                .distinct()</span>
+<span class="nc" id="L70">                .toList();</span>
+        
+<span class="nc" id="L72">        Map&lt;Integer, Users&gt; userMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (!userIds.isEmpty()) {</span>
+<span class="nc" id="L74">            List&lt;Users&gt; users = usersService.list(</span>
+<span class="nc" id="L75">                QueryWrapper.create().in(&quot;user_id&quot;, userIds)</span>
+            );
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            for (Users user : users) {</span>
+<span class="nc" id="L78">                userMap.put(user.getUserId(), user);</span>
+<span class="nc" id="L79">            }</span>
+        }
+        
+<span class="nc" id="L82">        List&lt;DoctorDTO&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        for (Doctors doctor : doctorsList) {</span>
+<span class="nc" id="L84">            Users user = userMap.get(doctor.getUserId());</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            String realName = user != null ? user.getRealName() : &quot;未知&quot;;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            String phone = user != null ? user.getPhone() : &quot;&quot;;</span>
+            
+<span class="nc" id="L88">            result.add(DoctorDTO.builder()</span>
+<span class="nc" id="L89">                    .doctorId(doctor.getDoctorId())</span>
+<span class="nc" id="L90">                    .userId(doctor.getUserId())</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                    .username(user != null ? user.getUsername() : null)</span>
+<span class="nc" id="L92">                    .realName(realName)</span>
+<span class="nc" id="L93">                    .title(doctor.getTitle())</span>
+<span class="nc" id="L94">                    .deptId(doctor.getDeptId())</span>
+<span class="nc" id="L95">                    .deptName(getDeptName(doctor.getDeptId()))</span>
+<span class="nc" id="L96">                    .specialty(doctor.getSpecialty())</span>
+<span class="nc" id="L97">                    .bio(doctor.getBio())</span>
+<span class="nc" id="L98">                    .status(doctor.getStatus())</span>
+<span class="nc" id="L99">                    .phone(phone)</span>
+<span class="nc" id="L100">                    .createdAt(doctor.getCreatedAt())</span>
+<span class="nc" id="L101">                    .build());</span>
+<span class="nc" id="L102">        }</span>
+        
+<span class="nc" id="L104">        return result;</span>
+    }
+
+    private String getDeptName(Integer deptId) {
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        if (deptNameCache == null) {</span>
+<span class="nc" id="L109">            List&lt;Departments&gt; allDepts = departmentsMapper.selectAll();</span>
+<span class="nc" id="L110">            deptNameCache = allDepts.stream()</span>
+<span class="nc" id="L111">                    .collect(Collectors.toMap(Departments::getDeptId, Departments::getDeptName));</span>
+        }
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        return deptNameCache.getOrDefault(deptId, deptId != null ? &quot;科室&quot; + deptId : &quot;未分配&quot;);</span>
+    }
+
+    @Override
+    public boolean addDoctor(DoctorAddRequest request) {
+        // 检查用户名是否已存在
+<span class="nc" id="L119">        QueryWrapper checkWrapper = QueryWrapper.create().eq(&quot;username&quot;, request.getUsername());</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        if (usersService.count(checkWrapper) &gt; 0) {</span>
+<span class="nc" id="L121">            throw new RuntimeException(&quot;用户名已存在&quot;);</span>
+        }
+
+        // 1. 创建用户账户
+<span class="nc" id="L125">        Users user = Users.builder()</span>
+<span class="nc" id="L126">                .username(request.getUsername())</span>
+<span class="nc" id="L127">                .password(PasswordUtils.encrypt(&quot;123456&quot;))</span>
+<span class="nc" id="L128">                .realName(request.getRealName())</span>
+<span class="nc" id="L129">                .phone(request.getPhone())</span>
+<span class="nc" id="L130">                .role(&quot;doctor&quot;)</span>
+<span class="nc" id="L131">                .status(&quot;active&quot;)</span>
+<span class="nc" id="L132">                .createdAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L133">                .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L134">                .build();</span>
+<span class="nc" id="L135">        boolean userSaved = usersService.save(user);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (!userSaved) {</span>
+<span class="nc" id="L137">            return false;</span>
+        }
+
+        // 2. 创建医生记录，关联用户
+<span class="nc" id="L141">        Doctors doctor = Doctors.builder()</span>
+<span class="nc" id="L142">                .userId(user.getUserId())</span>
+<span class="nc" id="L143">                .deptId(request.getDeptId())</span>
+<span class="nc" id="L144">                .title(request.getTitle())</span>
+<span class="nc" id="L145">                .specialty(request.getSpecialty())</span>
+<span class="nc" id="L146">                .bio(request.getBio())</span>
+<span class="nc" id="L147">                .status(&quot;available&quot;)</span>
+<span class="nc" id="L148">                .createdAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L149">                .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L150">                .build();</span>
+<span class="nc" id="L151">        return save(doctor);</span>
+    }
+
+    @Override
+    public boolean updateDoctor(DoctorUpdateRequest request) {
+        // 1. 更新医生信息
+<span class="nc" id="L157">        Doctors doctor = Doctors.builder()</span>
+<span class="nc" id="L158">                .doctorId(request.getDoctorId())</span>
+<span class="nc" id="L159">                .deptId(request.getDeptId())</span>
+<span class="nc" id="L160">                .title(request.getTitle())</span>
+<span class="nc" id="L161">                .specialty(request.getSpecialty())</span>
+<span class="nc" id="L162">                .bio(request.getBio())</span>
+<span class="nc" id="L163">                .status(request.getStatus())</span>
+<span class="nc" id="L164">                .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L165">                .build();</span>
+<span class="nc" id="L166">        boolean doctorUpdated = updateById(doctor);</span>
+
+        // 2. 更新关联的用户信息
+<span class="nc bnc" id="L169" title="All 6 branches missed.">        if (request.getUserId() != null &amp;&amp; (request.getRealName() != null || request.getPhone() != null)) {</span>
+<span class="nc" id="L170">            Users user = Users.builder()</span>
+<span class="nc" id="L171">                    .userId(request.getUserId())</span>
+<span class="nc" id="L172">                    .realName(request.getRealName())</span>
+<span class="nc" id="L173">                    .phone(request.getPhone())</span>
+<span class="nc" id="L174">                    .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L175">                    .build();</span>
+<span class="nc" id="L176">            usersService.updateById(user);</span>
+        }
+
+<span class="nc" id="L179">        return doctorUpdated;</span>
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteDoctor(Long doctorId) {
+<span class="nc" id="L185">        Doctors doctor = getById(doctorId);</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (doctor == null) {</span>
+<span class="nc" id="L187">            return false;</span>
+        }
+<span class="nc" id="L189">        Doctors updateDoctor = Doctors.builder()</span>
+<span class="nc" id="L190">                .doctorId(Math.toIntExact(doctorId))</span>
+<span class="nc" id="L191">                .status(&quot;unavailable&quot;)</span>
+<span class="nc" id="L192">                .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L193">                .build();</span>
+<span class="nc" id="L194">        boolean result = updateById(updateDoctor);</span>
+<span class="nc bnc" id="L195" title="All 4 branches missed.">        if (result &amp;&amp; doctor.getUserId() != null) {</span>
+<span class="nc" id="L196">            usersService.deleteUser(doctor.getUserId());</span>
+        }
+<span class="nc" id="L198">        return result;</span>
+    }
+
+    @Override
+    public Doctors getDoctorById(Long doctorId) {
+<span class="nc" id="L203">        return getById(doctorId);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

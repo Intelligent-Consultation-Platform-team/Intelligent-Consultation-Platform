@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ErrorCode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.exception</a> &gt; <span class="el_source">ErrorCode.java</span></div><h1>ErrorCode.java</h1><pre class="source lang-java linenums">package com.backend.exception;
+
+import lombok.Getter;
+
+<span class="fc" id="L5">@Getter</span>
+public enum ErrorCode {
+
+<span class="fc" id="L8">    SUCCESS(0, &quot;ok&quot;),</span>
+<span class="fc" id="L9">    PARAMS_ERROR(40001, &quot;参数错误&quot;),</span>
+<span class="fc" id="L10">    USER_OR_PASSWORD_ERROR(40002, &quot;用户名或密码错误&quot;),</span>
+<span class="fc" id="L11">    EMAIL_FORMAT_ERROR(40003, &quot;邮箱格式错误&quot;),</span>
+<span class="fc" id="L12">    USERNAME_EXISTS(40004, &quot;用户名已存在&quot;),</span>
+<span class="fc" id="L13">    EMAIL_EXISTS(40005, &quot;邮箱已注册&quot;),</span>
+<span class="fc" id="L14">    NOT_LOGIN_ERROR(40100, &quot;未登录或token无效&quot;),</span>
+<span class="fc" id="L15">    NO_AUTH_ERROR(40101, &quot;无权限&quot;),</span>
+<span class="fc" id="L16">    NOT_FOUND_ERROR(40400, &quot;请求数据不存在&quot;),</span>
+<span class="fc" id="L17">    FORBIDDEN_ERROR(40300, &quot;禁止访问&quot;),</span>
+<span class="fc" id="L18">    SYSTEM_ERROR(50000, &quot;服务端异常&quot;),</span>
+<span class="fc" id="L19">    OPERATION_ERROR(50001, &quot;操作失败&quot;);</span>
+
+    /**
+     * 状态码
+     */
+    private final int code;
+
+    /**
+     * 信息
+     */
+    private final String message;
+
+<span class="fc" id="L31">    ErrorCode(int code, String message) {</span>
+<span class="fc" id="L32">        this.code = code;</span>
+<span class="fc" id="L33">        this.message = message;</span>
+<span class="fc" id="L34">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

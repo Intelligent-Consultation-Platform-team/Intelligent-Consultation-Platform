@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SchedulesServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.service.impl</a> &gt; <span class="el_source">SchedulesServiceImpl.java</span></div><h1>SchedulesServiceImpl.java</h1><pre class="source lang-java linenums">package com.backend.service.impl;
+
+import com.backend.mapper.DepartmentsMapper;
+import com.backend.mapper.SchedulesMapper;
+import com.backend.model.dto.ScheduleDTO;
+import com.backend.model.entity.Departments;
+import com.backend.model.entity.Doctors;
+import com.backend.model.entity.Schedules;
+import com.backend.model.entity.Users;
+import com.backend.service.DoctorsService;
+import com.backend.service.SchedulesService;
+import com.backend.service.UsersService;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ *  排班服务实现类。
+ *
+ * @author 佳尔宇柔
+ */
+@Service
+<span class="fc" id="L33">public class SchedulesServiceImpl extends ServiceImpl&lt;SchedulesMapper, Schedules&gt; implements SchedulesService {</span>
+
+    @Resource
+    private DoctorsService doctorsService;
+
+    @Resource
+    private UsersService usersService;
+
+    @Resource
+    private DepartmentsMapper departmentsMapper;
+
+    @Override
+    public List&lt;Schedules&gt; getDoctorSchedules(Integer doctorId, String date) {
+<span class="nc" id="L46">        QueryWrapper queryWrapper = QueryWrapper.create();</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (doctorId != null) {</span>
+<span class="nc" id="L48">            queryWrapper.eq(&quot;doctor_id&quot;, doctorId);</span>
+        }
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (date != null) {</span>
+<span class="nc" id="L51">            LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;));</span>
+<span class="nc" id="L52">            int dayOfWeek = localDate.getDayOfWeek().getValue();</span>
+<span class="nc" id="L53">            queryWrapper.eq(&quot;day_of_week&quot;, dayOfWeek);</span>
+        }
+<span class="nc" id="L55">        return list(queryWrapper);</span>
+    }
+
+    @Override
+    public List&lt;ScheduleDTO&gt; getSchedulesWithDoctor(Integer deptId, Integer doctorId, String date) {
+<span class="nc" id="L60">        QueryWrapper queryWrapper = QueryWrapper.create();</span>
+        
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (doctorId != null) {</span>
+<span class="nc" id="L63">            queryWrapper.eq(&quot;doctor_id&quot;, doctorId);</span>
+        }
+        
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (date != null) {</span>
+<span class="nc" id="L67">            LocalDate localDate = LocalDate.parse(date, DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;));</span>
+<span class="nc" id="L68">            int dayOfWeek = localDate.getDayOfWeek().getValue();</span>
+<span class="nc" id="L69">            queryWrapper.eq(&quot;day_of_week&quot;, dayOfWeek);</span>
+        }
+
+<span class="nc" id="L72">        List&lt;Schedules&gt; schedulesList = list(queryWrapper);</span>
+        
+<span class="nc" id="L74">        List&lt;Integer&gt; doctorIds = schedulesList.stream()</span>
+<span class="nc" id="L75">                .map(Schedules::getDoctorId)</span>
+<span class="nc" id="L76">                .distinct()</span>
+<span class="nc" id="L77">                .toList();</span>
+        
+<span class="nc" id="L79">        Map&lt;Integer, Doctors&gt; doctorMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (!doctorIds.isEmpty()) {</span>
+<span class="nc" id="L81">            List&lt;Doctors&gt; doctors = doctorsService.list(</span>
+<span class="nc" id="L82">                QueryWrapper.create().in(&quot;doctor_id&quot;, doctorIds)</span>
+            );
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            for (Doctors doctor : doctors) {</span>
+<span class="nc" id="L85">                doctorMap.put(doctor.getDoctorId(), doctor);</span>
+<span class="nc" id="L86">            }</span>
+        }
+        
+<span class="nc" id="L89">        List&lt;Integer&gt; userIds = doctorMap.values().stream()</span>
+<span class="nc" id="L90">                .map(Doctors::getUserId)</span>
+<span class="nc" id="L91">                .distinct()</span>
+<span class="nc" id="L92">                .toList();</span>
+        
+<span class="nc" id="L94">        Map&lt;Integer, Users&gt; userMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (!userIds.isEmpty()) {</span>
+<span class="nc" id="L96">            List&lt;Users&gt; users = usersService.list(</span>
+<span class="nc" id="L97">                QueryWrapper.create().in(&quot;user_id&quot;, userIds)</span>
+            );
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            for (Users user : users) {</span>
+<span class="nc" id="L100">                userMap.put(user.getUserId(), user);</span>
+<span class="nc" id="L101">            }</span>
+        }
+        
+<span class="nc" id="L104">        List&lt;ScheduleDTO&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        for (Schedules schedule : schedulesList) {</span>
+<span class="nc" id="L106">            Doctors doctor = doctorMap.get(schedule.getDoctorId());</span>
+<span class="nc bnc" id="L107" title="All 6 branches missed.">            if (doctor != null &amp;&amp; (deptId == null || deptId.equals(doctor.getDeptId()))) {</span>
+<span class="nc" id="L108">                Users user = userMap.get(doctor.getUserId());</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                String doctorName = user != null ? user.getRealName() : &quot;未知医生&quot;;</span>
+                
+<span class="nc" id="L111">                result.add(ScheduleDTO.builder()</span>
+<span class="nc" id="L112">                        .scheduleId(schedule.getScheduleId())</span>
+<span class="nc" id="L113">                        .doctorId(doctor.getDoctorId())</span>
+<span class="nc" id="L114">                        .doctorName(doctorName)</span>
+<span class="nc" id="L115">                        .title(doctor.getTitle())</span>
+<span class="nc" id="L116">                        .deptId(doctor.getDeptId())</span>
+<span class="nc" id="L117">                        .deptName(getDeptName(doctor.getDeptId()))</span>
+<span class="nc" id="L118">                        .dayOfWeek(schedule.getDayOfWeek())</span>
+<span class="nc" id="L119">                        .date(date)</span>
+<span class="nc" id="L120">                        .startTime(schedule.getStartTime())</span>
+<span class="nc" id="L121">                        .endTime(schedule.getEndTime())</span>
+<span class="nc" id="L122">                        .availableSlots(schedule.getAvailableSlots())</span>
+<span class="nc" id="L123">                        .maxNumber(schedule.getAvailableSlots())</span>
+<span class="nc" id="L124">                        .remaining(schedule.getAvailableSlots())</span>
+<span class="nc" id="L125">                        .status(schedule.getStatus())</span>
+<span class="nc" id="L126">                        .createdAt(schedule.getCreatedAt())</span>
+<span class="nc" id="L127">                        .build());</span>
+            }
+<span class="nc" id="L129">        }</span>
+        
+<span class="nc" id="L131">        return result;</span>
+    }
+
+<span class="fc" id="L134">    private Map&lt;Integer, String&gt; deptNameCache = null;</span>
+
+    private String getDeptName(Integer deptId) {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (deptNameCache == null) {</span>
+<span class="nc" id="L138">            List&lt;Departments&gt; allDepts = departmentsMapper.selectAll();</span>
+<span class="nc" id="L139">            deptNameCache = allDepts.stream()</span>
+<span class="nc" id="L140">                    .collect(Collectors.toMap(Departments::getDeptId, Departments::getDeptName));</span>
+        }
+<span class="nc" id="L142">        return deptNameCache.getOrDefault(deptId, &quot;未知科室&quot;);</span>
+    }
+
+    @Override
+    public boolean addSchedule(Schedules schedules) {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        if (schedules.getAvailableSlots() == null) {</span>
+<span class="nc" id="L148">            schedules.setAvailableSlots(20);</span>
+        }
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (schedules.getStatus() == null) {</span>
+<span class="nc" id="L151">            schedules.setStatus(&quot;active&quot;);</span>
+        }
+<span class="nc" id="L153">        return save(schedules);</span>
+    }
+
+    @Override
+    public boolean updateSchedule(Schedules schedules) {
+<span class="nc" id="L158">        return updateById(schedules);</span>
+    }
+
+    @Override
+    public boolean deleteSchedule(Long scheduleId) {
+<span class="nc" id="L163">        Schedules schedule = Schedules.builder()</span>
+<span class="nc" id="L164">                .scheduleId(Math.toIntExact(scheduleId))</span>
+<span class="nc" id="L165">                .status(&quot;inactive&quot;)</span>
+<span class="nc" id="L166">                .build();</span>
+<span class="nc" id="L167">        return updateById(schedule);</span>
+    }
+
+    @Override
+    public Schedules getScheduleById(Long scheduleId) {
+<span class="nc" id="L172">        return getById(scheduleId);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

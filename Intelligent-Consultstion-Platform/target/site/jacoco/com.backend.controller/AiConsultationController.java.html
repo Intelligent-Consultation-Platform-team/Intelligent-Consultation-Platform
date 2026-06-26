@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AiConsultationController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.controller</a> &gt; <span class="el_source">AiConsultationController.java</span></div><h1>AiConsultationController.java</h1><pre class="source lang-java linenums">package com.backend.controller;
+
+import com.backend.common.BaseResponse;
+import com.backend.common.ResultUtils;
+import com.backend.model.dto.ai.CloseSessionRequest;
+import com.backend.model.dto.ai.CreateSessionRequest;
+import com.backend.model.dto.ai.SendMessageRequest;
+import com.backend.model.dto.ai.SessionDTO;
+import com.backend.service.AiConsultationService;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+<span class="fc" id="L19">@Slf4j</span>
+@RestController
+@RequestMapping(&quot;/api/ai-consultation&quot;)
+<span class="fc" id="L22">public class AiConsultationController {</span>
+
+    @Resource
+    private AiConsultationService aiConsultationService;
+
+    @PostMapping(&quot;/session&quot;)
+    public BaseResponse&lt;SessionDTO&gt; createSession(@Valid @RequestBody CreateSessionRequest request) {
+<span class="fc" id="L29">        log.info(&quot;Creating AI consultation session with complaint: {}&quot;, request.getChiefComplaint());</span>
+<span class="fc" id="L30">        SessionDTO session = aiConsultationService.createSession(request);</span>
+<span class="fc" id="L31">        return ResultUtils.success(session, &quot;创建成功&quot;);</span>
+    }
+
+    @PostMapping(&quot;/message&quot;)
+    public BaseResponse&lt;?&gt; sendMessage(@Valid @RequestBody SendMessageRequest request) {
+<span class="fc" id="L36">        log.info(&quot;Sending message to session: {}&quot;, request.getSessionId());</span>
+        try {
+<span class="fc" id="L38">            var response = aiConsultationService.sendMessage(request);</span>
+<span class="fc" id="L39">            return ResultUtils.success(response, &quot;发送成功&quot;);</span>
+<span class="nc" id="L40">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L41">            return ResultUtils.error(400, e.getMessage());</span>
+        }
+    }
+
+    @GetMapping(&quot;/session/{sessionId}&quot;)
+    public BaseResponse&lt;?&gt; getSessionDetail(@PathVariable String sessionId) {
+<span class="fc" id="L47">        log.info(&quot;Getting session detail: {}&quot;, sessionId);</span>
+        try {
+<span class="fc" id="L49">            SessionDTO session = aiConsultationService.getSessionDetail(sessionId);</span>
+<span class="fc" id="L50">            return ResultUtils.success(session, &quot;ok&quot;);</span>
+<span class="nc" id="L51">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L52">            return ResultUtils.error(404, e.getMessage());</span>
+        }
+    }
+
+    @GetMapping(&quot;/session/{sessionId}/messages&quot;)
+    public BaseResponse&lt;?&gt; getSessionMessages(
+            @PathVariable String sessionId,
+            @RequestParam(defaultValue = &quot;1&quot;) Integer page,
+            @RequestParam(defaultValue = &quot;20&quot;) Integer pageSize) {
+<span class="fc" id="L61">        log.info(&quot;Getting messages for session {}: page={}, pageSize={}&quot;, sessionId, page, pageSize);</span>
+        try {
+<span class="fc" id="L63">            List&lt;?&gt; messages = aiConsultationService.getSessionMessages(sessionId, page, pageSize);</span>
+<span class="fc" id="L64">            return ResultUtils.success(messages, &quot;ok&quot;);</span>
+<span class="nc" id="L65">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L66">            return ResultUtils.error(404, e.getMessage());</span>
+        }
+    }
+
+    @PostMapping(&quot;/session/{sessionId}/close&quot;)
+    public BaseResponse&lt;?&gt; closeSession(
+            @PathVariable String sessionId,
+            @RequestBody(required = false) CloseSessionRequest request) {
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        String closeReason = request != null ? request.getCloseReason() : &quot;用户主动结束&quot;;</span>
+<span class="fc" id="L75">        log.info(&quot;Closing session {}: {}&quot;, sessionId, closeReason);</span>
+        
+        try {
+<span class="fc" id="L78">            aiConsultationService.closeSession(sessionId, closeReason);</span>
+<span class="fc" id="L79">            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L80">            result.put(&quot;sessionId&quot;, sessionId);</span>
+<span class="fc" id="L81">            result.put(&quot;status&quot;, &quot;closed&quot;);</span>
+<span class="fc" id="L82">            return ResultUtils.success(result, &quot;会话已结束&quot;);</span>
+<span class="nc" id="L83">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L84">            return ResultUtils.error(400, e.getMessage());</span>
+        }
+    }
+
+    @GetMapping(&quot;/session/my&quot;)
+    public BaseResponse&lt;List&lt;SessionDTO&gt;&gt; getMySessions(
+            @RequestParam(defaultValue = &quot;1&quot;) Integer page,
+            @RequestParam(defaultValue = &quot;20&quot;) Integer pageSize,
+            @RequestParam(required = false) String status) {
+<span class="fc" id="L93">        log.info(&quot;Getting my sessions: page={}, pageSize={}, status={}&quot;, page, pageSize, status);</span>
+<span class="fc" id="L94">        List&lt;SessionDTO&gt; sessions = aiConsultationService.getMySessions(page, pageSize, status);</span>
+<span class="fc" id="L95">        return ResultUtils.success(sessions, &quot;ok&quot;);</span>
+    }
+
+    @GetMapping(&quot;/session/all&quot;)
+    public BaseResponse&lt;?&gt; getAllSessions(
+            @RequestParam(defaultValue = &quot;1&quot;) Integer page,
+            @RequestParam(defaultValue = &quot;20&quot;) Integer pageSize,
+            @RequestParam(required = false) String status) {
+<span class="fc" id="L103">        String role = com.backend.common.UserContext.getRole();</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        if (!&quot;admin&quot;.equals(role)) {</span>
+<span class="fc" id="L105">            return ResultUtils.error(403, &quot;无权限访问&quot;);</span>
+        }
+<span class="fc" id="L107">        log.info(&quot;Admin getting all sessions: page={}, pageSize={}, status={}&quot;, page, pageSize, status);</span>
+<span class="fc" id="L108">        List&lt;SessionDTO&gt; sessions = aiConsultationService.getAllSessions(page, pageSize, status);</span>
+<span class="fc" id="L109">        return ResultUtils.success(sessions, &quot;ok&quot;);</span>
+    }
+
+    @GetMapping(&quot;/session/{sessionId}/risk&quot;)
+    public BaseResponse&lt;?&gt; getSessionRisk(@PathVariable String sessionId) {
+<span class="fc" id="L114">        log.info(&quot;Getting risk assessment for session: {}&quot;, sessionId);</span>
+        try {
+<span class="fc" id="L116">            Map&lt;String, Object&gt; risk = aiConsultationService.getSessionRisk(sessionId);</span>
+<span class="fc" id="L117">            return ResultUtils.success(risk, &quot;ok&quot;);</span>
+<span class="nc" id="L118">        } catch (RuntimeException e) {</span>
+<span class="nc" id="L119">            return ResultUtils.error(404, e.getMessage());</span>
+        }
+    }
+
+    @PostMapping(&quot;/upload&quot;)
+    public BaseResponse&lt;Map&lt;String, Object&gt;&gt; uploadFile() {
+<span class="fc" id="L125">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L126">        result.put(&quot;message&quot;, &quot;文件上传功能暂未实现&quot;);</span>
+<span class="fc" id="L127">        return ResultUtils.success(result, &quot;ok&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DepartmentsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.controller</a> &gt; <span class="el_source">DepartmentsController.java</span></div><h1>DepartmentsController.java</h1><pre class="source lang-java linenums">package com.backend.controller;
+
+import com.backend.common.ResultUtils;
+import com.backend.model.entity.Departments;
+import com.backend.service.DepartmentsService;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ *  科室管理控制器。
+ *
+ * @author 佳尔宇柔
+ */
+@RestController
+@RequestMapping(&quot;/departments&quot;)
+<span class="fc" id="L18">public class DepartmentsController {</span>
+
+    @Resource
+    private DepartmentsService departmentsService;
+
+    /**
+     * 获取科室列表
+     *
+     * @return 科室列表
+     */
+    @GetMapping
+    public Object getDepartmentsList() {
+<span class="nc" id="L30">        List&lt;Departments&gt; departmentsList = departmentsService.getDepartmentsList();</span>
+<span class="nc" id="L31">        return ResultUtils.success(departmentsList);</span>
+    }
+
+    /**
+     * 添加科室
+     *
+     * @param departments 科室信息
+     * @return 操作结果
+     */
+    @PostMapping
+    public Object addDepartment(@RequestBody Departments departments) {
+<span class="nc" id="L42">        boolean result = departmentsService.addDepartment(departments);</span>
+<span class="nc" id="L43">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 更新科室
+     *
+     * @param departments 科室信息
+     * @return 操作结果
+     */
+    @PutMapping
+    public Object updateDepartment(@RequestBody Departments departments) {
+<span class="nc" id="L54">        boolean result = departmentsService.updateDepartment(departments);</span>
+<span class="nc" id="L55">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 删除科室
+     *
+     * @param deptId 科室ID
+     * @return 操作结果
+     */
+    @DeleteMapping(&quot;/{deptId}&quot;)
+    public Object deleteDepartment(@PathVariable Long deptId) {
+<span class="nc" id="L66">        boolean result = departmentsService.deleteDepartment(deptId);</span>
+<span class="nc" id="L67">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 根据ID获取科室
+     *
+     * @param deptId 科室ID
+     * @return 科室信息
+     */
+    @GetMapping(&quot;/{deptId}&quot;)
+    public Object getDepartmentById(@PathVariable Long deptId) {
+<span class="nc" id="L78">        Departments department = departmentsService.getDepartmentById(deptId);</span>
+<span class="nc" id="L79">        return ResultUtils.success(department);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

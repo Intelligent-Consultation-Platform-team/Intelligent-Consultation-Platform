@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsersController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.controller</a> &gt; <span class="el_source">UsersController.java</span></div><h1>UsersController.java</h1><pre class="source lang-java linenums">package com.backend.controller;
+
+import com.backend.common.ResultUtils;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.backend.model.dto.ResetPasswordRequest;
+import com.backend.model.entity.Users;
+import com.backend.service.UsersService;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
+
+/**
+ *  控制层。
+ *
+ * @author 佳尔宇柔
+ */
+@RestController
+@RequestMapping(&quot;/users&quot;)
+<span class="fc" id="L28">public class UsersController {</span>
+
+    @Autowired
+    private UsersService usersService;
+
+    /**
+     * 保存。
+     *
+     * @param users
+     * @return 操作结果
+     */
+    @PostMapping(&quot;save&quot;)
+    public Object save(@RequestBody Users users) {
+<span class="nc" id="L41">        boolean result = usersService.save(users);</span>
+<span class="nc" id="L42">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 根据主键删除。
+     *
+     * @param id 主键
+     * @return 操作结果
+     */
+    @DeleteMapping(&quot;remove/{id}&quot;)
+    public Object remove(@PathVariable Integer id) {
+<span class="nc" id="L53">        boolean result = usersService.deleteUser(id);</span>
+<span class="nc" id="L54">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 根据主键更新。
+     *
+     * @param users
+     * @return 操作结果
+     */
+    @PutMapping(&quot;update&quot;)
+    public Object update(@RequestBody Users users) {
+<span class="nc" id="L65">        boolean result = usersService.updateById(users);</span>
+<span class="nc" id="L66">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 查询所有。
+     *
+     * @return 所有数据
+     */
+    @GetMapping(&quot;list&quot;)
+    public Object list() {
+<span class="nc" id="L76">        QueryWrapper qw = QueryWrapper.create().eq(&quot;status&quot;, &quot;active&quot;);</span>
+<span class="nc" id="L77">        List&lt;Users&gt; result = usersService.list(qw);</span>
+<span class="nc" id="L78">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 根据主键获取。
+     *
+     * @param id 主键
+     * @return 详情
+     */
+    @GetMapping(&quot;getInfo/{id}&quot;)
+    public Object getInfo(@PathVariable Integer id) {
+<span class="nc" id="L89">        Users result = usersService.getById(id);</span>
+<span class="nc" id="L90">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 分页查询（支持关键词搜索）。
+     *
+     * @param page 分页对象
+     * @param keyword 搜索关键词（匹配用户名、真实姓名、手机号）
+     * @return 分页对象
+     */
+    @GetMapping(&quot;page&quot;)
+    public Object page(Page&lt;Users&gt; page, @RequestParam(required = false) String keyword) {
+<span class="nc" id="L102">        QueryWrapper queryWrapper = QueryWrapper.create().eq(&quot;status&quot;, &quot;active&quot;);</span>
+<span class="nc bnc" id="L103" title="All 4 branches missed.">        if (keyword != null &amp;&amp; !keyword.isBlank()) {</span>
+<span class="nc" id="L104">            String kw = &quot;%&quot; + keyword + &quot;%&quot;;</span>
+<span class="nc" id="L105">            queryWrapper.where(&quot;(username like ? or real_name like ? or phone like ?)&quot;, kw, kw, kw);</span>
+        }
+<span class="nc" id="L107">        Page&lt;Users&gt; result = usersService.page(page, queryWrapper);</span>
+<span class="nc" id="L108">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 重置用户密码为默认密码123456
+     *
+     * @param request 重置密码请求
+     * @return 操作结果
+     */
+    @PostMapping(&quot;resetPassword&quot;)
+    public Object resetPassword(@RequestBody ResetPasswordRequest request) {
+<span class="nc" id="L119">        boolean result = usersService.resetPassword(request.getUserId());</span>
+<span class="nc" id="L120">        return ResultUtils.success(result);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

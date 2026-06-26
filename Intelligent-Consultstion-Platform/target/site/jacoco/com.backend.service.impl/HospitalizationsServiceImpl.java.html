@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HospitalizationsServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.service.impl</a> &gt; <span class="el_source">HospitalizationsServiceImpl.java</span></div><h1>HospitalizationsServiceImpl.java</h1><pre class="source lang-java linenums">package com.backend.service.impl;
+
+import com.backend.common.UserContext;
+import com.backend.exception.BusinessException;
+import com.backend.exception.ErrorCode;
+import com.backend.mapper.DepartmentsMapper;
+import com.backend.mapper.DoctorsMapper;
+import com.backend.mapper.HospitalizationsMapper;
+import com.backend.mapper.PatientsMapper;
+import com.backend.mapper.UsersMapper;
+import com.backend.model.entity.Departments;
+import com.backend.model.entity.Doctors;
+import com.backend.model.entity.Hospitalizations;
+import com.backend.model.entity.Patients;
+import com.backend.model.entity.Users;
+import com.backend.service.HospitalizationsService;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ * 住院管理服务实现类。
+ *
+ * @author 佳尔宇柔
+ */
+@Service
+<span class="fc" id="L38">public class HospitalizationsServiceImpl extends ServiceImpl&lt;HospitalizationsMapper, Hospitalizations&gt; implements HospitalizationsService {</span>
+
+    @Resource
+    private PatientsMapper patientsMapper;
+
+    @Resource
+    private UsersMapper usersMapper;
+
+    @Resource
+    private DoctorsMapper doctorsMapper;
+
+    @Resource
+    private DepartmentsMapper departmentsMapper;
+
+    @Override
+    public Hospitalizations createHospitalization(Hospitalizations hospitalizations) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if (hospitalizations.getPatientId() == null) {</span>
+<span class="nc" id="L55">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;请选择患者&quot;);</span>
+        }
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (hospitalizations.getDoctorId() == null) {</span>
+<span class="nc" id="L58">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;请选择主治医生&quot;);</span>
+        }
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (hospitalizations.getDeptId() == null) {</span>
+<span class="nc" id="L61">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;请选择科室&quot;);</span>
+        }
+        // 检查患者是否已住院
+<span class="nc" id="L64">        long activeCount = count(QueryWrapper.create()</span>
+<span class="nc" id="L65">                .eq(&quot;patient_id&quot;, hospitalizations.getPatientId())</span>
+<span class="nc" id="L66">                .eq(&quot;status&quot;, &quot;admitted&quot;));</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (activeCount &gt; 0) {</span>
+<span class="nc" id="L68">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;该患者已住院，不能重复登记&quot;);</span>
+        }
+
+        // 检查病房号+床位号是否已被占用
+<span class="nc bnc" id="L72" title="All 4 branches missed.">        if (hospitalizations.getWardNumber() != null &amp;&amp; hospitalizations.getBedNumber() != null) {</span>
+<span class="nc" id="L73">            long bedUsed = count(QueryWrapper.create()</span>
+<span class="nc" id="L74">                    .eq(&quot;ward_number&quot;, hospitalizations.getWardNumber())</span>
+<span class="nc" id="L75">                    .eq(&quot;bed_number&quot;, hospitalizations.getBedNumber())</span>
+<span class="nc" id="L76">                    .eq(&quot;status&quot;, &quot;admitted&quot;));</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (bedUsed &gt; 0) {</span>
+<span class="nc" id="L78">                throw new BusinessException(ErrorCode.OPERATION_ERROR,</span>
+<span class="nc" id="L79">                        &quot;病房&quot; + hospitalizations.getWardNumber() + &quot;床位&quot; + hospitalizations.getBedNumber() + &quot;已被占用&quot;);</span>
+            }
+        }
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (hospitalizations.getAdmissionDate() == null) {</span>
+<span class="nc" id="L84">            hospitalizations.setAdmissionDate(new Timestamp(System.currentTimeMillis()));</span>
+        }
+<span class="nc" id="L86">        hospitalizations.setStatus(&quot;admitted&quot;);</span>
+<span class="nc" id="L87">        save(hospitalizations);</span>
+<span class="nc" id="L88">        return hospitalizations;</span>
+    }
+
+    @Override
+    public Map&lt;String, Object&gt; getPage(Integer current, Integer size, String patientName, String status) {
+<span class="nc" id="L93">        QueryWrapper queryWrapper = QueryWrapper.create()</span>
+<span class="nc" id="L94">                .orderBy(&quot;created_at&quot;, false);</span>
+
+<span class="nc bnc" id="L96" title="All 4 branches missed.">        if (patientName != null &amp;&amp; !patientName.trim().isEmpty()) {</span>
+<span class="nc" id="L97">            List&lt;Users&gt; matchedUsers = usersMapper.selectListByQuery(</span>
+<span class="nc" id="L98">                    QueryWrapper.create().like(&quot;real_name&quot;, &quot;%&quot; + patientName.trim() + &quot;%&quot;)</span>
+            );
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            if (matchedUsers.isEmpty()) {</span>
+<span class="nc" id="L101">                return emptyPage(current, size);</span>
+            }
+<span class="nc" id="L103">            List&lt;Integer&gt; matchedUserIds = matchedUsers.stream()</span>
+<span class="nc" id="L104">                    .map(Users::getUserId).collect(Collectors.toList());</span>
+<span class="nc" id="L105">            List&lt;Patients&gt; matchedPatients = patientsMapper.selectListByQuery(</span>
+<span class="nc" id="L106">                    QueryWrapper.create().in(&quot;user_id&quot;, matchedUserIds)</span>
+            );
+<span class="nc" id="L108">            List&lt;Integer&gt; matchedPatientIds = matchedPatients.stream()</span>
+<span class="nc" id="L109">                    .map(Patients::getPatientId).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            if (matchedPatientIds.isEmpty()) {</span>
+<span class="nc" id="L111">                return emptyPage(current, size);</span>
+            }
+<span class="nc" id="L113">            queryWrapper.in(&quot;patient_id&quot;, matchedPatientIds);</span>
+        }
+
+<span class="nc bnc" id="L116" title="All 4 branches missed.">        if (status != null &amp;&amp; !status.trim().isEmpty()) {</span>
+<span class="nc" id="L117">            queryWrapper.eq(&quot;status&quot;, status.trim());</span>
+        }
+
+        // 医生只看自己的住院患者，管理员看全部
+<span class="nc" id="L121">        String role = UserContext.getRole();</span>
+<span class="nc" id="L122">        Integer userId = UserContext.getUserId();</span>
+<span class="nc bnc" id="L123" title="All 4 branches missed.">        if (&quot;doctor&quot;.equals(role) &amp;&amp; userId != null) {</span>
+<span class="nc" id="L124">            Doctors doctor = doctorsMapper.selectOneByQuery(</span>
+<span class="nc" id="L125">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">            if (doctor != null) {</span>
+<span class="nc" id="L127">                queryWrapper.eq(&quot;doctor_id&quot;, doctor.getDoctorId());</span>
+            }
+        }
+
+<span class="nc" id="L131">        Page&lt;Hospitalizations&gt; page = new Page&lt;&gt;(current, size);</span>
+<span class="nc" id="L132">        page = page(page, queryWrapper);</span>
+<span class="nc" id="L133">        List&lt;Hospitalizations&gt; list = page.getRecords();</span>
+
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        if (list.isEmpty()) {</span>
+<span class="nc" id="L136">            return emptyPage(current, size);</span>
+        }
+
+<span class="nc" id="L139">        List&lt;Integer&gt; patientIds = list.stream()</span>
+<span class="nc" id="L140">                .map(Hospitalizations::getPatientId).distinct().collect(Collectors.toList());</span>
+<span class="nc" id="L141">        List&lt;Integer&gt; doctorIds = list.stream()</span>
+<span class="nc" id="L142">                .map(Hospitalizations::getDoctorId).distinct().collect(Collectors.toList());</span>
+<span class="nc" id="L143">        List&lt;Integer&gt; deptIds = list.stream()</span>
+<span class="nc" id="L144">                .map(Hospitalizations::getDeptId).distinct().collect(Collectors.toList());</span>
+
+<span class="nc" id="L146">        Map&lt;Integer, Patients&gt; patientMap = patientsMapper.selectListByQuery(</span>
+<span class="nc" id="L147">                QueryWrapper.create().in(&quot;patient_id&quot;, patientIds)</span>
+<span class="nc" id="L148">        ).stream().collect(Collectors.toMap(Patients::getPatientId, p -&gt; p));</span>
+<span class="nc" id="L149">        List&lt;Integer&gt; patientUserIds = patientMap.values().stream()</span>
+<span class="nc" id="L150">                .map(Patients::getUserId).distinct().collect(Collectors.toList());</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">        Map&lt;Integer, Users&gt; userMap = patientUserIds.isEmpty() ? new HashMap&lt;&gt;() :</span>
+<span class="nc" id="L152">                usersMapper.selectListByQuery(</span>
+<span class="nc" id="L153">                        QueryWrapper.create().in(&quot;user_id&quot;, patientUserIds)</span>
+<span class="nc" id="L154">                ).stream().collect(Collectors.toMap(Users::getUserId, u -&gt; u));</span>
+
+<span class="nc" id="L156">        Map&lt;Integer, Doctors&gt; doctorMap = doctorsMapper.selectListByQuery(</span>
+<span class="nc" id="L157">                QueryWrapper.create().in(&quot;doctor_id&quot;, doctorIds)</span>
+<span class="nc" id="L158">        ).stream().collect(Collectors.toMap(Doctors::getDoctorId, d -&gt; d));</span>
+<span class="nc" id="L159">        List&lt;Integer&gt; doctorUserIds = doctorMap.values().stream()</span>
+<span class="nc" id="L160">                .map(Doctors::getUserId).distinct().collect(Collectors.toList());</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        Map&lt;Integer, Users&gt; doctorUserMap = doctorUserIds.isEmpty() ? new HashMap&lt;&gt;() :</span>
+<span class="nc" id="L162">                usersMapper.selectListByQuery(</span>
+<span class="nc" id="L163">                        QueryWrapper.create().in(&quot;user_id&quot;, doctorUserIds)</span>
+<span class="nc" id="L164">                ).stream().collect(Collectors.toMap(Users::getUserId, u -&gt; u));</span>
+
+<span class="nc" id="L166">        Map&lt;Integer, Departments&gt; deptMap = departmentsMapper.selectListByQuery(</span>
+<span class="nc" id="L167">                QueryWrapper.create().in(&quot;dept_id&quot;, deptIds)</span>
+<span class="nc" id="L168">        ).stream().collect(Collectors.toMap(Departments::getDeptId, d -&gt; d));</span>
+
+<span class="nc" id="L170">        List&lt;Map&lt;String, Object&gt;&gt; records = list.stream().map(h -&gt; {</span>
+<span class="nc" id="L171">            Map&lt;String, Object&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L172">            item.put(&quot;hospitalizationId&quot;, h.getHospitalizationId());</span>
+<span class="nc" id="L173">            item.put(&quot;patientId&quot;, h.getPatientId());</span>
+<span class="nc" id="L174">            item.put(&quot;doctorId&quot;, h.getDoctorId());</span>
+<span class="nc" id="L175">            item.put(&quot;deptId&quot;, h.getDeptId());</span>
+<span class="nc" id="L176">            item.put(&quot;wardNumber&quot;, h.getWardNumber());</span>
+<span class="nc" id="L177">            item.put(&quot;bedNumber&quot;, h.getBedNumber());</span>
+<span class="nc" id="L178">            item.put(&quot;consultationId&quot;, h.getConsultationId());</span>
+<span class="nc" id="L179">            item.put(&quot;admissionDate&quot;, fmtDate(h.getAdmissionDate()));</span>
+<span class="nc" id="L180">            item.put(&quot;dischargeDate&quot;, fmtDate(h.getDischargeDate()));</span>
+<span class="nc" id="L181">            item.put(&quot;reason&quot;, h.getReason());</span>
+<span class="nc" id="L182">            item.put(&quot;status&quot;, h.getStatus());</span>
+<span class="nc" id="L183">            item.put(&quot;createdAt&quot;, h.getCreatedAt());</span>
+
+<span class="nc" id="L185">            Patients p = patientMap.get(h.getPatientId());</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">            if (p != null) {</span>
+<span class="nc" id="L187">                Users u = userMap.get(p.getUserId());</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                item.put(&quot;patientName&quot;, u != null ? u.getRealName() : &quot;患者&quot; + h.getPatientId());</span>
+<span class="nc" id="L189">            } else {</span>
+<span class="nc" id="L190">                item.put(&quot;patientName&quot;, &quot;患者&quot; + h.getPatientId());</span>
+            }
+
+<span class="nc" id="L193">            Doctors d = doctorMap.get(h.getDoctorId());</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            if (d != null) {</span>
+<span class="nc" id="L195">                Users du = doctorUserMap.get(d.getUserId());</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">                item.put(&quot;doctorName&quot;, du != null ? du.getRealName() : null);</span>
+            }
+
+<span class="nc" id="L199">            Departments dept = deptMap.get(h.getDeptId());</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            item.put(&quot;deptName&quot;, dept != null ? dept.getDeptName() : null);</span>
+
+<span class="nc" id="L202">            return item;</span>
+<span class="nc" id="L203">        }).collect(Collectors.toList());</span>
+
+<span class="nc" id="L205">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L206">        result.put(&quot;records&quot;, records);</span>
+<span class="nc" id="L207">        result.put(&quot;total&quot;, page.getTotalRow());</span>
+<span class="nc" id="L208">        result.put(&quot;current&quot;, current);</span>
+<span class="nc" id="L209">        result.put(&quot;size&quot;, size);</span>
+<span class="nc" id="L210">        return result;</span>
+    }
+
+    @Override
+    public void discharge(Integer hospitalizationId) {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        if (hospitalizationId == null) {</span>
+<span class="nc" id="L216">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;住院ID不能为空&quot;);</span>
+        }
+<span class="nc" id="L218">        Hospitalizations h = getById(hospitalizationId);</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">        if (h == null) {</span>
+<span class="nc" id="L220">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;住院记录不存在&quot;);</span>
+        }
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (&quot;discharged&quot;.equals(h.getStatus())) {</span>
+<span class="nc" id="L223">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;该患者已出院&quot;);</span>
+        }
+<span class="nc" id="L225">        h.setStatus(&quot;discharged&quot;);</span>
+<span class="nc" id="L226">        h.setDischargeDate(new Timestamp(System.currentTimeMillis()));</span>
+<span class="nc" id="L227">        updateById(h);</span>
+<span class="nc" id="L228">    }</span>
+
+    private Map&lt;String, Object&gt; emptyPage(Integer current, Integer size) {
+<span class="nc" id="L231">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L232">        result.put(&quot;records&quot;, new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L233">        result.put(&quot;total&quot;, 0L);</span>
+<span class="nc" id="L234">        result.put(&quot;current&quot;, current);</span>
+<span class="nc" id="L235">        result.put(&quot;size&quot;, size);</span>
+<span class="nc" id="L236">        return result;</span>
+    }
+
+    @Override
+    public boolean isPatientAdmitted(Integer patientId) {
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        if (patientId == null) return false;</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        return count(QueryWrapper.create()</span>
+<span class="nc" id="L243">                .eq(&quot;patient_id&quot;, patientId)</span>
+<span class="nc" id="L244">                .eq(&quot;status&quot;, &quot;admitted&quot;)) &gt; 0;</span>
+    }
+
+    private static String fmtDate(Timestamp ts) {
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        if (ts == null) return null;</span>
+<span class="nc" id="L249">        return new SimpleDateFormat(&quot;yyyy-MM-dd&quot;).format(ts);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

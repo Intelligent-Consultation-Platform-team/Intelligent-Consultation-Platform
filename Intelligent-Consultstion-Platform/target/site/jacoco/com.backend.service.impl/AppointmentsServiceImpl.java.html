@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppointmentsServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.service.impl</a> &gt; <span class="el_source">AppointmentsServiceImpl.java</span></div><h1>AppointmentsServiceImpl.java</h1><pre class="source lang-java linenums">package com.backend.service.impl;
+
+import com.backend.common.UserContext;
+import com.backend.exception.BusinessException;
+import com.backend.exception.ErrorCode;
+import com.backend.mapper.AppointmentsMapper;
+import com.backend.mapper.ConsultationsMapper;
+import com.backend.mapper.DepartmentsMapper;
+import com.backend.mapper.DoctorsMapper;
+import com.backend.mapper.PatientsMapper;
+import com.backend.mapper.SchedulesMapper;
+import com.backend.mapper.UsersMapper;
+import com.backend.model.dto.AppointmentDTO;
+import com.backend.model.entity.Appointments;
+import com.backend.model.entity.Consultations;
+import com.backend.model.entity.Departments;
+import com.backend.model.entity.Doctors;
+import com.backend.model.entity.Patients;
+import com.backend.model.entity.Schedules;
+import com.backend.model.entity.Users;
+import com.backend.service.AppointmentsService;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+/**
+ *  预约挂号服务实现类。
+ *
+ * @author 佳尔宇柔
+ */
+@Service
+<span class="fc" id="L43">public class AppointmentsServiceImpl extends ServiceImpl&lt;AppointmentsMapper, Appointments&gt; implements AppointmentsService {</span>
+
+    @Resource
+    private UsersMapper usersMapper;
+
+    @Resource
+    private PatientsMapper patientsMapper;
+
+    @Resource
+    private DoctorsMapper doctorsMapper;
+
+    @Resource
+    private SchedulesMapper schedulesMapper;
+
+    @Resource
+    private DepartmentsMapper departmentsMapper;
+
+    @Resource
+    private ConsultationsMapper consultationsMapper;
+
+    @Override
+    public Map&lt;String, Object&gt; getAppointmentsPage(Integer current, Integer size, String patientName, String status) {
+<span class="nc" id="L65">        QueryWrapper queryWrapper = QueryWrapper.create()</span>
+<span class="nc" id="L66">                .orderBy(&quot;created_at&quot;, false);</span>
+
+        // 根据当前用户角色决定查询范围
+<span class="nc" id="L69">        String role = UserContext.getRole();</span>
+<span class="nc" id="L70">        Integer userId = UserContext.getUserId();</span>
+<span class="nc bnc" id="L71" title="All 4 branches missed.">        if (&quot;patient&quot;.equals(role) &amp;&amp; userId != null) {</span>
+<span class="nc" id="L72">            Patients patient = patientsMapper.selectOneByQuery(</span>
+<span class="nc" id="L73">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            if (patient != null) {</span>
+<span class="nc" id="L75">                queryWrapper.eq(&quot;patient_id&quot;, patient.getPatientId());</span>
+            }
+<span class="nc bnc" id="L77" title="All 4 branches missed.">        } else if (&quot;doctor&quot;.equals(role) &amp;&amp; userId != null) {</span>
+<span class="nc" id="L78">            Doctors doctor = doctorsMapper.selectOneByQuery(</span>
+<span class="nc" id="L79">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">            if (doctor != null) {</span>
+<span class="nc" id="L81">                queryWrapper.eq(&quot;doctor_id&quot;, doctor.getDoctorId());</span>
+            }
+        }
+        // 管理员看全部
+
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (patientName != null &amp;&amp; !patientName.trim().isEmpty()) {</span>
+<span class="nc" id="L87">            List&lt;Users&gt; matchedUsers = usersMapper.selectListByQuery(</span>
+<span class="nc" id="L88">                    QueryWrapper.create().like(&quot;real_name&quot;, &quot;%&quot; + patientName.trim() + &quot;%&quot;)</span>
+            );
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            if (matchedUsers.isEmpty()) {</span>
+<span class="nc" id="L91">                Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L92">                result.put(&quot;records&quot;, new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L93">                result.put(&quot;total&quot;, 0L);</span>
+<span class="nc" id="L94">                result.put(&quot;current&quot;, current);</span>
+<span class="nc" id="L95">                result.put(&quot;size&quot;, size);</span>
+<span class="nc" id="L96">                return result;</span>
+            }
+<span class="nc" id="L98">            List&lt;Integer&gt; matchedUserIds = matchedUsers.stream()</span>
+<span class="nc" id="L99">                    .map(Users::getUserId).collect(Collectors.toList());</span>
+<span class="nc" id="L100">            List&lt;Patients&gt; matchedPatients = patientsMapper.selectListByQuery(</span>
+<span class="nc" id="L101">                    QueryWrapper.create().in(&quot;user_id&quot;, matchedUserIds)</span>
+            );
+<span class="nc" id="L103">            List&lt;Integer&gt; matchedPatientIds = matchedPatients.stream()</span>
+<span class="nc" id="L104">                    .map(Patients::getPatientId).collect(Collectors.toList());</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (matchedPatientIds.isEmpty()) {</span>
+<span class="nc" id="L106">                Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L107">                result.put(&quot;records&quot;, new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L108">                result.put(&quot;total&quot;, 0L);</span>
+<span class="nc" id="L109">                result.put(&quot;current&quot;, current);</span>
+<span class="nc" id="L110">                result.put(&quot;size&quot;, size);</span>
+<span class="nc" id="L111">                return result;</span>
+            }
+<span class="nc" id="L113">            queryWrapper.in(&quot;patient_id&quot;, matchedPatientIds);</span>
+        }
+<span class="nc bnc" id="L115" title="All 4 branches missed.">        if (status != null &amp;&amp; !status.trim().isEmpty()) {</span>
+<span class="nc" id="L116">            queryWrapper.eq(&quot;status&quot;, status.trim());</span>
+        }
+
+<span class="nc" id="L119">        Page&lt;Appointments&gt; page = new Page&lt;&gt;(current, size);</span>
+<span class="nc" id="L120">        page = page(page, queryWrapper);</span>
+<span class="nc" id="L121">        List&lt;Appointments&gt; appointmentsList = page.getRecords();</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (appointmentsList.isEmpty()) {</span>
+<span class="nc" id="L124">            Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L125">            result.put(&quot;records&quot;, new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L126">            result.put(&quot;total&quot;, 0L);</span>
+<span class="nc" id="L127">            result.put(&quot;current&quot;, current);</span>
+<span class="nc" id="L128">            result.put(&quot;size&quot;, size);</span>
+<span class="nc" id="L129">            return result;</span>
+        }
+
+<span class="nc" id="L132">        List&lt;Integer&gt; patientIds = appointmentsList.stream()</span>
+<span class="nc" id="L133">                .map(Appointments::getPatientId).distinct().collect(Collectors.toList());</span>
+<span class="nc" id="L134">        List&lt;Integer&gt; doctorIds = appointmentsList.stream()</span>
+<span class="nc" id="L135">                .map(Appointments::getDoctorId).distinct().collect(Collectors.toList());</span>
+
+<span class="nc" id="L137">        Map&lt;Integer, Patients&gt; patientIdMap = patientsMapper.selectListByQuery(</span>
+<span class="nc" id="L138">                QueryWrapper.create().in(&quot;patient_id&quot;, patientIds)</span>
+<span class="nc" id="L139">        ).stream().collect(Collectors.toMap(Patients::getPatientId, p -&gt; p));</span>
+<span class="nc" id="L140">        List&lt;Integer&gt; patientUserIds = patientIdMap.values().stream()</span>
+<span class="nc" id="L141">                .map(Patients::getUserId).distinct().collect(Collectors.toList());</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        Map&lt;Integer, Users&gt; patientUserMap = patientUserIds.isEmpty() ? new HashMap&lt;&gt;() :</span>
+<span class="nc" id="L143">                usersMapper.selectListByQuery(</span>
+<span class="nc" id="L144">                        QueryWrapper.create().in(&quot;user_id&quot;, patientUserIds)</span>
+<span class="nc" id="L145">                ).stream().collect(Collectors.toMap(Users::getUserId, u -&gt; u));</span>
+
+<span class="nc" id="L147">        Map&lt;Integer, Doctors&gt; doctorMap = doctorsMapper.selectListByQuery(</span>
+<span class="nc" id="L148">                QueryWrapper.create().in(&quot;doctor_id&quot;, doctorIds)</span>
+<span class="nc" id="L149">        ).stream().collect(Collectors.toMap(Doctors::getDoctorId, d -&gt; d));</span>
+
+<span class="nc" id="L151">        List&lt;Integer&gt; doctorUserIds = doctorMap.values().stream()</span>
+<span class="nc" id="L152">                .map(Doctors::getUserId).distinct().collect(Collectors.toList());</span>
+<span class="nc" id="L153">        Map&lt;Integer, Users&gt; doctorUserMap = usersMapper.selectListByQuery(</span>
+<span class="nc" id="L154">                QueryWrapper.create().in(&quot;user_id&quot;, doctorUserIds)</span>
+<span class="nc" id="L155">        ).stream().collect(Collectors.toMap(Users::getUserId, u -&gt; u));</span>
+
+<span class="nc" id="L157">        List&lt;Integer&gt; deptIds = doctorMap.values().stream()</span>
+<span class="nc" id="L158">                .map(Doctors::getDeptId).distinct().collect(Collectors.toList());</span>
+<span class="nc" id="L159">        Map&lt;Integer, Departments&gt; deptMap = departmentsMapper.selectListByQuery(</span>
+<span class="nc" id="L160">                QueryWrapper.create().in(&quot;dept_id&quot;, deptIds)</span>
+<span class="nc" id="L161">        ).stream().collect(Collectors.toMap(Departments::getDeptId, d -&gt; d));</span>
+
+<span class="nc" id="L163">        List&lt;Map&lt;String, Object&gt;&gt; records = appointmentsList.stream().map(apt -&gt; {</span>
+<span class="nc" id="L164">            Map&lt;String, Object&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L165">            item.put(&quot;appointmentId&quot;, apt.getAppointmentId());</span>
+<span class="nc" id="L166">            item.put(&quot;patientId&quot;, apt.getPatientId());</span>
+<span class="nc" id="L167">            item.put(&quot;appointmentDate&quot;, apt.getAppointmentDate());</span>
+<span class="nc" id="L168">            item.put(&quot;appointmentTime&quot;, apt.getAppointmentTime());</span>
+<span class="nc" id="L169">            item.put(&quot;status&quot;, apt.getStatus());</span>
+<span class="nc" id="L170">            item.put(&quot;symptoms&quot;, apt.getSymptoms());</span>
+<span class="nc" id="L171">            item.put(&quot;createdAt&quot;, apt.getCreatedAt());</span>
+
+<span class="nc" id="L173">            Patients patientRecord = patientIdMap.get(apt.getPatientId());</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (patientRecord != null) {</span>
+<span class="nc" id="L175">                Users patientUser = patientUserMap.get(patientRecord.getUserId());</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                item.put(&quot;patientName&quot;, patientUser != null ? patientUser.getRealName() : null);</span>
+<span class="nc" id="L177">            } else {</span>
+<span class="nc" id="L178">                item.put(&quot;patientName&quot;, null);</span>
+            }
+
+<span class="nc" id="L181">            Doctors doctor = doctorMap.get(apt.getDoctorId());</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">            if (doctor != null) {</span>
+<span class="nc" id="L183">                item.put(&quot;doctorId&quot;, doctor.getDoctorId());</span>
+<span class="nc" id="L184">                Users doctorUser = doctorUserMap.get(doctor.getUserId());</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                item.put(&quot;doctorName&quot;, doctorUser != null ? doctorUser.getRealName() : null);</span>
+<span class="nc" id="L186">                item.put(&quot;doctorTitle&quot;, doctor.getTitle());</span>
+<span class="nc" id="L187">                Departments dept = deptMap.get(doctor.getDeptId());</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                item.put(&quot;deptName&quot;, dept != null ? dept.getDeptName() : null);</span>
+            }
+
+<span class="nc" id="L191">            return item;</span>
+<span class="nc" id="L192">        }).collect(Collectors.toList());</span>
+
+<span class="nc" id="L194">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L195">        result.put(&quot;records&quot;, records);</span>
+<span class="nc" id="L196">        result.put(&quot;total&quot;, page.getTotalRow());</span>
+<span class="nc" id="L197">        result.put(&quot;current&quot;, current);</span>
+<span class="nc" id="L198">        result.put(&quot;size&quot;, size);</span>
+<span class="nc" id="L199">        return result;</span>
+    }
+
+    @Override
+    public void cancelAppointment(Integer appointmentId) {
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (appointmentId == null) {</span>
+<span class="nc" id="L205">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;预约ID不能为空&quot;);</span>
+        }
+<span class="fc" id="L207">        Appointments apt = getById(appointmentId);</span>
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">        if (apt == null) {</span>
+<span class="nc" id="L209">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;预约不存在&quot;);</span>
+        }
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        if (&quot;cancelled&quot;.equals(apt.getStatus())) {</span>
+<span class="fc" id="L212">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;预约已取消，无需重复操作&quot;);</span>
+        }
+<span class="fc" id="L214">        apt.setStatus(&quot;cancelled&quot;);</span>
+<span class="fc" id="L215">        updateById(apt);</span>
+
+        // 恢复号源
+<span class="fc" id="L218">        Schedules schedule = schedulesMapper.selectOneById(apt.getScheduleId());</span>
+<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if (schedule != null) {</span>
+<span class="fc" id="L220">            Schedules updateSchedule = new Schedules();</span>
+<span class="fc" id="L221">            updateSchedule.setAvailableSlots(schedule.getAvailableSlots() + 1);</span>
+<span class="fc" id="L222">            schedulesMapper.updateByQuery(updateSchedule,</span>
+<span class="fc" id="L223">                    QueryWrapper.create().eq(&quot;schedule_id&quot;, schedule.getScheduleId()));</span>
+        }
+<span class="fc" id="L225">    }</span>
+
+    @Override
+    public Appointments createAppointment(Appointments appointments) {
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        if (appointments.getScheduleId() == null) {</span>
+<span class="nc" id="L230">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;排班ID不能为空&quot;);</span>
+        }
+<span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if (appointments.getAppointmentDate() == null) {</span>
+<span class="nc" id="L233">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;预约日期不能为空&quot;);</span>
+        }
+
+        // 查询排班
+<span class="fc" id="L237">        Schedules schedule = schedulesMapper.selectOneById(appointments.getScheduleId());</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">        if (schedule == null) {</span>
+<span class="nc" id="L239">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;排班不存在&quot;);</span>
+        }
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">        if (!&quot;active&quot;.equals(schedule.getStatus())) {</span>
+<span class="nc" id="L242">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;该排班已停用&quot;);</span>
+        }
+
+        // 校验预约日期必须匹配排班的星期几
+<span class="fc" id="L246">        LocalDate appointmentLocalDate = appointments.getAppointmentDate().toLocalDate();</span>
+<span class="fc" id="L247">        int dayOfWeek = appointmentLocalDate.getDayOfWeek().getValue();</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        if (!String.valueOf(dayOfWeek).equals(schedule.getDayOfWeek())) {</span>
+<span class="fc" id="L249">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;预约日期与医生排班不匹配，该医生仅在此时间段出诊&quot;);</span>
+        }
+
+        // 校验日期：不能是过去，且只能在未来15天内
+<span class="fc" id="L253">        LocalDate today = LocalDate.now();</span>
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        if (appointmentLocalDate.isBefore(today)) {</span>
+<span class="nc" id="L255">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;不能预约过去的日期&quot;);</span>
+        }
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">        if (appointmentLocalDate.isAfter(today.plusDays(15))) {</span>
+<span class="nc" id="L258">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;只能预约未来15天内的号源&quot;);</span>
+        }
+
+        // 校验号源
+<span class="pc bpc" id="L262" title="1 of 4 branches missed.">        if (schedule.getAvailableSlots() == null || schedule.getAvailableSlots() &lt;= 0) {</span>
+<span class="fc" id="L263">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;该排班号源已用完&quot;);</span>
+        }
+
+        // 解析患者ID：患者角色自动获取，管理员/医生从请求体传入
+<span class="fc" id="L267">        String role = UserContext.getRole();</span>
+<span class="fc" id="L268">        Integer userId = UserContext.getUserId();</span>
+<span class="pc bpc" id="L269" title="2 of 4 branches missed.">        if (&quot;patient&quot;.equals(role) &amp;&amp; userId != null) {</span>
+<span class="fc" id="L270">            Patients patient = patientsMapper.selectOneByQuery(</span>
+<span class="fc" id="L271">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">            if (patient != null) {</span>
+<span class="fc" id="L273">                appointments.setPatientId(patient.getPatientId());</span>
+            }
+        }
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">        if (appointments.getPatientId() == null) {</span>
+<span class="nc" id="L277">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;请指定就诊患者&quot;);</span>
+        }
+
+        // 防重：同一患者同一排班同一日期已有非取消预约时拒绝
+<span class="fc" id="L281">        long existing = count(QueryWrapper.create()</span>
+<span class="fc" id="L282">                .eq(&quot;patient_id&quot;, appointments.getPatientId())</span>
+<span class="fc" id="L283">                .eq(&quot;schedule_id&quot;, appointments.getScheduleId())</span>
+<span class="fc" id="L284">                .eq(&quot;appointment_date&quot;, appointments.getAppointmentDate())</span>
+<span class="fc" id="L285">                .ne(&quot;status&quot;, &quot;cancelled&quot;));</span>
+<span class="fc bfc" id="L286" title="All 2 branches covered.">        if (existing &gt; 0) {</span>
+<span class="fc" id="L287">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;该时段您已有预约，请勿重复预约&quot;);</span>
+        }
+
+        // 扣减号源
+<span class="fc" id="L291">        Schedules updateSchedule = new Schedules();</span>
+<span class="fc" id="L292">        updateSchedule.setAvailableSlots(schedule.getAvailableSlots() - 1);</span>
+<span class="fc" id="L293">        schedulesMapper.updateByQuery(updateSchedule,</span>
+<span class="fc" id="L294">                QueryWrapper.create().eq(&quot;schedule_id&quot;, schedule.getScheduleId()));</span>
+
+        // 设置医生ID和预约时间（来自排班）
+<span class="fc" id="L297">        appointments.setDoctorId(schedule.getDoctorId());</span>
+<span class="pc bpc" id="L298" title="1 of 2 branches missed.">        if (appointments.getAppointmentTime() == null) {</span>
+<span class="nc" id="L299">            appointments.setAppointmentTime(schedule.getStartTime());</span>
+        }
+<span class="fc" id="L301">        appointments.setStatus(&quot;pending&quot;);</span>
+<span class="fc" id="L302">        save(appointments);</span>
+<span class="fc" id="L303">        return appointments;</span>
+    }
+
+    @Override
+    public List&lt;AppointmentDTO&gt; getPatientAppointments(Integer patientId) {
+<span class="nc" id="L308">        QueryWrapper queryWrapper = QueryWrapper.create()</span>
+<span class="nc" id="L309">                .eq(&quot;patient_id&quot;, patientId);</span>
+<span class="nc" id="L310">        List&lt;Appointments&gt; appointmentsList = list(queryWrapper);</span>
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">        if (appointmentsList.isEmpty()) {</span>
+<span class="nc" id="L313">            return new ArrayList&lt;&gt;();</span>
+        }
+
+<span class="nc" id="L316">        List&lt;Integer&gt; doctorIds = appointmentsList.stream()</span>
+<span class="nc" id="L317">                .map(Appointments::getDoctorId)</span>
+<span class="nc" id="L318">                .distinct()</span>
+<span class="nc" id="L319">                .collect(Collectors.toList());</span>
+<span class="nc" id="L320">        List&lt;Integer&gt; scheduleIds = appointmentsList.stream()</span>
+<span class="nc" id="L321">                .map(Appointments::getScheduleId)</span>
+<span class="nc" id="L322">                .distinct()</span>
+<span class="nc" id="L323">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L325">        Users patient = usersMapper.selectOneById(patientId);</span>
+
+<span class="nc" id="L327">        Map&lt;Integer, Doctors&gt; doctorMap = doctorsMapper.selectListByQuery(</span>
+<span class="nc" id="L328">                QueryWrapper.create().in(&quot;doctor_id&quot;, doctorIds)</span>
+<span class="nc" id="L329">        ).stream().collect(Collectors.toMap(Doctors::getDoctorId, d -&gt; d));</span>
+
+<span class="nc" id="L331">        List&lt;Integer&gt; doctorUserIds = doctorMap.values().stream()</span>
+<span class="nc" id="L332">                .map(Doctors::getUserId)</span>
+<span class="nc" id="L333">                .distinct()</span>
+<span class="nc" id="L334">                .collect(Collectors.toList());</span>
+<span class="nc" id="L335">        Map&lt;Integer, Users&gt; doctorUserMap = usersMapper.selectListByQuery(</span>
+<span class="nc" id="L336">                QueryWrapper.create().in(&quot;user_id&quot;, doctorUserIds)</span>
+<span class="nc" id="L337">        ).stream().collect(Collectors.toMap(Users::getUserId, u -&gt; u));</span>
+
+<span class="nc" id="L339">        Map&lt;Integer, Schedules&gt; scheduleMap = schedulesMapper.selectListByQuery(</span>
+<span class="nc" id="L340">                QueryWrapper.create().in(&quot;schedule_id&quot;, scheduleIds)</span>
+<span class="nc" id="L341">        ).stream().collect(Collectors.toMap(Schedules::getScheduleId, s -&gt; s));</span>
+
+<span class="nc" id="L343">        return appointmentsList.stream().map(apt -&gt; {</span>
+<span class="nc" id="L344">            Doctors doctor = doctorMap.get(apt.getDoctorId());</span>
+<span class="nc" id="L345">            Schedules schedule = scheduleMap.get(apt.getScheduleId());</span>
+
+<span class="nc" id="L347">            AppointmentDTO dto = AppointmentDTO.builder()</span>
+<span class="nc" id="L348">                    .appointmentId(apt.getAppointmentId())</span>
+<span class="nc" id="L349">                    .patientId(apt.getPatientId())</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">                    .patientName(patient != null ? patient.getRealName() : null)</span>
+<span class="nc" id="L351">                    .doctorId(apt.getDoctorId())</span>
+<span class="nc" id="L352">                    .scheduleId(apt.getScheduleId())</span>
+<span class="nc" id="L353">                    .appointmentDate(apt.getAppointmentDate())</span>
+<span class="nc" id="L354">                    .appointmentTime(apt.getAppointmentTime())</span>
+<span class="nc" id="L355">                    .status(apt.getStatus())</span>
+<span class="nc" id="L356">                    .createdAt(apt.getCreatedAt())</span>
+<span class="nc" id="L357">                    .build();</span>
+
+<span class="nc bnc" id="L359" title="All 2 branches missed.">            if (doctor != null) {</span>
+<span class="nc" id="L360">                Users doctorUser = doctorUserMap.get(doctor.getUserId());</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">                dto.setDoctorName(doctorUser != null ? doctorUser.getRealName() : null);</span>
+<span class="nc" id="L362">                dto.setDoctorTitle(doctor.getTitle());</span>
+<span class="nc" id="L363">                dto.setDeptId(doctor.getDeptId());</span>
+            }
+
+<span class="nc bnc" id="L366" title="All 2 branches missed.">            if (schedule != null) {</span>
+<span class="nc" id="L367">                dto.setAppointmentTime(schedule.getStartTime());</span>
+            }
+
+<span class="nc" id="L370">            return dto;</span>
+<span class="nc" id="L371">        }).collect(Collectors.toList());</span>
+    }
+
+    /**
+     * 接诊，将预约状态改为 processing，并创建就诊记录
+     */
+    @Override
+    public void processAppointment(Integer appointmentId) {
+<span class="pc bpc" id="L379" title="1 of 2 branches missed.">        if (appointmentId == null) {</span>
+<span class="nc" id="L380">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;预约ID不能为空&quot;);</span>
+        }
+<span class="fc" id="L382">        Appointments apt = getById(appointmentId);</span>
+<span class="pc bpc" id="L383" title="1 of 2 branches missed.">        if (apt == null) {</span>
+<span class="nc" id="L384">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;预约不存在&quot;);</span>
+        }
+<span class="pc bpc" id="L386" title="1 of 4 branches missed.">        if (!&quot;pending&quot;.equals(apt.getStatus()) &amp;&amp; !&quot;confirmed&quot;.equals(apt.getStatus())) {</span>
+<span class="fc" id="L387">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;当前状态不支持接诊操作&quot;);</span>
+        }
+<span class="fc" id="L389">        Appointments update = Appointments.builder()</span>
+<span class="fc" id="L390">                .appointmentId(appointmentId)</span>
+<span class="fc" id="L391">                .status(&quot;processing&quot;)</span>
+<span class="fc" id="L392">                .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="fc" id="L393">                .build();</span>
+<span class="fc" id="L394">        updateById(update);</span>
+
+        // 创建就诊记录
+<span class="fc" id="L397">        Consultations consultation = Consultations.builder()</span>
+<span class="fc" id="L398">                .appointmentId(appointmentId)</span>
+<span class="fc" id="L399">                .doctorId(apt.getDoctorId())</span>
+<span class="fc" id="L400">                .patientId(apt.getPatientId())</span>
+<span class="fc" id="L401">                .symptoms(apt.getSymptoms())</span>
+<span class="fc" id="L402">                .consultationDate(new Timestamp(System.currentTimeMillis()))</span>
+<span class="fc" id="L403">                .createdAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="fc" id="L404">                .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="fc" id="L405">                .build();</span>
+<span class="fc" id="L406">        consultationsMapper.insert(consultation);</span>
+<span class="fc" id="L407">    }</span>
+
+    /**
+     * 患者到院签到，将预约状态改为 confirmed
+     */
+    @Override
+    public void confirmAppointment(Integer appointmentId) {
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">        if (appointmentId == null) {</span>
+<span class="nc" id="L415">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;预约ID不能为空&quot;);</span>
+        }
+<span class="fc" id="L417">        Appointments apt = getById(appointmentId);</span>
+<span class="pc bpc" id="L418" title="1 of 2 branches missed.">        if (apt == null) {</span>
+<span class="nc" id="L419">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;预约不存在&quot;);</span>
+        }
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">        if (!&quot;pending&quot;.equals(apt.getStatus())) {</span>
+<span class="nc" id="L422">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;当前状态不支持签到操作&quot;);</span>
+        }
+<span class="fc" id="L424">        apt.setStatus(&quot;confirmed&quot;);</span>
+<span class="fc" id="L425">        updateById(apt);</span>
+<span class="fc" id="L426">    }</span>
+
+    /**
+     * 医生完成就诊，将预约状态改为 completed
+     */
+    @Override
+    public void completeAppointment(Integer appointmentId) {
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        if (appointmentId == null) {</span>
+<span class="nc" id="L434">            throw new BusinessException(ErrorCode.PARAMS_ERROR, &quot;预约ID不能为空&quot;);</span>
+        }
+<span class="nc" id="L436">        Appointments apt = getById(appointmentId);</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">        if (apt == null) {</span>
+<span class="nc" id="L438">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;预约不存在&quot;);</span>
+        }
+<span class="nc bnc" id="L440" title="All 2 branches missed.">        if (!&quot;processing&quot;.equals(apt.getStatus())) {</span>
+<span class="nc" id="L441">            throw new BusinessException(ErrorCode.OPERATION_ERROR, &quot;当前状态不支持完成操作&quot;);</span>
+        }
+<span class="nc" id="L443">        apt.setStatus(&quot;completed&quot;);</span>
+<span class="nc" id="L444">        updateById(apt);</span>
+<span class="nc" id="L445">    }</span>
+
+    /**
+     * 医生获取自己的出诊列表（包含患者信息）
+     */
+    public List&lt;Map&lt;String, Object&gt;&gt; getDoctorAppointments(Integer doctorUserId) {
+<span class="nc" id="L451">        Doctors doctor = doctorsMapper.selectOneByQuery(</span>
+<span class="nc" id="L452">                QueryWrapper.create().eq(&quot;user_id&quot;, doctorUserId)</span>
+        );
+<span class="nc bnc" id="L454" title="All 2 branches missed.">        if (doctor == null) {</span>
+<span class="nc" id="L455">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;医生信息不存在&quot;);</span>
+        }
+
+<span class="nc" id="L458">        List&lt;Appointments&gt; appointmentsList = list(</span>
+<span class="nc" id="L459">                QueryWrapper.create()</span>
+<span class="nc" id="L460">                        .eq(&quot;doctor_id&quot;, doctor.getDoctorId())</span>
+<span class="nc" id="L461">                        .orderBy(&quot;appointment_date&quot;, false)</span>
+        );
+
+<span class="nc bnc" id="L464" title="All 2 branches missed.">        if (appointmentsList.isEmpty()) {</span>
+<span class="nc" id="L465">            return new ArrayList&lt;&gt;();</span>
+        }
+
+<span class="nc" id="L468">        List&lt;Integer&gt; patientIds = appointmentsList.stream()</span>
+<span class="nc" id="L469">                .map(Appointments::getPatientId).distinct().collect(Collectors.toList());</span>
+
+<span class="nc" id="L471">        Map&lt;Integer, Patients&gt; patientIdMap = patientsMapper.selectListByQuery(</span>
+<span class="nc" id="L472">                QueryWrapper.create().in(&quot;patient_id&quot;, patientIds)</span>
+<span class="nc" id="L473">        ).stream().collect(Collectors.toMap(Patients::getPatientId, p -&gt; p));</span>
+<span class="nc" id="L474">        List&lt;Integer&gt; patientUserIds = patientIdMap.values().stream()</span>
+<span class="nc" id="L475">                .map(Patients::getUserId).distinct().collect(Collectors.toList());</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">        Map&lt;Integer, Users&gt; patientUserMap = patientUserIds.isEmpty() ? new HashMap&lt;&gt;() :</span>
+<span class="nc" id="L477">                usersMapper.selectListByQuery(</span>
+<span class="nc" id="L478">                        QueryWrapper.create().in(&quot;user_id&quot;, patientUserIds)</span>
+<span class="nc" id="L479">                ).stream().collect(Collectors.toMap(Users::getUserId, u -&gt; u));</span>
+
+<span class="nc" id="L481">        return appointmentsList.stream().map(apt -&gt; {</span>
+<span class="nc" id="L482">            Map&lt;String, Object&gt; item = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L483">            item.put(&quot;appointmentId&quot;, apt.getAppointmentId());</span>
+<span class="nc" id="L484">            item.put(&quot;appointmentDate&quot;, apt.getAppointmentDate());</span>
+<span class="nc" id="L485">            item.put(&quot;appointmentTime&quot;, apt.getAppointmentTime());</span>
+<span class="nc" id="L486">            item.put(&quot;status&quot;, apt.getStatus());</span>
+<span class="nc" id="L487">            item.put(&quot;symptoms&quot;, apt.getSymptoms());</span>
+
+<span class="nc" id="L489">            Patients patientRecord = patientIdMap.get(apt.getPatientId());</span>
+<span class="nc" id="L490">            item.put(&quot;patientId&quot;, apt.getPatientId());</span>
+<span class="nc bnc" id="L491" title="All 2 branches missed.">            if (patientRecord != null) {</span>
+<span class="nc" id="L492">                Users patientUser = patientUserMap.get(patientRecord.getUserId());</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">                item.put(&quot;patientName&quot;, patientUser != null ? patientUser.getRealName() : &quot;患者&quot; + apt.getPatientId());</span>
+<span class="nc" id="L494">            } else {</span>
+<span class="nc" id="L495">                item.put(&quot;patientName&quot;, &quot;患者&quot; + apt.getPatientId());</span>
+            }
+
+<span class="nc" id="L498">            return item;</span>
+<span class="nc" id="L499">        }).collect(Collectors.toList());</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

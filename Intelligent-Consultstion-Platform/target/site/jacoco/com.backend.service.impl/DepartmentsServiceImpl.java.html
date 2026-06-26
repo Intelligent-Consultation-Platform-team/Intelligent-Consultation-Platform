@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DepartmentsServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.service.impl</a> &gt; <span class="el_source">DepartmentsServiceImpl.java</span></div><h1>DepartmentsServiceImpl.java</h1><pre class="source lang-java linenums">package com.backend.service.impl;
+
+import com.backend.mapper.DepartmentsMapper;
+import com.backend.model.entity.Departments;
+import com.backend.service.DepartmentsService;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.sql.Timestamp;
+
+/**
+ *  科室服务实现类。
+ *
+ * @author 佳尔宇柔
+ */
+@Service
+<span class="fc" id="L19">public class DepartmentsServiceImpl extends ServiceImpl&lt;DepartmentsMapper, Departments&gt; implements DepartmentsService {</span>
+
+    @Override
+    public List&lt;Departments&gt; getDepartmentsList() {
+<span class="nc" id="L23">        return list();</span>
+    }
+
+    @Override
+    public boolean addDepartment(Departments departments) {
+<span class="nc" id="L28">        departments.setCreatedAt(new Timestamp(System.currentTimeMillis()));</span>
+<span class="nc" id="L29">        departments.setUpdatedAt(new Timestamp(System.currentTimeMillis()));</span>
+<span class="nc" id="L30">        return save(departments);</span>
+    }
+
+    @Override
+    public boolean updateDepartment(Departments departments) {
+<span class="nc" id="L35">        departments.setUpdatedAt(new Timestamp(System.currentTimeMillis()));</span>
+<span class="nc" id="L36">        return updateById(departments);</span>
+    }
+
+    @Override
+    public boolean deleteDepartment(Long deptId) {
+<span class="nc" id="L41">        return removeById(deptId);</span>
+    }
+
+    @Override
+    public Departments getDepartmentById(Long deptId) {
+<span class="nc" id="L46">        return getById(deptId);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -4,7 +4,6 @@ com\backend\service\impl\NoticesServiceImpl.class
 com\backend\utils\PasswordUtils.class
 com\backend\common\DeleteRequest.class
 com\backend\service\DepartmentsService.class
-com\backend\service\AiConsultationService$SessionData.class
 com\backend\mapper\SchedulesMapper.class
 com\backend\model\entity\Consultations$ConsultationsBuilder.class
 com\backend\config\CorsConfig.class

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.controller</a> &gt; <span class="el_source">AuthController.java</span></div><h1>AuthController.java</h1><pre class="source lang-java linenums">package com.backend.controller;
+
+import com.backend.common.BaseResponse;
+import com.backend.common.ResultUtils;
+import com.backend.common.UserContext;
+import com.backend.exception.BusinessException;
+import com.backend.exception.ErrorCode;
+import com.backend.mapper.AdminsMapper;
+import com.backend.mapper.DoctorsMapper;
+import com.backend.mapper.PatientsMapper;
+import com.backend.mapper.UsersMapper;
+import com.backend.model.dto.UserLoginRequest;
+import com.backend.model.dto.UserRegisterRequest;
+import com.backend.model.entity.Admins;
+import com.backend.model.entity.Doctors;
+import com.backend.model.entity.Patients;
+import com.backend.model.entity.Users;
+import com.backend.service.UsersService;
+import com.mybatisflex.core.query.QueryWrapper;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+
+import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping(&quot;/auth&quot;)
+<span class="fc" id="L30">public class AuthController {</span>
+
+    @Resource
+    private UsersService usersService;
+
+    @Resource
+    private UsersMapper usersMapper;
+
+    @Resource
+    private DoctorsMapper doctorsMapper;
+
+    @Resource
+    private PatientsMapper patientsMapper;
+
+    @Resource
+    private AdminsMapper adminsMapper;
+
+    @PostMapping(&quot;/register&quot;)
+    public BaseResponse&lt;Map&lt;String, Object&gt;&gt; register(@Valid @RequestBody UserRegisterRequest userRegisterRequest) {
+<span class="fc" id="L49">        Long userId = usersService.userRegister(userRegisterRequest);</span>
+<span class="fc" id="L50">        Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L51">        data.put(&quot;userId&quot;, userId);</span>
+<span class="fc" id="L52">        data.put(&quot;username&quot;, userRegisterRequest.getUsername());</span>
+<span class="fc" id="L53">        data.put(&quot;realName&quot;, userRegisterRequest.getRealName());</span>
+<span class="fc" id="L54">        data.put(&quot;role&quot;, userRegisterRequest.getRole());</span>
+<span class="fc" id="L55">        data.put(&quot;createdAt&quot;, new java.util.Date().toInstant());</span>
+<span class="fc" id="L56">        return ResultUtils.success(data, &quot;注册成功&quot;);</span>
+    }
+
+    @PostMapping(&quot;/login&quot;)
+    public BaseResponse&lt;Map&lt;String, Object&gt;&gt; login(@Valid @RequestBody UserLoginRequest userLoginRequest) {
+<span class="fc" id="L61">        Map&lt;String, Object&gt; result = usersService.userLogin(userLoginRequest);</span>
+<span class="fc" id="L62">        return ResultUtils.success(result, &quot;登录成功&quot;);</span>
+    }
+
+    /**
+     * 获取当前登录用户的完整信息
+     */
+    @GetMapping(&quot;/me&quot;)
+    public BaseResponse&lt;Map&lt;String, Object&gt;&gt; getCurrentUser() {
+<span class="nc" id="L70">        Integer userId = UserContext.getUserId();</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (userId == null) {</span>
+<span class="nc" id="L72">            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, &quot;请先登录&quot;);</span>
+        }
+<span class="nc" id="L74">        Users user = usersMapper.selectOneById(userId);</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L76">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;用户不存在&quot;);</span>
+        }
+
+<span class="nc" id="L79">        Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L80">        data.put(&quot;userId&quot;, user.getUserId());</span>
+<span class="nc" id="L81">        data.put(&quot;username&quot;, user.getUsername());</span>
+<span class="nc" id="L82">        data.put(&quot;realName&quot;, user.getRealName());</span>
+<span class="nc" id="L83">        data.put(&quot;phone&quot;, user.getPhone());</span>
+<span class="nc" id="L84">        data.put(&quot;email&quot;, user.getEmail());</span>
+<span class="nc" id="L85">        data.put(&quot;role&quot;, user.getRole());</span>
+<span class="nc" id="L86">        data.put(&quot;status&quot;, user.getStatus());</span>
+
+<span class="nc" id="L88">        String role = user.getRole();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (&quot;doctor&quot;.equals(role)) {</span>
+<span class="nc" id="L90">            Doctors doctor = doctorsMapper.selectOneByQuery(</span>
+<span class="nc" id="L91">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            if (doctor != null) {</span>
+<span class="nc" id="L93">                data.put(&quot;title&quot;, doctor.getTitle());</span>
+<span class="nc" id="L94">                data.put(&quot;specialty&quot;, doctor.getSpecialty());</span>
+<span class="nc" id="L95">                data.put(&quot;bio&quot;, doctor.getBio());</span>
+<span class="nc" id="L96">                data.put(&quot;deptId&quot;, doctor.getDeptId());</span>
+<span class="nc" id="L97">                data.put(&quot;doctorStatus&quot;, doctor.getStatus());</span>
+            }
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        } else if (&quot;patient&quot;.equals(role)) {</span>
+<span class="nc" id="L100">            Patients patient = patientsMapper.selectOneByQuery(</span>
+<span class="nc" id="L101">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (patient != null) {</span>
+<span class="nc" id="L103">                data.put(&quot;idCard&quot;, patient.getIdCard());</span>
+<span class="nc" id="L104">                data.put(&quot;gender&quot;, patient.getGender());</span>
+<span class="nc" id="L105">                data.put(&quot;age&quot;, patient.getAge());</span>
+<span class="nc" id="L106">                data.put(&quot;address&quot;, patient.getAddress());</span>
+<span class="nc" id="L107">                data.put(&quot;balance&quot;, patient.getBalance());</span>
+            }
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        } else if (&quot;admin&quot;.equals(role)) {</span>
+<span class="nc" id="L110">            Admins admin = adminsMapper.selectOneByQuery(</span>
+<span class="nc" id="L111">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            if (admin != null) {</span>
+<span class="nc" id="L113">                data.put(&quot;department&quot;, admin.getDepartment());</span>
+<span class="nc" id="L114">                data.put(&quot;position&quot;, admin.getPosition());</span>
+            }
+        }
+
+<span class="nc" id="L118">        return ResultUtils.success(data);</span>
+    }
+
+    /**
+     * 更新当前登录用户的个人信息
+     */
+    @PutMapping(&quot;/profile&quot;)
+    public BaseResponse&lt;Map&lt;String, Object&gt;&gt; updateProfile(@RequestBody Map&lt;String, Object&gt; body) {
+<span class="nc" id="L126">        Integer userId = UserContext.getUserId();</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (userId == null) {</span>
+<span class="nc" id="L128">            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR, &quot;请先登录&quot;);</span>
+        }
+<span class="nc" id="L130">        Users user = usersMapper.selectOneById(userId);</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (user == null) {</span>
+<span class="nc" id="L132">            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, &quot;用户不存在&quot;);</span>
+        }
+
+        // 更新 users 表
+<span class="nc" id="L136">        Users updateUser = Users.builder()</span>
+<span class="nc" id="L137">                .userId(userId)</span>
+<span class="nc" id="L138">                .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L139">                .build();</span>
+<span class="nc" id="L140">        boolean userChanged = false;</span>
+
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (body.containsKey(&quot;realName&quot;)) {</span>
+<span class="nc" id="L143">            updateUser.setRealName((String) body.get(&quot;realName&quot;));</span>
+<span class="nc" id="L144">            userChanged = true;</span>
+        }
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (body.containsKey(&quot;phone&quot;)) {</span>
+<span class="nc" id="L147">            updateUser.setPhone((String) body.get(&quot;phone&quot;));</span>
+<span class="nc" id="L148">            userChanged = true;</span>
+        }
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if (body.containsKey(&quot;email&quot;)) {</span>
+<span class="nc" id="L151">            updateUser.setEmail((String) body.get(&quot;email&quot;));</span>
+<span class="nc" id="L152">            userChanged = true;</span>
+        }
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (userChanged) {</span>
+<span class="nc" id="L155">            usersMapper.update(updateUser);</span>
+        }
+
+<span class="nc" id="L158">        String role = user.getRole();</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (&quot;doctor&quot;.equals(role)) {</span>
+<span class="nc" id="L160">            Doctors doctor = doctorsMapper.selectOneByQuery(</span>
+<span class="nc" id="L161">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            if (doctor != null) {</span>
+<span class="nc" id="L163">                Doctors updateDoctor = Doctors.builder()</span>
+<span class="nc" id="L164">                        .doctorId(doctor.getDoctorId())</span>
+<span class="nc" id="L165">                        .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L166">                        .build();</span>
+<span class="nc" id="L167">                boolean doctorChanged = false;</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                if (body.containsKey(&quot;title&quot;)) {</span>
+<span class="nc" id="L169">                    updateDoctor.setTitle((String) body.get(&quot;title&quot;));</span>
+<span class="nc" id="L170">                    doctorChanged = true;</span>
+                }
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                if (body.containsKey(&quot;specialty&quot;)) {</span>
+<span class="nc" id="L173">                    updateDoctor.setSpecialty((String) body.get(&quot;specialty&quot;));</span>
+<span class="nc" id="L174">                    doctorChanged = true;</span>
+                }
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                if (body.containsKey(&quot;bio&quot;)) {</span>
+<span class="nc" id="L177">                    updateDoctor.setBio((String) body.get(&quot;bio&quot;));</span>
+<span class="nc" id="L178">                    doctorChanged = true;</span>
+                }
+<span class="nc bnc" id="L180" title="All 2 branches missed.">                if (doctorChanged) {</span>
+<span class="nc" id="L181">                    doctorsMapper.update(updateDoctor);</span>
+                }
+            }
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        } else if (&quot;patient&quot;.equals(role)) {</span>
+<span class="nc" id="L185">            Patients patient = patientsMapper.selectOneByQuery(</span>
+<span class="nc" id="L186">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">            if (patient != null) {</span>
+<span class="nc" id="L188">                Patients updatePatient = Patients.builder()</span>
+<span class="nc" id="L189">                        .patientId(patient.getPatientId())</span>
+<span class="nc" id="L190">                        .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L191">                        .build();</span>
+<span class="nc" id="L192">                boolean patientChanged = false;</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">                if (body.containsKey(&quot;gender&quot;)) {</span>
+<span class="nc" id="L194">                    updatePatient.setGender((String) body.get(&quot;gender&quot;));</span>
+<span class="nc" id="L195">                    patientChanged = true;</span>
+                }
+<span class="nc bnc" id="L197" title="All 2 branches missed.">                if (body.containsKey(&quot;age&quot;)) {</span>
+<span class="nc" id="L198">                    Object ageVal = body.get(&quot;age&quot;);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                    updatePatient.setAge(ageVal != null ? Integer.valueOf(ageVal.toString()) : null);</span>
+<span class="nc" id="L200">                    patientChanged = true;</span>
+                }
+<span class="nc bnc" id="L202" title="All 2 branches missed.">                if (body.containsKey(&quot;address&quot;)) {</span>
+<span class="nc" id="L203">                    updatePatient.setAddress((String) body.get(&quot;address&quot;));</span>
+<span class="nc" id="L204">                    patientChanged = true;</span>
+                }
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                if (patientChanged) {</span>
+<span class="nc" id="L207">                    patientsMapper.update(updatePatient);</span>
+                }
+            }
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        } else if (&quot;admin&quot;.equals(role)) {</span>
+<span class="nc" id="L211">            Admins admin = adminsMapper.selectOneByQuery(</span>
+<span class="nc" id="L212">                    QueryWrapper.create().eq(&quot;user_id&quot;, userId));</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">            if (admin != null) {</span>
+<span class="nc" id="L214">                Admins updateAdmin = Admins.builder()</span>
+<span class="nc" id="L215">                        .adminId(admin.getAdminId())</span>
+<span class="nc" id="L216">                        .updatedAt(new Timestamp(System.currentTimeMillis()))</span>
+<span class="nc" id="L217">                        .build();</span>
+<span class="nc" id="L218">                boolean adminChanged = false;</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">                if (body.containsKey(&quot;department&quot;)) {</span>
+<span class="nc" id="L220">                    updateAdmin.setDepartment((String) body.get(&quot;department&quot;));</span>
+<span class="nc" id="L221">                    adminChanged = true;</span>
+                }
+<span class="nc bnc" id="L223" title="All 2 branches missed.">                if (body.containsKey(&quot;position&quot;)) {</span>
+<span class="nc" id="L224">                    updateAdmin.setPosition((String) body.get(&quot;position&quot;));</span>
+<span class="nc" id="L225">                    adminChanged = true;</span>
+                }
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                if (adminChanged) {</span>
+<span class="nc" id="L228">                    adminsMapper.update(updateAdmin);</span>
+                }
+            }
+        }
+
+<span class="nc" id="L233">        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L234">        result.put(&quot;userId&quot;, userId);</span>
+<span class="nc" id="L235">        return ResultUtils.success(result, &quot;个人信息已更新&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

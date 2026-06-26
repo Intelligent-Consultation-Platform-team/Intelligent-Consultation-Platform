@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SchedulesController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.controller</a> &gt; <span class="el_source">SchedulesController.java</span></div><h1>SchedulesController.java</h1><pre class="source lang-java linenums">package com.backend.controller;
+
+import com.backend.common.ResultUtils;
+import com.backend.model.entity.Schedules;
+import com.backend.service.SchedulesService;
+import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ *  排班管理控制器。
+ *
+ * @author 佳尔宇柔
+ */
+@RestController
+@RequestMapping(&quot;/schedules&quot;)
+<span class="fc" id="L18">public class SchedulesController {</span>
+
+    @Resource
+    private SchedulesService schedulesService;
+
+    /**
+     * 获取医生排班（包含医生信息）
+     *
+     * @param deptId 科室ID
+     * @param doctorId 医生ID
+     * @param date 日期
+     * @return 排班列表（包含医生信息）
+     */
+    @GetMapping
+    public Object getDoctorSchedules(
+            @RequestParam(required = false) Integer deptId,
+            @RequestParam(required = false) Integer doctorId,
+            @RequestParam(required = false) String date) {
+<span class="nc" id="L36">        List&lt;?&gt; schedulesList = schedulesService.getSchedulesWithDoctor(deptId, doctorId, date);</span>
+<span class="nc" id="L37">        return ResultUtils.success(schedulesList);</span>
+    }
+
+    /**
+     * 添加排班
+     *
+     * @param schedules 排班信息
+     * @return 操作结果
+     */
+    @PostMapping
+    public Object addSchedule(@RequestBody Schedules schedules) {
+<span class="nc" id="L48">        boolean result = schedulesService.addSchedule(schedules);</span>
+<span class="nc" id="L49">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 更新排班信息
+     *
+     * @param schedules 排班信息
+     * @return 操作结果
+     */
+    @PutMapping
+    public Object updateSchedule(@RequestBody Schedules schedules) {
+<span class="nc" id="L60">        boolean result = schedulesService.updateSchedule(schedules);</span>
+<span class="nc" id="L61">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 删除排班
+     *
+     * @param scheduleId 排班ID
+     * @return 操作结果
+     */
+    @DeleteMapping(&quot;/{scheduleId}&quot;)
+    public Object deleteSchedule(@PathVariable Long scheduleId) {
+<span class="nc" id="L72">        boolean result = schedulesService.deleteSchedule(scheduleId);</span>
+<span class="nc" id="L73">        return ResultUtils.success(result);</span>
+    }
+
+    /**
+     * 根据ID获取排班信息
+     *
+     * @param scheduleId 排班ID
+     * @return 排班信息
+     */
+    @GetMapping(&quot;/{scheduleId}&quot;)
+    public Object getScheduleById(@PathVariable Long scheduleId) {
+<span class="nc" id="L84">        Schedules schedule = schedulesService.getScheduleById(scheduleId);</span>
+<span class="nc" id="L85">        return ResultUtils.success(schedule);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

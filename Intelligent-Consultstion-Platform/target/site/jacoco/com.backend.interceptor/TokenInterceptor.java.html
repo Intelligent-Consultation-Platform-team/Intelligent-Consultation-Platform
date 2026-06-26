@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TokenInterceptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.interceptor</a> &gt; <span class="el_source">TokenInterceptor.java</span></div><h1>TokenInterceptor.java</h1><pre class="source lang-java linenums">package com.backend.interceptor;
+
+import com.backend.common.UserContext;
+import com.backend.utils.JwtUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.JwtException;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+<span class="fc" id="L17">public class TokenInterceptor implements HandlerInterceptor {</span>
+
+    @Resource
+    private JwtUtils jwtUtils;
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+<span class="fc" id="L24">        String token = extractToken(request);</span>
+
+        // 没有 token，直接返回 401
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (token == null) {</span>
+<span class="fc" id="L28">            UserContext.clear();</span>
+<span class="fc" id="L29">            sendUnauthorized(response, &quot;请先登录&quot;);</span>
+<span class="fc" id="L30">            return false;</span>
+        }
+
+        try {
+<span class="fc" id="L34">            Integer userId = jwtUtils.extractUserId(token);</span>
+<span class="fc" id="L35">            String username = jwtUtils.extractUsername(token);</span>
+<span class="fc" id="L36">            String role = jwtUtils.extractRole(token);</span>
+
+<span class="fc bfc" id="L38" title="All 2 branches covered.">            if (jwtUtils.isTokenExpired(token)) {</span>
+<span class="fc" id="L39">                UserContext.clear();</span>
+<span class="fc" id="L40">                sendUnauthorized(response, &quot;登录已过期，请重新登录&quot;);</span>
+<span class="fc" id="L41">                return false;</span>
+            }
+
+<span class="fc" id="L44">            UserContext.UserInfo userInfo = new UserContext.UserInfo(userId, username, role);</span>
+<span class="fc" id="L45">            UserContext.setUserInfo(userInfo);</span>
+<span class="fc" id="L46">            return true;</span>
+<span class="fc" id="L47">        } catch (JwtException e) {</span>
+<span class="fc" id="L48">            UserContext.clear();</span>
+<span class="fc" id="L49">            sendUnauthorized(response, &quot;token无效，请重新登录&quot;);</span>
+<span class="fc" id="L50">            return false;</span>
+        }
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+<span class="fc" id="L56">        UserContext.clear();</span>
+<span class="fc" id="L57">    }</span>
+
+    private void sendUnauthorized(HttpServletResponse response, String message) throws Exception {
+<span class="fc" id="L60">        response.setStatus(HttpServletResponse.SC_OK);</span>
+<span class="fc" id="L61">        response.setContentType(&quot;application/json;charset=UTF-8&quot;);</span>
+<span class="fc" id="L62">        response.setCharacterEncoding(&quot;UTF-8&quot;);</span>
+<span class="fc" id="L63">        Map&lt;String, Object&gt; body = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L64">        body.put(&quot;code&quot;, 401);</span>
+<span class="fc" id="L65">        body.put(&quot;message&quot;, message);</span>
+<span class="fc" id="L66">        body.put(&quot;data&quot;, null);</span>
+<span class="fc" id="L67">        response.getWriter().write(new ObjectMapper().writeValueAsString(body));</span>
+<span class="fc" id="L68">    }</span>
+
+    private String extractToken(HttpServletRequest request) {
+<span class="fc" id="L71">        String bearerToken = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="pc bpc" id="L72" title="1 of 4 branches missed.">        if (bearerToken != null &amp;&amp; bearerToken.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L73">            return bearerToken.substring(7);</span>
+        }
+<span class="fc" id="L75">        return null;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

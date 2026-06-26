@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Intelligent-Consultstion-Platform</a> &gt; <a href="index.source.html" class="el_package">com.backend.common</a> &gt; <span class="el_source">ResultUtils.java</span></div><h1>ResultUtils.java</h1><pre class="source lang-java linenums">package com.backend.common;
+
+import com.backend.exception.ErrorCode;
+
+<span class="nc" id="L5">public class ResultUtils {</span>
+
+    /**
+     * 成功
+     *
+     * @param data 数据
+     * @param &lt;T&gt;  数据类型
+     * @return 响应
+     */
+    public static &lt;T&gt; BaseResponse&lt;T&gt; success(T data) {
+<span class="nc" id="L15">        return new BaseResponse&lt;&gt;(0, data, &quot;ok&quot;);</span>
+    }
+
+    /**
+     * 成功
+     *
+     * @param data 数据
+     * @param message 消息
+     * @param &lt;T&gt;  数据类型
+     * @return 响应
+     */
+    public static &lt;T&gt; BaseResponse&lt;T&gt; success(T data, String message) {
+<span class="fc" id="L27">        return new BaseResponse&lt;&gt;(0, data, message);</span>
+    }
+
+    /**
+     * 失败
+     *
+     * @param errorCode 错误码
+     * @return 响应
+     */
+    public static BaseResponse&lt;?&gt; error(ErrorCode errorCode) {
+<span class="nc" id="L37">        return new BaseResponse&lt;&gt;(errorCode);</span>
+    }
+
+    /**
+     * 失败
+     *
+     * @param code    错误码
+     * @param message 错误信息
+     * @return 响应
+     */
+    public static BaseResponse&lt;?&gt; error(int code, String message) {
+<span class="fc" id="L48">        return new BaseResponse&lt;&gt;(code, null, message);</span>
+    }
+
+    /**
+     * 失败
+     *
+     * @param errorCode 错误码
+     * @return 响应
+     */
+    public static BaseResponse&lt;?&gt; error(ErrorCode errorCode, String message) {
+<span class="fc" id="L58">        return new BaseResponse&lt;&gt;(errorCode.getCode(), null, message);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
